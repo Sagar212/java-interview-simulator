@@ -1,0 +1,38 @@
+[
+    { "type": "category", "content": "Missing Topics & HR Questions" },
+    { "type": "question", "content": "What is HS256 and RS256? (256 Encryption in JWT)" },
+    { "type": "theory", "content": "HS256 (HMAC with SHA-256) is a symmetric algorithm, meaning it uses the exact same secret key to both sign the JWT and verify it. It is fast but requires sharing the secret key across all microservices.\n\nRS256 (RSA Signature with SHA-256) is an asymmetric algorithm. It uses a **Private Key** (kept securely on the Auth Server) to sign the JWT, and a **Public Key** (distributed to all microservices) to verify the token. RS256 is much more secure for distributed systems because if a microservice is compromised, the attacker only gets the public key and cannot forge new tokens." },
+    
+    { "type": "question", "content": "What is filter in Stream and how many parameters we pass?" },
+    { "type": "theory", "content": "The `filter()` method is an intermediate operation in the Stream API used to select elements based on a condition. It takes exactly **one parameter**: a `Predicate<T>`. A Predicate is a functional interface that takes an object and returns a boolean (`true` to keep the element, `false` to discard it)." },
+
+    { "type": "question", "content": "Difference between ArrayList and Set?" },
+    { "type": "theory", "content": "An `ArrayList` implements the `List` interface, meaning it allows **duplicate elements** and maintains the exact **insertion order**. A `Set` (like `HashSet`) implements the `Set` interface, meaning it **strictly prohibits duplicate elements** and generally does not guarantee any specific ordering." },
+
+    { "type": "question", "content": "Difference between Procedure and Function?" },
+    { "type": "theory", "content": "Both are stored database blocks, but they have key differences:\n1. A **Function** must return a single value, whereas a **Procedure** can return zero, one, or multiple values via `OUT` parameters.\n2. A Function can be called directly inside a `SELECT` statement (e.g., `SELECT my_function(id) FROM table`), but a Procedure cannot; it must be invoked using `CALL` or `EXECUTE`.\n3. Procedures can handle complex transaction logic (like `COMMIT` and `ROLLBACK`), whereas Functions generally cannot modify database state." },
+
+    { "type": "question", "content": "What all interfaces do we have in the Collection Framework?" },
+    { "type": "theory", "content": "The core interfaces are:\n1. **Collection**: The root interface.\n2. **List**: Ordered collections (`ArrayList`, `LinkedList`).\n3. **Set**: Unique elements (`HashSet`, `TreeSet`).\n4. **Queue**: FIFO data structure (`PriorityQueue`).\n5. **Map**: Key-Value pairs (`HashMap`, `TreeMap`). Note that `Map` is part of the Collections Framework but does *not* inherit from the `Collection` interface." },
+
+    { "type": "question", "content": "What are the different Atomic variables in Java?" },
+    { "type": "theory", "content": "Java provides classes in `java.util.concurrent.atomic` for lock-free thread-safe operations on single variables. The most common ones are:\n- `AtomicInteger`\n- `AtomicLong`\n- `AtomicBoolean`\n- `AtomicReference` (used to atomically update object references)\nThey achieve thread-safety using hardware-level Compare-And-Swap (CAS) instructions instead of synchronized locks." },
+
+    { "type": "question", "content": "If there are two systems and one is failing, what will you do?" },
+    { "type": "theory", "content": "This is a classic system design question. The best approach is to implement the **Circuit Breaker Pattern** (using a library like Resilience4j). When System B fails continuously, System A's circuit breaker trips open, instantly rejecting new requests to System B and returning a default fallback response. This prevents System A from exhausting its thread pool waiting for timeouts, allowing the ecosystem to degrade gracefully rather than crashing entirely." },
+
+    { "type": "question", "content": "Which Java security have you implemented?" },
+    { "type": "theory", "content": "I have implemented **Spring Security** combined with stateless JWT (JSON Web Tokens). This involved creating custom security filters to intercept incoming HTTP requests, extracting the JWT from the `Authorization: Bearer` header, verifying the cryptographic signature (using RS256/HS256), and setting the `SecurityContextHolder` with the authenticated user's roles for Role-Based Access Control (RBAC)." },
+
+    { "type": "question", "content": "If I want to map my employee object to some database table, how would you do it using JPA? Explain the full flow." },
+    { "type": "theory", "content": "1. **Entity Class**: I would create an `Employee` class and annotate it with `@Entity` and `@Table(name=\"employees\")`.\n2. **Primary Key**: I would add an `id` field annotated with `@Id` and `@GeneratedValue(strategy = GenerationType.IDENTITY)` for auto-increment.\n3. **Columns**: I would map specific fields using `@Column(name=\"emp_name\")`.\n4. **Repository**: I would create an interface `EmployeeRepository extends JpaRepository<Employee, Long>`.\n5. Spring Boot's Auto-Configuration (via Hibernate) automatically scans these entities and handles all the JDBC connection boilerplate behind the scenes." },
+
+    { "type": "question", "content": "Write SQL to find the count of employees in each department." },
+    { "type": "code", "lang": "sql", "content": "SELECT deptid, COUNT(empid) as employee_count\nFROM employees\nGROUP BY deptid;" },
+
+    { "type": "question", "content": "Given a JSON object, write code to iterate over it and print the address array." },
+    { "type": "code", "lang": "java", "content": "// Assuming you are using Jackson's JsonNode\nObjectMapper mapper = new ObjectMapper();\nJsonNode rootNode = mapper.readTree(jsonString);\n\nJsonNode addressArray = rootNode.path(\"employee1\").path(\"address\");\n\nif (addressArray.isArray()) {\n    for (JsonNode address : addressArray) {\n        System.out.println(\"City: \" + address.path(\"city\").asText());\n        System.out.println(\"Street: \" + address.path(\"street\").asText());\n        System.out.println(\"Pincode: \" + address.path(\"pincode\").asText());\n    }\n}" },
+
+    { "type": "question", "content": "Explain your project? / Where do you see yourself after 5 years? / What is your expected CTC? / Where did you get those 40% figures in your resume?" },
+    { "type": "theory", "content": "*(Behavioral / Personal Questions)*\nThese questions require personalized answers. \n- **Project**: Use the STAR method (Situation, Task, Action, Result) to explain the architecture and your specific contributions.\n- **5 Years**: Focus on stepping into a Senior Architecture role, mentoring juniors, and mastering distributed system design.\n- **Resume Metrics**: Always back up percentage improvements (like \"reduced latency by 40%\") with technical facts (e.g., \"We achieved this by replacing synchronous REST calls with asynchronous Kafka events and implementing Redis caching\")." }
+]

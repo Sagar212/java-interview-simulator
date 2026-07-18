@@ -1,0 +1,361 @@
+{ type: "category", content: "Tricky Core Java Deep Dive" },
+
+{ type: "question", content: "What is the difference between == and equals() for objects in Java? Why is this a common interview trap?" },
+{ type: "theory", content: `The <code>==</code> operator checks whether two references point to the exact same object in memory, while <code>equals()</code> checks logical equality based on the implementation of the class. In the <code>Object</code> class, <code>equals()</code> behaves exactly like <code>==</code>, but classes like <code>String</code>, <code>Integer</code>, and many domain objects override it to compare actual content rather than memory addresses.<div class="recall-anchor">MEMORY HOOK: <code>==</code> means "same box", <code>equals()</code> means "same value inside the box".</div>The trap is that developers often remember the rule only for <code>String</code> but forget it for custom classes. If you create two separate <code>Employee</code> objects with the same id and name, <code>==</code> will be false because they are different objects. Unless you override <code>equals()</code>, even <code>equals()</code> will also return false. This is why collections like <code>HashSet</code> can behave unexpectedly for custom objects.` },
+{ type: "code", lang: "java", content: `class Employee {
+    int id;
+    Employee(int id) {
+        this.id = id;
+    }
+}
+
+public class EqualityDemo {
+    public static void main(String[] args) {
+        String s1 = new String("java");
+        String s2 = new String("java");
+
+        System.out.println(s1 == s2);       // false
+        System.out.println(s1.equals(s2));  // true
+
+        Employee e1 = new Employee(101);
+        Employee e2 = new Employee(101);
+
+        System.out.println(e1 == e2);       // false
+        System.out.println(e1.equals(e2));  // false, because equals() not overridden
+    }
+}` },
+
+{ type: "question", content: "Explain the equals() and hashCode() contract. Why must both be overridden together?" },
+{ type: "theory", content: `The contract is simple but extremely important. If two objects are considered equal by <code>equals()</code>, they must return the same <code>hashCode()</code>. If you override only <code>equals()</code> and not <code>hashCode()</code>, hash-based collections like <code>HashMap</code> and <code>HashSet</code> break logically because they first use <code>hashCode()</code> to find the bucket and then use <code>equals()</code> to compare inside that bucket.<table><tr><th>Rule</th><th>Meaning</th></tr><tr><td><code>equals()</code> true</td><td><code>hashCode()</code> must be same</td></tr><tr><td><code>hashCode()</code> same</td><td><code>equals()</code> may be true or false</td></tr><tr><td>Override one</td><td>Override both for value objects</td></tr></table><div class="recall-anchor">MEMORY HOOK: Hash first, equals next. Wrong hashCode means object goes to the wrong house before comparison even starts.</div>This is one of the most common real-world bugs in Java interviews. A candidate says "Set removes duplicates", but for custom objects it only works correctly if <code>equals()</code> and <code>hashCode()</code> are implemented consistently.` },
+{ type: "code", lang: "java", content: `import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
+class User {
+    private int id;
+    private String name;
+
+    User(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof User)) return false;
+        User other = (User) obj;
+        return id == other.id && Objects.equals(name, other.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name);
+    }
+}
+
+public class HashContractDemo {
+    public static void main(String[] args) {
+        Set<User> set = new HashSet<>();
+        set.add(new User(1, "Sagar"));
+        set.add(new User(1, "Sagar"));
+
+        System.out.println(set.size()); // 1
+    }
+}` },
+
+{ type: "question", content: "Why is String immutable in Java, and why is that considered a design advantage?" },
+{ type: "theory", content: `A <code>String</code> object cannot be changed after creation. Every modification-like operation such as <code>concat()</code>, <code>replace()</code>, or <code>substring()</code> produces a new object rather than mutating the existing one. This design gives Java several powerful advantages: security, thread safety, hashcode caching, and efficient String Pool reuse. If Strings were mutable, a reference shared across modules could be altered unexpectedly, which would be dangerous for file paths, database URLs, class loading, and security credentials.<table><tr><th>Benefit</th><th>Why it matters</th></tr><tr><td>Security</td><td>Critical values cannot be silently modified</td></tr><tr><td>Thread Safety</td><td>Immutable objects are naturally safe to share</td></tr><tr><td>String Pool</td><td>Same literals can be reused safely</td></tr><tr><td>Hash caching</td><td>Useful when String is a HashMap key</td></tr></table><div class="recall-anchor">MEMORY HOOK: Mutable key is dangerous. Immutable String makes reuse safe.</div>This is a favorite interview question because it tests whether you know both the language behavior and the design reasoning behind it.` },
+
+{ type: "question", content: "How do you create an immutable class in Java?" },
+{ type: "theory", content: `To make a class immutable, you typically follow five rules. Make the class <code>final</code> so it cannot be extended. Make all fields <code>private final</code>. Initialize all fields through the constructor. Provide only getters and no setters. If the class contains mutable objects like <code>Date</code>, <code>List</code>, or arrays, return defensive copies instead of exposing the original internal reference.<div class="recall-anchor">MEMORY HOOK: final class, final fields, constructor only, no setters, defensive copy.</div>The real trap is not with primitives or Strings, but with mutable nested fields. Many candidates claim their class is immutable while returning the original <code>Date</code> or <code>List</code> reference from a getter, which completely breaks immutability.` },
+{ type: "code", lang: "java", content: `import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+final class Student {
+    private final int id;
+    private final String name;
+    private final List<String> skills;
+
+    public Student(int id, String name, List<String> skills) {
+        this.id = id;
+        this.name = name;
+        this.skills = new ArrayList<>(skills); // defensive copy
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public List<String> getSkills() {
+        return Collections.unmodifiableList(skills);
+    }
+}` },
+
+{ type: "question", content: "What is the difference between String, StringBuilder, and StringBuffer?" },
+{ type: "theory", content: `All three represent character sequences, but their mutability and thread-safety differ greatly. <code>String</code> is immutable, so every modification creates a new object. <code>StringBuilder</code> is mutable and not synchronized, making it the fastest choice for single-threaded string manipulation. <code>StringBuffer</code> is mutable and synchronized, making it thread-safe but slower than <code>StringBuilder</code> in most cases.<table><tr><th>Type</th><th>Mutable?</th><th>Thread-safe?</th><th>Use case</th></tr><tr><td>String</td><td>No</td><td>Yes by immutability</td><td>Read-only text</td></tr><tr><td>StringBuilder</td><td>Yes</td><td>No</td><td>Fast single-threaded concatenation</td></tr><tr><td>StringBuffer</td><td>Yes</td><td>Yes</td><td>Multi-threaded mutable text</td></tr></table><div class="recall-anchor">MEMORY HOOK: Builder is fast, Buffer is safe, String is fixed.</div>The interview trap is that people often answer only "StringBuffer is thread-safe" without explaining why <code>StringBuilder</code> is usually preferred in modern application code.` },
+
+{ type: "question", content: "What is the difference between final, finally, and finalize()?" },
+{ type: "theory", content: `<code>final</code> is a keyword used to restrict classes, methods, or variables. <code>finally</code> is a block used with exception handling and is intended for cleanup code that should run whether an exception occurs or not. <code>finalize()</code> was a method called by the garbage collector before reclaiming an object, but it is unreliable and deprecated for removal in modern Java because its execution timing is unpredictable.<table><tr><th>Term</th><th>Purpose</th></tr><tr><td><code>final</code></td><td>Restriction on inheritance, overriding, or reassignment</td></tr><tr><td><code>finally</code></td><td>Cleanup block in exception handling</td></tr><tr><td><code>finalize()</code></td><td>Old GC hook, unreliable, should be avoided</td></tr></table><div class="recall-anchor">MEMORY HOOK: final = lock it, finally = clean it, finalize = forget it.</div>This question is common because the three words sound similar but belong to completely different parts of the language.` },
+
+{ type: "question", content: "Does finally always execute in Java? What are the exceptions?" },
+{ type: "theory", content: `In normal control flow, the <code>finally</code> block executes whether an exception occurs or not, even if there is a <code>return</code> inside <code>try</code> or <code>catch</code>. However, it may not execute in abnormal JVM termination scenarios such as <code>System.exit(0)</code>, JVM crash, power failure, or a fatal native error.<div class="recall-anchor">MEMORY HOOK: finally is almost always executed, but not after the JVM is gone.</div>Interviewers love this question because many candidates say "finally always runs" without knowing the edge cases. The correct answer is: it runs in regular program control, but not when the process itself terminates before it gets the chance.` },
+{ type: "code", lang: "java", content: `public class FinallyDemo {
+    public static int test() {
+        try {
+            return 10;
+        } finally {
+            System.out.println("finally executed");
+        }
+    }
+
+    public static void main(String[] args) {
+        System.out.println(test());
+    }
+}` },
+
+{ type: "question", content: "What is the difference between checked and unchecked exceptions?" },
+{ type: "theory", content: `Checked exceptions are verified by the compiler. If a method may throw one, you must either handle it with <code>try-catch</code> or declare it using <code>throws</code>. Unchecked exceptions are subclasses of <code>RuntimeException</code> and are not enforced by the compiler. They usually indicate programming errors such as null handling mistakes, illegal arguments, or index violations.<table><tr><th>Type</th><th>Checked by compiler?</th><th>Examples</th></tr><tr><td>Checked Exception</td><td>Yes</td><td><code>IOException</code>, <code>SQLException</code></td></tr><tr><td>Unchecked Exception</td><td>No</td><td><code>NullPointerException</code>, <code>ArithmeticException</code>, <code>IllegalArgumentException</code></td></tr></table><div class="recall-anchor">MEMORY HOOK: Checked = recoverable external problem, Unchecked = coding bug or invalid usage.</div>The important interview point is not just the definition, but when to use each category while designing APIs.` },
+
+{ type: "question", content: "What is exception propagation in Java?" },
+{ type: "theory", content: `Exception propagation means that if a method does not handle an exception, it passes up the call stack to its caller. This continues until some method handles it, or until it reaches the JVM, which then terminates the program and prints the stack trace. Propagation mainly applies to unchecked exceptions automatically, while checked exceptions must still be declared or handled at compile time.<div class="recall-anchor">MEMORY HOOK: If method A cannot handle it, the exception climbs upward looking for someone who can.</div>This concept matters in interviews because it explains why a bug may appear far away from the actual line where the wrong state began.` },
+{ type: "code", lang: "java", content: `public class PropagationDemo {
+    static void method3() {
+        int x = 10 / 0;
+    }
+
+    static void method2() {
+        method3();
+    }
+
+    static void method1() {
+        method2();
+    }
+
+    public static void main(String[] args) {
+        try {
+            method1();
+        } catch (ArithmeticException e) {
+            System.out.println("Handled in main: " + e);
+        }
+    }
+}` },
+
+{ type: "question", content: "What is the difference between throw and throws in Java?" },
+{ type: "theory", content: `<code>throw</code> is used inside a method body to explicitly throw a specific exception object. <code>throws</code> is used in a method signature to declare that the method may pass certain exceptions to the caller. One creates the exception flow; the other documents and delegates responsibility.<table><tr><th>Keyword</th><th>Used where?</th><th>Purpose</th></tr><tr><td><code>throw</code></td><td>Inside method body</td><td>Actually throws an exception object</td></tr><tr><td><code>throws</code></td><td>Method signature</td><td>Declares possible exceptions</td></tr></table><div class="recall-anchor">MEMORY HOOK: throw = do it now, throws = warning for caller.</div>This is often asked with custom exceptions, so always be ready to explain both together.` },
+{ type: "code", lang: "java", content: `public class ThrowVsThrowsDemo {
+    static void validateAge(int age) throws Exception {
+        if (age < 18) {
+            throw new Exception("Age must be 18 or above");
+        }
+    }
+
+    public static void main(String[] args) {
+        try {
+            validateAge(15);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+}` },
+
+{ type: "question", content: "Can we have try without catch in Java?" },
+{ type: "theory", content: `Yes, but only if it is followed by a <code>finally</code> block. A <code>try</code> block must be followed by either at least one <code>catch</code> block or a <code>finally</code> block. This is useful when you do not want to handle the exception locally but still want cleanup logic to run.<div class="recall-anchor">MEMORY HOOK: try cannot stand alone. It needs catch or finally.</div>Interviewers ask this because many candidates think <code>catch</code> is mandatory after every <code>try</code>, which is not correct.` },
+{ type: "code", lang: "java", content: `public class TryFinallyDemo {
+    public static void main(String[] args) {
+        try {
+            System.out.println("Inside try");
+        } finally {
+            System.out.println("Cleanup in finally");
+        }
+    }
+}` },
+
+{ type: "question", content: "Can we overload the main() method in Java? Which main method does JVM call?" },
+{ type: "theory", content: `Yes, you can overload <code>main()</code> just like any other method by changing its parameter list. However, the JVM only looks for the exact entry-point signature <code>public static void main(String[] args)</code>. Any overloaded version is just a normal method and will not be used as the application starting point.<div class="recall-anchor">MEMORY HOOK: You can overload main, but JVM has only one door key.</div>This is a classic tricky question because candidates confuse "allowed by Java syntax" with "used by JVM as entry point".` },
+{ type: "code", lang: "java", content: `public class MainOverloadDemo {
+    public static void main(String[] args) {
+        System.out.println("JVM starts here");
+        main(10);
+    }
+
+    public static void main(int x) {
+        System.out.println("Overloaded main: " + x);
+    }
+}` },
+
+{ type: "question", content: "Can static methods be overridden in Java?" },
+{ type: "theory", content: `No, static methods are not overridden because overriding is resolved at runtime using dynamic dispatch, and static methods belong to the class, not the object. If a subclass declares a static method with the same signature as the parent, it is called method hiding, not overriding. Which method gets called depends on the reference type, not the actual object type.<div class="recall-anchor">MEMORY HOOK: Instance methods override, static methods hide.</div>This is a strong interview trap because candidates often say "yes, overridden", but the correct term is <strong>method hiding</strong>.` },
+{ type: "code", lang: "java", content: `class Parent {
+    static void show() {
+        System.out.println("Parent static");
+    }
+}
+
+class Child extends Parent {
+    static void show() {
+        System.out.println("Child static");
+    }
+}
+
+public class StaticHidingDemo {
+    public static void main(String[] args) {
+        Parent obj = new Child();
+        obj.show(); // Parent static
+    }
+}` },
+
+{ type: "question", content: "Can private methods be overridden in Java?" },
+{ type: "theory", content: `No, private methods are not visible to subclasses, so they cannot be overridden. If a subclass defines a method with the same name and signature, it is an entirely new method unrelated to the parent's private method. Since overriding requires inheritance visibility, a private method is excluded from runtime polymorphism.<div class="recall-anchor">MEMORY HOOK: If child cannot see it, child cannot override it.</div>This question is asked to test whether you understand visibility rules, not just memorized polymorphism definitions.` },
+
+{ type: "question", content: "What is method hiding and how is it different from overriding?" },
+{ type: "theory", content: `Method overriding happens with instance methods and is resolved at runtime based on the actual object. Method hiding happens with static methods and is resolved at compile time based on the reference type. Overriding supports runtime polymorphism, while hiding does not.<table><tr><th>Feature</th><th>Overriding</th><th>Hiding</th></tr><tr><td>Applies to</td><td>Instance methods</td><td>Static methods</td></tr><tr><td>Resolution</td><td>Runtime</td><td>Compile time</td></tr><tr><td>Polymorphism</td><td>Yes</td><td>No</td></tr></table><div class="recall-anchor">MEMORY HOOK: Overriding is object-based, hiding is reference-based.</div>` },
+
+{ type: "question", content: "What is the difference between shallow copy and deep copy?" },
+{ type: "theory", content: `A shallow copy duplicates the top-level object but still shares references to nested mutable objects. A deep copy duplicates both the top-level object and the nested objects, so changes in one copy do not affect the other. This matters in interviews because candidates often say "copy created" without specifying whether internal state is still shared.<div class="recall-anchor">MEMORY HOOK: Shallow copy copies the house key, deep copy builds a new house.</div>Whenever a class contains arrays, lists, maps, or other mutable references, interviewers may ask whether your copy is truly independent.` },
+{ type: "code", lang: "java", content: `class Address {
+    String city;
+    Address(String city) {
+        this.city = city;
+    }
+}
+
+class Employee {
+    String name;
+    Address address;
+
+    Employee(String name, Address address) {
+        this.name = name;
+        this.address = address;
+    }
+
+    Employee(Employee other) {
+        this.name = other.name;
+        this.address = new Address(other.address.city); // deep copy
+    }
+}` },
+
+{ type: "question", content: "What is cloning in Java? Why is Cloneable considered tricky?" },
+{ type: "theory", content: `Cloning in Java usually refers to creating an object copy using the <code>clone()</code> method inherited from <code>Object</code>. To make it work, the class must implement <code>Cloneable</code>; otherwise, <code>CloneNotSupportedException</code> is thrown. It is considered tricky because <code>clone()</code> performs only a shallow copy by default, has awkward design rules, and often leads to bugs with mutable fields. That is why many modern codebases prefer copy constructors or factory methods instead.<div class="recall-anchor">MEMORY HOOK: clone() looks easy, but shared nested state makes it dangerous.</div>` },
+
+{ type: "question", content: "What is serialization in Java? What is the use of transient?" },
+{ type: "theory", content: `Serialization is the process of converting an object's state into a byte stream so it can be stored in a file, sent over the network, or cached. A class typically implements <code>Serializable</code> to indicate that its objects can be serialized. The <code>transient</code> keyword marks fields that should not be serialized, usually because they are sensitive, derived, temporary, or not meaningful outside the current runtime context.<div class="recall-anchor">MEMORY HOOK: Serializable saves object state, transient tells Java what not to pack.</div>A classic interview example is passwords: even if an object is serialized, a password field marked <code>transient</code> will not be written to the stream.` },
+{ type: "code", lang: "java", content: `import java.io.Serializable;
+
+class Account implements Serializable {
+    private String username;
+    private transient String password;
+
+    public Account(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+}` },
+
+{ type: "question", content: "Why is char[] preferred over String for storing passwords?" },
+{ type: "theory", content: `A <code>String</code> is immutable, so once a password is created as a String, it stays in memory until the garbage collector removes it, and you cannot explicitly erase its contents. A <code>char[]</code> can be overwritten manually after use, reducing the time the sensitive data remains readable in memory. This is why security-focused APIs often prefer character arrays for passwords.<div class="recall-anchor">MEMORY HOOK: String stays, char[] can be wiped.</div>This is a great question because it connects immutability, security, and practical API design in one answer.` },
+
+{ type: "question", content: "What is autoboxing and unboxing? What problem can it create in interviews?" },
+{ type: "theory", content: `Autoboxing is the automatic conversion of a primitive like <code>int</code> into its wrapper class <code>Integer</code>. Unboxing is the reverse conversion from wrapper to primitive. The tricky part is that wrappers can be <code>null</code>, so unboxing a null value throws <code>NullPointerException</code>.<div class="recall-anchor">MEMORY HOOK: Primitive cannot be null, wrapper can. Null + unboxing = crash.</div>This is especially dangerous in code involving maps, databases, and JSON parsing where wrapper values may legitimately be absent.` },
+{ type: "code", lang: "java", content: `public class AutoBoxingDemo {
+    public static void main(String[] args) {
+        Integer count = null;
+        int value = count; // NullPointerException during unboxing
+        System.out.println(value);
+    }
+}` },
+
+{ type: "question", content: "Why does Integer comparison with == sometimes work and sometimes fail?" },
+{ type: "theory", content: `The <code>Integer</code> class uses internal caching for values typically in the range -128 to 127. If you create wrapper objects using autoboxing within this range, Java may return the same cached object, so <code>==</code> may appear to work. Outside that range, different objects are usually created, so <code>==</code> becomes false even when the numeric values are equal. The correct way to compare wrapper values is <code>equals()</code> or explicit primitive unboxing.<div class="recall-anchor">MEMORY HOOK: Small Integers are cached, large ones usually are not.</div>This is a famous interview trap because it produces inconsistent-looking results that reveal whether the candidate really understands reference comparison.` },
+{ type: "code", lang: "java", content: `public class IntegerCacheDemo {
+    public static void main(String[] args) {
+        Integer a = 127;
+        Integer b = 127;
+        Integer x = 128;
+        Integer y = 128;
+
+        System.out.println(a == b); // true
+        System.out.println(x == y); // false
+        System.out.println(x.equals(y)); // true
+    }
+}` },
+
+{ type: "question", content: "What is a static block in Java? When does it execute?" },
+{ type: "theory", content: `A static block is a block of code used for class-level initialization. It executes only once, when the class is first loaded into memory by the JVM, before any object is created and before the main method uses the class. It is typically used for one-time initialization of static variables or startup logic that belongs to the class itself.<div class="recall-anchor">MEMORY HOOK: Constructor is for object birth, static block is for class birth.</div>Interviewers may combine this with execution-order questions involving static variables, instance blocks, and constructors.` },
+{ type: "code", lang: "java", content: `public class StaticBlockDemo {
+    static {
+        System.out.println("Static block executed");
+    }
+
+    public static void main(String[] args) {
+        System.out.println("Main method executed");
+    }
+}` },
+
+{ type: "question", content: "What is the order of execution in Java: static block, instance block, constructor?" },
+{ type: "theory", content: `The order is: static block executes first when the class is loaded, instance initialization block executes next whenever an object is created, and then the constructor runs. If multiple static or instance blocks exist, they execute in the order they appear in the class. This is a classic output-based interview question.<div class="recall-anchor">MEMORY HOOK: Class loads first, object prepares next, constructor finishes last.</div>` },
+{ type: "code", lang: "java", content: `public class ExecutionOrderDemo {
+    static {
+        System.out.println("1. Static block");
+    }
+
+    {
+        System.out.println("2. Instance block");
+    }
+
+    ExecutionOrderDemo() {
+        System.out.println("3. Constructor");
+    }
+
+    public static void main(String[] args) {
+        new ExecutionOrderDemo();
+    }
+}` },
+
+{ type: "question", content: "What is the difference between compile-time polymorphism and runtime polymorphism?" },
+{ type: "theory", content: `Compile-time polymorphism is achieved through method overloading, where the compiler decides which method to call based on the method signature. Runtime polymorphism is achieved through method overriding, where the JVM decides at runtime which overridden method to execute based on the actual object type. The key distinction is when the decision is made.<table><tr><th>Type</th><th>Achieved by</th><th>Resolved when?</th></tr><tr><td>Compile-time polymorphism</td><td>Overloading</td><td>During compilation</td></tr><tr><td>Runtime polymorphism</td><td>Overriding</td><td>During execution</td></tr></table><div class="recall-anchor">MEMORY HOOK: Overloading chooses early, overriding chooses late.</div>` },
+
+{ type: "question", content: "Can a subclass throw a broader checked exception than the parent method while overriding?" },
+{ type: "theory", content: `No. When overriding a method, the child class cannot declare a broader checked exception than the parent version. It may declare the same exception, a narrower checked exception, or no checked exception at all. For unchecked exceptions, there is no such restriction. This rule exists so that code using the parent reference is not forced to handle unexpected broader checked exceptions introduced by the child.<div class="recall-anchor">MEMORY HOOK: Child can narrow checked exceptions, not widen them.</div>This is a favorite advanced core Java interview question because it mixes inheritance with exception rules.` },
+
+{ type: "question", content: "What is deadlock in Java and how do you explain it simply in an interview?" },
+{ type: "theory", content: `Deadlock occurs when two or more threads wait forever for each other to release locks, so none of them can proceed. A common example is Thread A holding Lock 1 and waiting for Lock 2, while Thread B holds Lock 2 and waits for Lock 1. The system is not crashed, but progress has stopped completely.<div class="recall-anchor">MEMORY HOOK: A waits for B's lock, B waits for A's lock, both freeze forever.</div>In interviews, the strongest answer is not just the definition but also the prevention idea: enforce consistent lock ordering, reduce nested locks, or use timeout-based locking APIs.` },
+{ type: "code", lang: "java", content: `public class DeadlockDemo {
+    private static final Object lock1 = new Object();
+    private static final Object lock2 = new Object();
+
+    public static void main(String[] args) {
+        Thread t1 = new Thread(() -> {
+            synchronized (lock1) {
+                synchronized (lock2) {
+                    System.out.println("Thread 1 acquired both locks");
+                }
+            }
+        });
+
+        Thread t2 = new Thread(() -> {
+            synchronized (lock2) {
+                synchronized (lock1) {
+                    System.out.println("Thread 2 acquired both locks");
+                }
+            }
+        });
+
+        t1.start();
+        t2.start();
+    }
+}` },
+
+{ type: "question", content: "What is race condition in Java?" },
+{ type: "theory", content: `A race condition happens when multiple threads access and modify shared data concurrently and the final result depends on the unpredictable order of execution. The code may work sometimes and fail at other times, which makes the bug difficult to reproduce. Operations like <code>count++</code> are dangerous because they are not atomic; they involve read, modify, and write steps.<div class="recall-anchor">MEMORY HOOK: If output depends on who runs first, you have a race.</div>This is one of the most frequently asked concurrency basics because it reveals whether the candidate understands why synchronization is needed, not just how to write it.` },
+
+{ type: "question", content: "What is volatile in Java? Does it make code thread-safe?" },
+{ type: "theory", content: `The <code>volatile</code> keyword tells the JVM that reads and writes of a variable should go directly to main memory, improving visibility between threads. If one thread updates a volatile variable, another thread reading it is more likely to see the latest value immediately. However, <code>volatile</code> does not make compound operations like <code>count++</code> atomic, so it does not provide full thread safety for read-modify-write logic.<div class="recall-anchor">MEMORY HOOK: volatile gives visibility, not atomicity.</div>This is a high-value interview question because many candidates incorrectly think <code>volatile</code> is a complete replacement for synchronization.` },
+
+{ type: "question", content: "What is the difference between synchronized method and synchronized block?" },
+{ type: "theory", content: `A synchronized method locks the monitor of the whole object instance, or the Class object if the method is static, for the entire method duration. A synchronized block locks only a specific section of code and can lock on any chosen object. Because it gives finer control and smaller lock scope, a synchronized block is usually more efficient and flexible.<table><tr><th>Feature</th><th>Synchronized Method</th><th>Synchronized Block</th></tr><tr><td>Lock scope</td><td>Entire method</td><td>Specific code section</td></tr><tr><td>Flexibility</td><td>Less</td><td>More</td></tr><tr><td>Performance</td><td>May lock too much</td><td>Can reduce contention</td></tr></table><div class="recall-anchor">MEMORY HOOK: Method lock is broad, block lock is surgical.</div>` }

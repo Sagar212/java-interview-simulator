@@ -1,0 +1,1543 @@
+[
+    {
+        "type": "category",
+        "content": "Core Java & OOPs"
+    },
+    {
+        "type": "question",
+        "content": "Is Java Pass-by-Reference? Prove why Java is strictly Pass-by-Value."
+    },
+    {
+        "type": "theory",
+        "content": "Java is **strictly Pass-by-Value**. It never passes the actual object itself; it passes a *copy of the memory reference* that points to the object. \n\nIf you modify the object's internal fields using that copied reference, the original object changes (which tricks people into thinking it's pass-by-reference). However, if you try to reassign the reference variable entirely to a brand new object using the `new` keyword, the original object in the calling method remains completely untouched. If Java were actually Pass-by-Reference, the original object would have been swapped."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "public class PassByValueDemo {\n    public static void main(String[] args) {\n        Dog myDog = new Dog(\"Max\");\n        modifyDog(myDog);\n        \n        // Output is \"Charlie\", NOT \"Rex\"!\n        System.out.println(myDog.name); \n    }\n\n    public static void modifyDog(Dog dogParam) {\n        // 1. This works because the copied reference points to the same original object in memory.\n        dogParam.name = \"Charlie\"; \n        \n        // 2. TRICKY PART: We reassign the reference to a brand new object.\n        // If Java was Pass-By-Reference, 'myDog' in main would now point to this new \"Rex\" dog.\n        // But because it is Pass-By-Value, this only overwrites the local 'dogParam' copy.\n        dogParam = new Dog(\"Rex\"); \n    }\n}"
+    },
+    {
+        "type": "question",
+        "content": "Tricky Scenarios: Interface vs Abstract Class in modern Java (8+)"
+    },
+    {
+        "type": "theory",
+        "content": "Since Java 8 introduced `default` and `static` methods in interfaces with concrete bodies, the line between them has blurred. Interviewers will test your knowledge on the strict limitations that remain:\n\n<table>\n    <tr><th>Feature</th><th>Interface</th><th>Abstract Class</th></tr>\n    <tr><td><strong>Constructors</strong></td><td><strong>CANNOT</strong> have constructors. An interface cannot be instantiated, nor does it have state to initialize.</td><td><strong>CAN</strong> have constructors. They are called when a concrete child class is created to initialize shared state.</td></tr>\n    <tr><td><strong>Variables (State)</strong></td><td>All variables are strictly <code>public static final</code> (constants). You cannot declare mutable instance variables.</td><td>Can have standard, mutable instance variables (protected, private) to maintain state across methods.</td></tr>\n    <tr><td><strong>Multiple Inheritance</strong></td><td>A class can <code>implement</code> multiple interfaces.</td><td>A class can only <code>extend</code> a single abstract class.</td></tr>\n    <tr><td><strong>Access Modifiers</strong></td><td>Methods are implicitly <code>public abstract</code>. (Java 9 added <code>private</code> methods for sharing internal logic).</td><td>Methods can be <code>protected</code>, <code>private</code>, or <code>public</code>.</td></tr>\n</table>"
+    },
+    {
+        "type": "question",
+        "content": "What is the difference between String and StringBuffer? What will be the output of `str.concat()`?"
+    },
+    {
+        "type": "theory",
+        "content": "A `String` in Java is immutable, meaning once an object is created, its value cannot be changed. Any operation that seems to alter the string actually creates a brand new string object in memory. `StringBuffer`, on the other hand, is mutable and thread-safe (its methods are synchronized), allowing you to modify the sequence of characters without creating new objects, which is highly memory-efficient during heavy string manipulation.\n        \n<table>\n    <tr><th>Feature</th><th>String</th><th>StringBuffer</th></tr>\n    <tr><td>Mutability</td><td>Immutable</td><td>Mutable</td></tr>\n    <tr><td>Thread Safety</td><td>Not thread-safe (but immutable, so inherently safe)</td><td>Thread-safe (Synchronized)</td></tr>\n    <tr><td>Performance</td><td>Slow for heavy concatenations (creates many objects)</td><td>Fast for heavy concatenations</td></tr>\n    <tr><td>Storage</td><td>String Pool (if literal) or Heap</td><td>Heap Memory</td></tr>\n</table>\n\nIf you execute `str.concat(\"xyz\")` without assigning it, the original string **remains completely unchanged** because the `concat` method creates and returns a new object. To retain the change, you must assign it: `str = str.concat(\"xyz\");`."
+    },
+    {
+        "type": "question",
+        "content": "What happens when comparing String literals with the == operator vs equals()?"
+    },
+    {
+        "type": "theory",
+        "content": "In Java, the `==` operator checks for **reference equality**, meaning it verifies whether two variables point to the exact same memory address in the heap. The `equals()` method, which is overridden in the String class, checks for **value equality**, meaning it compares the actual character sequence. \n\nBecause of memory optimization, Java uses a special memory area called the String Pool. **Strings created without the new keyword are cached in the String Pool.** Therefore, if you write `String s1 = \"hello\"; String s2 = \"hello\";`, the JVM only creates one object in the pool and points both references to it, making `s1 == s2` evaluate to true. However, using `new String(\"hello\")` forces Java to allocate a brand new object in standard Heap memory, bypassing the pool, which makes `==` return false."
+    },
+    {
+        "type": "question",
+        "content": "What is a final variable, method, and class?"
+    },
+    {
+        "type": "theory",
+        "content": "The `final` keyword in Java is an access modifier used to apply strict restrictions on classes, methods, and variables.\n\n1. **Final Variable**: It becomes a constant. Once initialized, its value cannot be reassigned. If it's a reference variable, you cannot reassign it to point to a different object, though the object's internal state can still change.\n2. **Final Method**: A method marked as final **cannot be overridden** by subclasses. This is often used in designing APIs to prevent the alteration of critical algorithms or security mechanisms.\n3. **Final Class**: A class marked as final cannot be extended (inherited from). Examples in the JDK include the `String` and wrapper classes like `Integer`. This prevents inheritance-based vulnerabilities."
+    },
+    {
+        "type": "question",
+        "content": "What are wrapper classes and why are they needed?"
+    },
+    {
+        "type": "theory",
+        "content": "Wrapper classes (such as `Integer`, `Boolean`, `Double`) provide a way to convert primitive data types into fully-fledged objects. They are primarily needed because **Java's Collections Framework (like ArrayList, HashMap) only works with Objects and cannot store primitives directly**. \n\nAdditionally, wrapper classes provide extremely useful utility methods (e.g., `Integer.parseInt(String)`) and allow the representation of `null` values, which is heavily used in databases to signify the absence of a value (a primitive `int` defaults to 0, not null). Java utilizes Autoboxing and Unboxing to automatically convert between primitives and their respective wrapper classes."
+    },
+    {
+        "type": "question",
+        "content": "What is a finally block and why is it needed? What is try-with-resources?"
+    },
+    {
+        "type": "theory",
+        "content": "The `finally` block is attached to a try-catch block and contains crucial code that **always executes regardless of whether an exception was thrown or caught**. It is primarily needed to safely release system resources (closing database connections, file streams, sockets) to prevent memory leaks.\n\nJava 7 introduced `try-with-resources`, an elegant syntactical improvement that automates this process. Any resource declared inside the parenthesis of a `try` block that **implements the AutoCloseable interface** will be automatically closed at the end of the statement, completely removing the need for an explicit `finally` block."
+    },
+    {
+        "type": "question",
+        "content": "Can a constructor be final or static? What is the difference between a method and a constructor?"
+    },
+    {
+        "type": "theory",
+        "content": "Constructors **cannot be final or static**. A constructor belongs to object instantiation, so `static` (class-level) makes no sense. Furthermore, constructors are never inherited by subclasses, so applying `final` (which prevents overriding) is redundant and illegal in Java.\n\n<table>\n    <tr><th>Feature</th><th>Constructor</th><th>Method</th></tr>\n    <tr><td>Purpose</td><td>Initializes the state of a newly created object.</td><td>Defines the behavior or logic of an object.</td></tr>\n    <tr><td>Return Type</td><td>Has no return type (not even void).</td><td>Must have a return type or void.</td></tr>\n    <tr><td>Naming</td><td>Must perfectly match the exact name of the Class.</td><td>Can be named anything (camelCase conventionally).</td></tr>\n    <tr><td>Invocation</td><td>Invoked implicitly via the <code>new</code> keyword.</td><td>Invoked explicitly via object or class references.</td></tr>\n</table>"
+    },
+    {
+        "type": "question",
+        "content": "What is the Reflection API?"
+    },
+    {
+        "type": "theory",
+        "content": "The Reflection API allows a Java program to **inspect, analyze, and manipulate the internal properties of classes, methods, and fields at runtime**, even if they are declared as private. This means you can invoke private methods or instantiate objects without knowing their class names at compile time.\n\nWhile powerful, it is generally slow and breaks encapsulation. However, it is the backbone of major frameworks like Spring and Hibernate, allowing them to dynamically perform Dependency Injection, mapping, and proxy generation without hardcoded references."
+    },
+    {
+        "type": "question",
+        "content": "What is the difference between an Abstract Class and an Interface? Can we create an object of an abstract class?"
+    },
+    {
+        "type": "theory",
+        "content": "Both Abstract Classes and Interfaces are mechanisms to achieve abstraction in Java, but they serve different design paradigms.\n\n<table>\n    <tr><th>Feature</th><th>Abstract Class</th><th>Interface</th></tr>\n    <tr><td>Inheritance</td><td>A class can extend only one Abstract Class (no multiple inheritance).</td><td>A class can implement multiple Interfaces.</td></tr>\n    <tr><td>State (Variables)</td><td>Can hold instance variables (state). Fields can be protected, private, etc.</td><td>Cannot hold instance variables. All fields are implicitly <code>public static final</code> (constants).</td></tr>\n    <tr><td>Constructors</td><td>Can have constructors which are invoked during child class instantiation.</td><td>Cannot have constructors.</td></tr>\n    <tr><td>Usage</td><td>Used when objects share a common foundational identity (e.g., Vehicle -> Car).</td><td>Used to define a capability or contract (e.g., Flyable -> Bird, Airplane).</td></tr>\n</table>\n\n**You cannot instantiate an abstract class directly** using the `new` keyword because it is incomplete. However, you can instantiate its concrete subclasses, or create an anonymous inner class on the fly."
+    },
+    {
+        "type": "question",
+        "content": "What is a Functional Interface in Java? Give examples of built-in functional interfaces."
+    },
+    {
+        "type": "theory",
+        "content": "A Functional Interface is an interface that contains **exactly one abstract method** (SAM - Single Abstract Method). They are the absolute foundation of functional programming in Java because they provide target types for Lambda Expressions and Method References. You can optionally enforce this rule at compile-time using the `@FunctionalInterface` annotation.\n\nEven if an interface has default methods or static methods, as long as it has exactly one abstract method, it remains a functional interface.\n\n<table>\n    <tr><th>Interface</th><th>Abstract Method</th><th>Purpose</th></tr>\n    <tr><td><code>Predicate&lt;T&gt;</code></td><td><code>boolean test(T t)</code></td><td>Evaluates a boolean condition (e.g., used inside Stream <code>filter()</code>).</td></tr>\n    <tr><td><code>Function&lt;T, R&gt;</code></td><td><code>R apply(T t)</code></td><td>Transforms an input <code>T</code> into an output <code>R</code> (e.g., used inside Stream <code>map()</code>).</td></tr>\n    <tr><td><code>Consumer&lt;T&gt;</code></td><td><code>void accept(T t)</code></td><td>Consumes an input but returns nothing (e.g., used in <code>forEach()</code>).</td></tr>\n    <tr><td><code>Supplier&lt;T&gt;</code></td><td><code>T get()</code></td><td>Takes no arguments but supplies a result (e.g., lazy generation).</td></tr>\n</table>"
+    },
+    {
+        "type": "question",
+        "content": "What is the problem in this code: `@Service public class OrderService { private final PaymentService ps; }`"
+    },
+    {
+        "type": "theory",
+        "content": "The code will not compile, and Spring Dependency Injection will fail. Because the `ps` field is marked `final`, Java requires it to be initialized during object construction. Spring cannot inject dependencies into a final field if there is no constructor provided. \n\nTo fix this elegantly, you must **add a constructor for Dependency Injection, or simply use Lombok's @RequiredArgsConstructor**, which automatically generates a constructor for all final fields at compile time."
+    },
+    {
+        "type": "question",
+        "content": "How do you verify hashcodes generated on the client side with the server side to prevent Man in the Middle (MITM) attacks?"
+    },
+    {
+        "type": "theory",
+        "content": "To prevent a MITM from modifying API request bodies, you implement HMAC (Hash-based Message Authentication Code). The client calculates a cryptographic hash of the JSON payload using a shared Secret Key and sends it in the `X-Signature` header. \n\nThe server receives the payload, re-hashes it using the identical Secret Key, and compares it to the client's header. **If the hashes don't match, the request was tampered with in transit**, and the server rejects it with a 401 Unauthorized."
+    },
+    {
+        "type": "question",
+        "content": "Write a stream pipeline to count the frequency of each character in a string."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "Map<Character, Long> charCount = \"interview\".chars()\n    .mapToObj(c -> (char) c)\n    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));"
+    },
+    {
+        "type": "question",
+        "content": "Find the first non-repeating character in a string using Streams."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "Optional<Character> first = input.chars().mapToObj(c -> (char) c)\n    // Use LinkedHashMap to preserve insertion order\n    .collect(Collectors.groupingBy(Function.identity(), LinkedHashMap::new, Collectors.counting()))\n    .entrySet().stream()\n    .filter(e -> e.getValue() == 1)\n    .map(Map.Entry::getKey)\n    .findFirst();"
+    },
+    {
+        "type": "question",
+        "content": "Method Overriding?"
+    },
+    {
+        "type": "theory",
+        "content": "Method Overriding occurs when a child class provides a specific implementation of a method that is already provided by its parent class. The method signature (name and parameters) must perfectly match. It is the core of **Runtime Polymorphism (Dynamic Method Dispatch)**. The `@Override` annotation is highly recommended to catch compile-time errors if the signature accidentally mismatches."
+    },
+    {
+        "type": "question",
+        "content": "What is a Marker Interface?"
+    },
+    {
+        "type": "theory",
+        "content": "A Marker Interface is an interface that **contains absolutely no methods or constants**. It is entirely empty. It simply acts as a tag to flag a class to the JVM or compiler, indicating that the class possesses a specific capability. Examples include `Serializable` (flags the class for object serialization) and `Cloneable`."
+    },
+    {
+        "type": "question",
+        "content": "Find the first repeating character in a string."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "public static char findFirstRepeating(String str) {\n    HashSet<Character> seen = new HashSet<>();\n    for (char c : str.toCharArray()) {\n        if (!seen.add(c)) {\n            return c; // add() returns false if it already exists\n        }\n    }\n    return '\\0';\n}"
+    },
+    {
+        "type": "question",
+        "content": "What all interfaces do we have in the Collection Framework?"
+    },
+    {
+        "type": "theory",
+        "content": "The core interfaces are:\n1. **Collection**: The root interface.\n2. **List**: Ordered collections (`ArrayList`, `LinkedList`).\n3. **Set**: Unique elements (`HashSet`, `TreeSet`).\n4. **Queue**: FIFO data structure (`PriorityQueue`).\n5. **Map**: Key-Value pairs (`HashMap`, `TreeMap`). Note that `Map` is part of the Collections Framework but does *not* inherit from the `Collection` interface."
+    },
+    {
+        "type": "question",
+        "content": "Can we overload a method by only changing the return type?"
+    },
+    {
+        "type": "theory",
+        "content": "No, you **cannot** overload a method in Java by only changing its return type. The compiler uses the method signature (the method name and the parameter list) to differentiate methods. If two methods have the same name and identical parameters but different return types, the compiler will throw an ambiguous method error."
+    },
+    {
+        "type": "question",
+        "content": "Have you generated hashcodes in your application earlier?"
+    },
+    {
+        "type": "theory",
+        "content": "Yes, I regularly override `hashCode()` using `Objects.hash(field1, field2)` to ensure objects function correctly as keys in a `HashMap`. For security (e.g., password hashing or API signatures), I have used cryptographic hash functions like SHA-256 via libraries like Apache Commons Codec or Spring Security's `BCryptPasswordEncoder`."
+    },
+    {
+        "type": "question",
+        "content": "What is Abstraction? Provide a detailed real-world example."
+    },
+    {
+        "type": "theory",
+        "content": "**Abstraction** is the process of hiding internal implementation details and exposing only essential functionalities to the user. It reduces complexity and isolates changes. In Java, it is achieved using `abstract` classes (0 to 100% abstraction) and `interfaces` (100% abstraction).\n\n**Real-World Example (Car Dashboard)**:\nWhen you drive a car, you press the accelerator pedal. You only know that pressing the pedal increases speed (the abstract behavior). You do **not** need to know the complex internal mechanics of fuel injection, spark plug ignition, and combustion happening in the engine. The dashboard \"abstracts\" the engine's complexity away from the driver.\n\n**Java Example:**\n`public interface PaymentGateway { void processPayment(double amount); }`\nThe caller just calls `processPayment()`. They don't care if the underlying implementation is `StripePaymentImpl` or `PayPalPaymentImpl`."
+    },
+    {
+        "type": "category",
+        "content": "Java 8 & Streams"
+    },
+    {
+        "type": "question",
+        "content": "How do you create a custom Functional Interface and use it with a Lambda expression?"
+    },
+    {
+        "type": "theory",
+        "content": "A Functional Interface must contain exactly **one abstract method**. You strongly enforce this using the `@FunctionalInterface` annotation so the compiler throws an error if someone adds a second method.\n\nLambdas allow us to provide the implementation for this single abstract method inline, completely eliminating the need for bulky anonymous inner classes."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "// 1. Define the Custom Interface\n@FunctionalInterface\npublic interface MathOperation {\n    int operate(int a, int b);\n}\n\npublic class LambdaDemo {\n    public static void main(String[] args) {\n        // 2. Implement it instantly using a Lambda Expression\n        MathOperation addition = (a, b) -> a + b;\n        MathOperation multiplication = (a, b) -> a * b;\n\n        // 3. Execute the implementation\n        System.out.println(\"Sum: \" + addition.operate(10, 5)); // Output: 15\n        System.out.println(\"Product: \" + multiplication.operate(10, 5)); // Output: 50\n    }\n}"
+    },
+    {
+        "type": "question",
+        "content": "Provide concrete examples of Intermediate vs Terminal operations in Streams."
+    },
+    {
+        "type": "theory",
+        "content": "**Intermediate Operations** transform the stream into another stream. They are **lazy**, meaning they absolutely do not execute until a terminal operation is called. \nExamples: `filter()`, `map()`, `sorted()`, `distinct()`.\n\n**Terminal Operations** trigger the execution of the entire pipeline and produce a final non-stream result (like a Collection, integer, or void).\nExamples: `collect()`, `forEach()`, `reduce()`, `count()`."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "List<String> names = Arrays.asList(\"Alice\", \"Bob\", \"Charlie\", \"David\", \"Alice\");\n\n// Pipeline Execution\nlong count = names.stream()\n    .filter(name -> name.length() > 3)  // Intermediate: Keeps [Alice, Charlie, David, Alice]\n    .distinct()                         // Intermediate: Keeps [Alice, Charlie, David]\n    .map(String::toUpperCase)           // Intermediate: Transforms to [ALICE, CHARLIE, DAVID]\n    .count();                           // Terminal: Triggers execution! Returns 3"
+    },
+    {
+        "type": "question",
+        "content": "What are Lambda Expressions in Java 8 and why are they important?"
+    },
+    {
+        "type": "theory",
+        "content": "Lambda expressions introduced a clear and concise way to represent anonymous functions in Java. They drastically reduce boilerplate code by **eliminating the need to write bulky anonymous inner classes**. \n\nA lambda expression essentially provides the implementation for the single abstract method of a Functional Interface on the fly. Its syntax is `(parameters) -> expression` or `(parameters) -> { statements; }`.\n\n**Before Java 8:**\n<pre><code class=\"language-java\">Runnable r = new Runnable() {\n    @Override\n    public void run() { System.out.println(\"Running...\"); }\n};</code></pre>\n\n**After Java 8 (Lambda):**\n<pre><code class=\"language-java\">Runnable r = () -> System.out.println(\"Running...\");</code></pre>\n\nThis paradigm shift enabled Java to embrace functional programming, making advanced APIs like Streams possible."
+    },
+    {
+        "type": "question",
+        "content": "Explain the Java 8 Stream API. What is the difference between Intermediate and Terminal operations?"
+    },
+    {
+        "type": "theory",
+        "content": "The Stream API is a powerful abstraction used to process sequences of elements (like Collections) in a functional and declarative manner. Streams do not store data; they transport data from a source through a pipeline of computational operations.\n\nA Stream pipeline consists of a source, zero or more intermediate operations, and exactly one terminal operation.\n\n<table>\n    <tr><th>Feature</th><th>Intermediate Operations</th><th>Terminal Operations</th></tr>\n    <tr><td>Execution</td><td><b>Lazily evaluated.</b> They don't execute until a terminal operation is invoked.</td><td>Eagerly evaluated. Triggers the execution of the entire pipeline.</td></tr>\n    <tr><td>Return Type</td><td>Returns a new <code>Stream</code>, allowing chaining.</td><td>Returns a final non-stream result (List, Integer, void, etc.) or throws an exception.</td></tr>\n    <tr><td>Examples</td><td><code>filter()</code>, <code>map()</code>, <code>sorted()</code>, <code>distinct()</code></td><td><code>collect()</code>, <code>reduce()</code>, <code>forEach()</code>, <code>count()</code></td></tr>\n</table>\n\nFor example, `filter()` takes a `Predicate` to remove unwanted elements, while `map()` takes a `Function` to transform elements. The pipeline remains dormant until a terminal operation like `collect()` consumes the processed data."
+    },
+    {
+        "type": "question",
+        "content": "What is the Optional class and what problem does it solve?"
+    },
+    {
+        "type": "theory",
+        "content": "`Optional` is a generic container object introduced in Java 8 used to represent a value that may or may not be present (null). \n\nHistorically, returning null led to the infamous `NullPointerException`. By returning an `Optional<User>` instead of a `User`, the API explicitly communicates to the caller that the object might be missing. **It forces developers to explicitly handle the absence of a value** using elegant methods like `isPresent()`, `ifPresent()`, `orElse(defaultValue)`, and `orElseThrow()`."
+    },
+    {
+        "type": "question",
+        "content": "Write a stream pipeline to group persons by age."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "Map<Integer, List<Person>> peopleByAge = people.stream()\n    .collect(Collectors.groupingBy(Person::getAge));"
+    },
+    {
+        "type": "question",
+        "content": "Reduce method in stream?"
+    },
+    {
+        "type": "theory",
+        "content": "The `reduce()` method is a terminal operation that takes a sequence of elements and combines them into a single, summary result by repeatedly applying a binary operation. For example, summing all numbers in a list, or concatenating all strings.\n\n`int sum = numbers.stream().reduce(0, (a, b) -> a + b);` \nIt is an extremely powerful tool for aggregation without mutating external state."
+    },
+    {
+        "type": "question",
+        "content": "Print unique values of an array without using HashSet, HashMap, ArrayList, or Java 8 (In-Place approach for O(1) Space)."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "public static int removeDuplicates(int[] arr) {\n    if (arr.length == 0) return 0;\n    Arrays.sort(arr); // Group duplicates together\n\n    int j = 0; // Pointer for unique elements\n    for (int i = 1; i < arr.length; i++) {\n        if (arr[i] != arr[j]) {\n            j++;\n            arr[j] = arr[i]; // Move the unique element to the front\n        }\n    }\n    return j + 1; // Return the count of unique elements\n}"
+    },
+    {
+        "type": "question",
+        "content": "Using Streams: Group employees by department and find the count of employees in each."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "Map<String, Long> countByDept = employees.stream()\n    .collect(Collectors.groupingBy(\n        Employee::getDepartment, \n        Collectors.counting()\n    ));"
+    },
+    {
+        "type": "question",
+        "content": "Using Streams: Find the maximum salary from an employee list."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "Optional<Employee> highestPaid = employees.stream()\n    .max(Comparator.comparingDouble(Employee::getSalary));"
+    },
+    {
+        "type": "question",
+        "content": "Using Streams: Find the average salary in each department."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "Map<String, Double> avgSalaryByDept = employees.stream()\n    .collect(Collectors.groupingBy(\n        Employee::getDepartment, \n        Collectors.averagingDouble(Employee::getSalary)\n    ));"
+    },
+    {
+        "type": "question",
+        "content": "What is filter in Stream and how many parameters we pass?"
+    },
+    {
+        "type": "theory",
+        "content": "The `filter()` method is an intermediate operation in the Stream API used to select elements based on a condition. It takes exactly **one parameter**: a `Predicate<T>`. A Predicate is a functional interface that takes an object and returns a boolean (`true` to keep the element, `false` to discard it)."
+    },
+    {
+        "type": "question",
+        "content": "What Java 8 features have you used in your application?"
+    },
+    {
+        "type": "theory",
+        "content": "In my daily development, I heavily utilize:\n1. **Streams API**: For declarative data filtering and transformation.\n2. **Lambdas**: To implement Functional Interfaces cleanly.\n3. **Optional**: To explicitly handle potential null returns and eliminate `NullPointerException`.\n4. **java.time API**: Specifically `LocalDateTime` and `Instant`, fully replacing the legacy, mutable `java.util.Date` class."
+    },
+    {
+        "type": "category",
+        "content": "Collections Framework"
+    },
+    {
+        "type": "question",
+        "content": "When should you use each Collection? (Data Structures Cheat Sheet)"
+    },
+    {
+        "type": "theory",
+        "content": "<table>\n    <tr><th>Collection</th><th>Key Characteristic</th><th>When to Use? (Real-World Scenario)</th></tr>\n    <tr><td><strong>ArrayList</strong></td><td>Fast Iteration, Slow Insertion/Deletion (O(n)).</td><td>Read-heavy operations. E.g., Storing a massive catalog of products to display on an e-commerce webpage.</td></tr>\n    <tr><td><strong>LinkedList</strong></td><td>Fast Insertion/Deletion (O(1)), Slow Iteration (O(n)).</td><td>Write-heavy operations. E.g., Implementing a queue for a messaging system where items are constantly being added and removed from the ends.</td></tr>\n    <tr><td><strong>HashSet</strong></td><td>No duplicates, No ordering, Fast lookups (O(1)).</td><td>When you need to quickly check if an element exists. E.g., Checking if a username is already taken during registration.</td></tr>\n    <tr><td><strong>TreeSet</strong></td><td>No duplicates, Automatically Sorted (O(log n)).</td><td>When you need a unique, constantly sorted list. E.g., Displaying a live leaderboard of top scores in a game.</td></tr>\n    <tr><td><strong>HashMap</strong></td><td>Key-Value pairs, Unordered, Fast lookups (O(1)).</td><td>Caching data. E.g., Storing user session data where the key is the highly unique Session ID.</td></tr>\n    <tr><td><strong>TreeMap</strong></td><td>Key-Value pairs, Sorted by Key (O(log n)).</td><td>When you need to retrieve a sequential range of keys. E.g., Fetching all transactions between two specific dates.</td></tr>\n    <tr><td><strong>ConcurrentHashMap</strong></td><td>Thread-safe, Segment-level locking.</td><td>When multiple threads need to read/write to a shared cache simultaneously without locking the entire map and causing bottlenecks.</td></tr>\n</table>"
+    },
+    {
+        "type": "question",
+        "content": "How does HashMap work internally in Java? What is the difference between HashMap and ConcurrentHashMap?"
+    },
+    {
+        "type": "theory",
+        "content": "<p><strong>Step 1: Hashing & Indexing</strong></p>\n<p>When you call <code>put(Key, Value)</code>, HashMap calculates the hash code of the Key using its <code>hashCode()</code> method. It then applies a secondary bitwise hash function (<code>(n - 1) & hash</code>) to determine the exact <strong>Bucket Index</strong> (the specific slot in its internal array) where the data should go.</p>\n\n<p><strong>Step 2: Collision Handling</strong></p>\n<p>If two different keys produce the exact same bucket index, a <strong>Collision</strong> occurs. Before Java 8, the HashMap simply stored these colliding entries in a standard <strong>LinkedList</strong> hanging off that specific bucket. However, if a massive amount of collisions occurred, searching that bucket degraded from an optimal O(1) to a terrible O(n) performance.</p>\n\n<p><strong>Step 3: Java 8 Red-Black Tree Optimization</strong></p>\n<p>To fix the O(n) worst-case performance, Java 8 introduced a massive architectural optimization: If the number of nodes in a single bucket's LinkedList crosses a threshold (specifically <strong>8 elements</strong>), the HashMap automatically transforms that LinkedList into a self-balancing <strong>Red-Black Tree</strong>. This drastically improves the worst-case search performance from O(n) to an extremely fast <strong>O(log n)</strong>.</p>\n\n<p><strong>Step 4: Rehashing (Load Factor)</strong></p>\n<p>When the HashMap becomes 75% full (triggered by the default <code>0.75 Load Factor</code>), it automatically doubles its internal array capacity (e.g., from 16 to 32 buckets). It must then painstakingly recalculate the hashes for every single existing element and redistribute them into the new larger array. This is an expensive operation, which is why explicitly initializing a HashMap with a known capacity is a high-performance best practice.</p>"
+    },
+    {
+        "type": "question",
+        "content": "ArrayList vs LinkedList: Which is better for inserting 10 million elements?"
+    },
+    {
+        "type": "theory",
+        "content": "Both implement the `List` interface but use entirely different underlying data structures.\n\n<table>\n    <tr><th>Feature</th><th>ArrayList</th><th>LinkedList</th></tr>\n    <tr><td>Data Structure</td><td>Backed by a dynamic, resizable array.</td><td>Backed by a doubly-linked list (nodes with pointers).</td></tr>\n    <tr><td>Memory</td><td>Contiguous memory allocation. Excellent for CPU caching.</td><td>Scattered nodes in memory. High overhead due to storing previous/next pointers.</td></tr>\n    <tr><td>Read Access</td><td>O(1) time complexity (instant random access via index).</td><td>O(N) time complexity (must traverse nodes sequentially).</td></tr>\n    <tr><td>Insertion/Deletion</td><td>O(N) time if inserting in the middle (requires shifting all subsequent elements).</td><td>O(1) time if inserting/deleting in the middle (assuming the node reference is known).</td></tr>\n</table>\n\nFor adding 10 million elements sequentially to the *end* of the list, ArrayList is vastly superior due to contiguous memory allocation and batch resizing. However, for **frequent, continuous insertions or deletions in the middle of the list**, LinkedList is technically faster because it only requires updating pointer references, whereas ArrayList forces massive memory shifting."
+    },
+    {
+        "type": "question",
+        "content": "What is the difference between Comparable and Comparator?"
+    },
+    {
+        "type": "theory",
+        "content": "<table>\n    <tr><th>Feature</th><th>Comparable</th><th>Comparator</th></tr>\n    <tr><td><strong>Package</strong></td><td><code>java.lang.Comparable</code></td><td><code>java.util.Comparator</code></td></tr>\n    <tr><td><strong>Method</strong></td><td><code>public int compareTo(Object o)</code></td><td><code>public int compare(Object o1, Object o2)</code></td></tr>\n    <tr><td><strong>Sorting Logic</strong></td><td>Provides the <strong>Natural/Default Sorting</strong> order.</td><td>Provides <strong>Custom/Multiple Sorting</strong> logic.</td></tr>\n    <tr><td><strong>Class Modification</strong></td><td>Requires modifying the actual domain class itself (e.g., <code>class Employee implements Comparable</code>).</td><td>Does not touch the original class. You create separate external classes or use inline Lambdas.</td></tr>\n    <tr><td><strong>Usage Example</strong></td><td><code>Collections.sort(employees);</code></td><td><code>Collections.sort(employees, new SalaryComparator());</code></td></tr>\n</table>\n<br>\n<strong>Notes & Real-World Example:</strong>\n<ul>\n    <li>If you have an `Employee` class, you implement <strong>Comparable</strong> to sort them by their `employeeId` by default.</li>\n    <li>If the HR department suddenly requests to see the list sorted by <em>Salary</em>, and then later sorted by <em>Age</em>, you cannot change the hardcoded `compareTo()` method. Instead, you use <strong>Comparator</strong> to create external, swappable sorting algorithms on the fly (e.g., <code>employees.sort(Comparator.comparing(Employee::getSalary));</code>).</li>\n</ul>"
+    },
+    {
+        "type": "question",
+        "content": "What is the difference between Fail-Fast and Fail-Safe iterators?"
+    },
+    {
+        "type": "theory",
+        "content": "When iterating over a collection in a multithreaded environment, structural modifications (adding/removing) can cause severe issues.\n\n<table>\n    <tr><th>Feature</th><th>Fail-Fast Iterators</th><th>Fail-Safe Iterators</th></tr>\n    <tr><td>Behavior</td><td>Immediately throws <code>ConcurrentModificationException</code> if the collection is altered during iteration.</td><td>Does not throw exceptions if the collection is altered.</td></tr>\n    <tr><td>Mechanism</td><td>Operates directly on the actual underlying data structure using a `modCount` tracker.</td><td><b>Operates on a clone or snapshot of the collection</b>, allowing the original to be modified safely.</td></tr>\n    <tr><td>Examples</td><td><code>ArrayList</code>, <code>HashMap</code>, <code>HashSet</code></td><td><code>ConcurrentHashMap</code>, <code>CopyOnWriteArrayList</code></td></tr>\n</table>"
+    },
+    {
+        "type": "question",
+        "content": "Map on object and its syntax?"
+    },
+    {
+        "type": "theory",
+        "content": "If you meant mapping an object using Streams, you use the `map()` method. The `map()` method in the Stream API is an intermediate operation that takes a `Function<T, R>` as an argument. It applies this function to every element of the stream, transforming them into a completely new stream of objects.\n\nFor example, to map a list of `Employee` objects to a list of their names:\n`List<String> names = employees.stream().map(Employee::getName).collect(Collectors.toList());`"
+    },
+    {
+        "type": "question",
+        "content": "What is RequestMapping?"
+    },
+    {
+        "type": "theory",
+        "content": "`@RequestMapping` is a Spring annotation used to map web requests to specific handler methods or classes. It defines the URL path, the HTTP method (GET, POST), and the media types consumed/produced. While you can use `@RequestMapping(method = RequestMethod.GET)`, it is widely considered best practice to use the composed shortcut annotations like `@GetMapping` or `@PostMapping` for cleaner code."
+    },
+    {
+        "type": "question",
+        "content": "What is @JsonAnySetter and @JsonAnyGetter?"
+    },
+    {
+        "type": "theory",
+        "content": "These are powerful Jackson annotations used when dealing with dynamic or unknown JSON properties. \nIf a JSON payload has arbitrary keys that you cannot map to hardcoded fields in your POJO, you can use a `Map<String, Object>`. \nAnnotating a method with `@JsonAnySetter` tells Jackson to throw all unrecognized JSON keys into that map during deserialization. Conversely, `@JsonAnyGetter` tells Jackson to serialize that map back into the root JSON object as flat properties."
+    },
+    {
+        "type": "question",
+        "content": "Difference between ArrayList and Set?"
+    },
+    {
+        "type": "theory",
+        "content": "An `ArrayList` implements the `List` interface, meaning it allows **duplicate elements** and maintains the exact **insertion order**. A `Set` (like `HashSet`) implements the `Set` interface, meaning it **strictly prohibits duplicate elements** and generally does not guarantee any specific ordering."
+    },
+    {
+        "type": "question",
+        "content": "If there are two systems and one is failing, what will you do?"
+    },
+    {
+        "type": "theory",
+        "content": "This is a classic system design question. The best approach is to implement the **Circuit Breaker Pattern** (using a library like Resilience4j). When System B fails continuously, System A's circuit breaker trips open, instantly rejecting new requests to System B and returning a default fallback response. This prevents System A from exhausting its thread pool waiting for timeouts, allowing the ecosystem to degrade gracefully rather than crashing entirely."
+    },
+    {
+        "type": "question",
+        "content": "If I want to map my employee object to some database table, how would you do it using JPA? Explain the full flow."
+    },
+    {
+        "type": "theory",
+        "content": "1. **Entity Class**: I would create an `Employee` class and annotate it with `@Entity` and `@Table(name=\"employees\")`.\n2. **Primary Key**: I would add an `id` field annotated with `@Id` and `@GeneratedValue(strategy = GenerationType.IDENTITY)` for auto-increment.\n3. **Columns**: I would map specific fields using `@Column(name=\"emp_name\")`.\n4. **Repository**: I would create an interface `EmployeeRepository extends JpaRepository<Employee, Long>`.\n5. Spring Boot's Auto-Configuration (via Hibernate) automatically scans these entities and handles all the JDBC connection boilerplate behind the scenes."
+    },
+    {
+        "type": "category",
+        "content": "Multithreading & Concurrency"
+    },
+    {
+        "type": "question",
+        "content": "How do you execute asynchronous threads using Java 8 CompletableFuture?"
+    },
+    {
+        "type": "theory",
+        "content": "Prior to Java 8, managing asynchronous threads using the standard `Future` interface was incredibly clunky because the operations were **blocking** (calling `.get()` froze the main thread completely) and they couldn't be chained together.\n\nJava 8 introduced `CompletableFuture`, which allows you to build massive, non-blocking asynchronous pipelines. You can use `supplyAsync()` to spawn a background task on a separate thread (pulled from the common `ForkJoinPool`), and instantly chain callbacks like `thenApply()` or `thenAccept()` that will asynchronously execute **only when** the background thread finishes."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "CompletableFuture.supplyAsync(() -> {\n    // Task 1: Runs in a separate background thread\n    System.out.println(\"Fetching data in thread: \" + Thread.currentThread().getName());\n    return \"Order#123\";\n})\n.thenApply(orderId -> {\n    // Task 2: Chained non-blocking operation\n    return \"Processing \" + orderId;\n})\n.thenAccept(result -> {\n    // Task 3: Terminal consumer operation\n    System.out.println(\"Final Result: \" + result);\n});"
+    },
+    {
+        "type": "question",
+        "content": "Explain multithreading. Identify the issue in a Counter class implementing: `count++`"
+    },
+    {
+        "type": "theory",
+        "content": "Multithreading is a core Java capability allowing concurrent execution of two or more parts of a program to maximize CPU utilization. \n\nA classic interview trap is the `count++` operation. While it looks like a single line of code, the `++` operator is **not atomic**. It is compiled into three distinct machine instructions: Read the current value, Add one to it, and Write it back to memory. In a highly concurrent system, Thread A and Thread B might read the value `5` simultaneously. Both add 1, and both write `6` back. One update is entirely lost (a Race Condition). \n\nTo resolve this, you must **use Atomic variables (like AtomicInteger, leveraging hardware CAS) or the synchronized keyword** to ensure thread safety."
+    },
+    {
+        "type": "question",
+        "content": "What happens if a thread calls notify() or wait() without holding the lock?"
+    },
+    {
+        "type": "theory",
+        "content": "The `wait()`, `notify()`, and `notifyAll()` methods are strictly meant for inter-thread communication. They require the calling thread to own the monitor (lock) of the object they are being called upon. If a thread calls these methods without holding the monitor lock\u2014meaning it is not executing inside a `synchronized` block or method for that specific object\u2014the JVM immediately **throws an IllegalMonitorStateException**."
+    },
+    {
+        "type": "question",
+        "content": "What is a LinkedBlockingQueue and why is it preferred in concurrency?"
+    },
+    {
+        "type": "theory",
+        "content": "A `LinkedBlockingQueue` is a thread-safe, optionally-bounded blocking queue backed by linked nodes. It implements the Producer-Consumer pattern efficiently. If the queue is empty, a consumer calling `take()` will block until an element is added. If the queue is full, a producer calling `put()` will block until space opens up.\n\nIts massive performance advantage stems from its architecture: **it uses two separate ReentrantLocks (putLock and takeLock)**. This allows producers to add elements and consumers to remove elements simultaneously without blocking each other, dramatically increasing throughput compared to a single-lock `ArrayBlockingQueue`."
+    },
+    {
+        "type": "question",
+        "content": "Lock safe vs thread safe class?"
+    },
+    {
+        "type": "theory",
+        "content": "A **thread-safe** class ensures its state remains consistent even when accessed by multiple threads concurrently, usually achieved via synchronization. A **lock-safe** or lock-free class (like `AtomicInteger` or `ConcurrentLinkedQueue`) achieves thread-safety *without* using traditional locks (like `synchronized` blocks or `ReentrantLock`), relying instead on hardware-level Compare-And-Swap (CAS) operations. Lock-free classes generally perform far better under high contention because they avoid thread suspension."
+    },
+    {
+        "type": "question",
+        "content": "Singleton class? Is it thread-safe? How does serialization affect it?"
+    },
+    {
+        "type": "theory",
+        "content": "A Singleton ensures a class has only one instance and provides a global point of access to it. It is created by making the constructor private and providing a static `getInstance()` method.\n\nA basic Singleton is **not thread-safe**. If two threads enter the `if (instance == null)` block simultaneously, two objects are created. You make it thread-safe using **Double-Checked Locking** with the `volatile` keyword, or by using Bill Pugh's inner static helper class.\n\n**Serialization destroys the Singleton pattern**, because deserializing an object creates a brand new instance. To fix this, you must implement the `readResolve()` method in your Singleton class to return the existing instance instead."
+    },
+    {
+        "type": "question",
+        "content": "What are the different Atomic variables in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "Java provides classes in `java.util.concurrent.atomic` for lock-free thread-safe operations on single variables. The most common ones are:\n- `AtomicInteger`\n- `AtomicLong`\n- `AtomicBoolean`\n- `AtomicReference` (used to atomically update object references)\nThey achieve thread-safety using hardware-level Compare-And-Swap (CAS) instructions instead of synchronized locks."
+    },
+    {
+        "type": "question",
+        "content": "Explain multithreading in Java and how you used it in server-side development?"
+    },
+    {
+        "type": "theory",
+        "content": "Multithreading allows multiple threads to run concurrently, maximizing CPU usage. \nIn server-side development with Spring Boot, **multithreading is completely native**. The embedded Tomcat server maintains a thread pool and automatically assigns a new thread to every incoming HTTP request. I also manually utilize it using Spring's `@Async` annotation paired with a custom `ThreadPoolTaskExecutor` to offload heavy background tasks (like sending confirmation emails) without blocking the primary user request."
+    },
+    {
+        "type": "question",
+        "content": "How can you debug a deadlock using jstack in multithreading?"
+    },
+    {
+        "type": "theory",
+        "content": "If an application freezes due to a deadlock, you first use the `jps` command in the terminal to find the Java Process ID (PID). Then, you execute `jstack <PID>`. \n\nThis generates a thread dump. You scroll to the bottom of the dump, and the tool will explicitly state **\"Found one Java-level deadlock:\"**. It prints out the exact thread names, the precise line of code where they are blocked, and the specific memory addresses of the monitor locks causing the cyclic dependency."
+    },
+    {
+        "type": "category",
+        "content": "Spring Boot & Architecture"
+    },
+    {
+        "type": "question",
+        "content": "How do you check if a JWT token is expired in cache?"
+    },
+    {
+        "type": "theory",
+        "content": "JWT tokens inherently contain an `exp` (expiration time) claim directly inside their payload. You do **not** need to query a database or cache to check for expiration. The server simply decodes the payload and checks if the current server time is past the `exp` timestamp.\n\nHowever, if you want to **force-invalidate** a token *before* it naturally expires (e.g., the user clicks \"Logout\"), you store the token in a Redis cache as a \"blacklist\". The server must then check this Redis cache on every single request to verify the token hasn't been manually revoked."
+    },
+    {
+        "type": "question",
+        "content": "What are different HTTP methods? Can we use POST for updating?"
+    },
+    {
+        "type": "theory",
+        "content": "Common HTTP methods map to CRUD operations: `GET` (Retrieve), `POST` (Create), `PUT` (Full Replace), `PATCH` (Partial Update), and `DELETE` (Remove).\n\nYes, technically you *can* use `POST` for updating records (and many legacy APIs do). However, it severely violates strict RESTful conventions. `POST` is explicitly non-idempotent (calling it twice creates two resources), whereas updates should use `PUT` or `PATCH`, which are mathematically designed to be idempotent."
+    },
+    {
+        "type": "question",
+        "content": "Explain the role of tracing and correlation IDs in a distributed Spring Boot application."
+    },
+    {
+        "type": "theory",
+        "content": "In a Microservices architecture, a single user click might trigger a request that travels through 5 different services (API Gateway -> Auth -> Order -> Inventory -> Payment). If an error occurs deep in the Payment service, reading disjointed logs across 5 servers to find out what happened is impossible.\n\nTo solve this, we use **Distributed Tracing** (via Zipkin, Jaeger, or Spring Cloud Sleuth/Micrometer). When the request hits the very first API Gateway, it generates a unique UUID called a **Correlation ID** (or Trace ID). This ID is attached to the HTTP headers and passed to every subsequent service. All servers print this Correlation ID in their logs, allowing developers to query Logstash/Splunk for that exact ID and view the entire chronological lifecycle of the failed request."
+    },
+    {
+        "type": "question",
+        "content": "Difference between Spring MVC and Spring Boot?"
+    },
+    {
+        "type": "theory",
+        "content": "<table>\n<tr><th>Feature</th><th>Spring MVC</th><th>Spring Boot</th></tr>\n<tr><td><strong>Nature</strong></td><td>A web framework that is part of the core Spring Framework.</td><td>A complete ecosystem built <em>on top</em> of Spring MVC to simplify it.</td></tr>\n<tr><td><strong>Configuration</strong></td><td>Requires massive amounts of manual XML or Java configuration (DispatcherServlet, ViewResolvers).</td><td>Eliminates boilerplate via Auto-Configuration (<code>@SpringBootApplication</code>).</td></tr>\n<tr><td><strong>Deployment</strong></td><td>You must manually package a WAR file and deploy it to an external Tomcat/JBoss server.</td><td>Embeds a Tomcat server directly inside the JAR file, allowing you to run the app with a simple <code>java -jar</code> command.</td></tr>\n</table>"
+    },
+    {
+        "type": "question",
+        "content": "What are the uses of pom.xml and application.yml?"
+    },
+    {
+        "type": "theory",
+        "content": "- **`pom.xml` (Project Object Model)**: The core configuration file used by the **Maven** build tool. It manages the project's dependencies (downloading external JAR libraries like Spring Web or PostgreSQL Driver from the internet), build plugins, and the compilation lifecycle.\n- **`application.yml`**: A configuration file used strictly by **Spring Boot** at runtime (an alternative to `application.properties`). It stores environment-specific settings like Database URLs, credentials, server ports, logging levels, and custom business properties in a highly readable hierarchical YAML format."
+    },
+    {
+        "type": "question",
+        "content": "How do you execute a stored procedure in Java code?"
+    },
+    {
+        "type": "theory",
+        "content": "There are two main ways to execute stored procedures in modern Java:\n1. **Core JDBC API**: You use a `CallableStatement`.\n`CallableStatement stmt = connection.prepareCall(\"{call update_salary(?, ?)}\");`\n`stmt.setInt(1, empId);`\n`stmt.execute();`\n\n2. **Spring Data JPA**: You can map it directly in your Repository interface using the `@Procedure` annotation, making it completely declarative.\n`@Procedure(procedureName = \"update_salary\")`\n`void updateSalary(Integer empId, Double newSalary);`"
+    },
+    {
+        "type": "question",
+        "content": "What are HTTP Status codes? 4xx stands for what status?"
+    },
+    {
+        "type": "theory",
+        "content": "HTTP status codes indicate the result of a client's request to the server.\n- **2xx (Success)**: The request succeeded (e.g., 200 OK, 201 Created).\n- **3xx (Redirection)**: The resource has moved and the client must take additional action.\n- **4xx (Client Error)**: Indicates the client (the frontend) messed up. They sent bad data, an invalid token, or requested a non-existent page (e.g., 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found).\n- **5xx (Server Error)**: Indicates the server crashed or failed to process a perfectly valid request (e.g., 500 Internal Server Error)."
+    },
+    {
+        "type": "question",
+        "content": "What is the @NoArgsConstructor annotation?"
+    },
+    {
+        "type": "theory",
+        "content": "It is a **Lombok** annotation that automatically generates a default, empty constructor (with zero parameters) at compile time. \n\n**Why is it important?** This is strictly required by frameworks like JPA/Hibernate and Jackson JSON parsers. Hibernate requires a no-argument constructor to dynamically instantiate entity objects via reflection before using setters/reflection to populate them with the database row data."
+    },
+    {
+        "type": "question",
+        "content": "Which Java security frameworks have you implemented?"
+    },
+    {
+        "type": "theory",
+        "content": "In my projects, I exclusively implement **Spring Security**. \nI secure REST APIs by establishing stateless authentication using **JWT (JSON Web Tokens)**. I implement custom `OncePerRequestFilter` classes to intercept all incoming requests, cryptographically validate the JWT signature and expiration, and load the user's `GrantedAuthorities` into the `SecurityContextHolder`. \n\nFurthermore, I extensively configure method-level security using annotations like `@PreAuthorize(\"hasRole('ADMIN')\")` to strictly restrict access to specific sensitive endpoints."
+    },
+    {
+        "type": "question",
+        "content": "Write code to iterate over a JSON object and print an address."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "import com.fasterxml.jackson.databind.JsonNode;\nimport com.fasterxml.jackson.databind.ObjectMapper;\nimport java.util.Iterator;\nimport java.util.Map;\n\npublic class JsonIteratorDemo {\n    public static void main(String[] args) throws Exception {\n        ObjectMapper mapper = new ObjectMapper();\n        String jsonString = \"{\\\"name\\\":\\\"John\\\", \\\"address\\\":{\\\"city\\\":\\\"New York\\\", \\\"zip\\\":\\\"10001\\\"}}\";\n\n        // 1. Parse JSON into a tree structure\n        JsonNode rootNode = mapper.readTree(jsonString);\n        \n        // 2. Extract the \"address\" object node\n        JsonNode addressNode = rootNode.get(\"address\");\n        \n        // 3. Iterate over the fields of the address object\n        Iterator<Map.Entry<String, JsonNode>> fields = addressNode.fields();\n        while (fields.hasNext()) {\n            Map.Entry<String, JsonNode> field = fields.next();\n            System.out.println(field.getKey() + \" : \" + field.getValue().asText());\n        }\n    }\n}"
+    },
+    {
+        "type": "question",
+        "content": "Bank Scenario: How do you prevent 'Double Spending' when an impatient user clicks the 'Pay' button twice rapidly?"
+    },
+    {
+        "type": "theory",
+        "content": "Double spending is a critical issue in payment gateways. If a user impatiently clicks 'Submit Payment' twice, the browser might send two identical API requests simultaneously.\n\n**Solution: Idempotency Keys**\n1. The frontend generates a unique UUID (the Idempotency Key) for the transaction and attaches it to the HTTP Headers of the `POST` request.\n2. When the server receives the request, it checks a fast in-memory database (like **Redis**) to see if this UUID already exists.\n3. **Request 1** arrives, the UUID is not found. The server locks the UUID in Redis, processes the actual payment with Stripe/Visa, and saves the successful HTTP response in Redis against that exact UUID.\n4. **Request 2** arrives just milliseconds later. The server checks Redis, sees the UUID is already locked/processed, and immediately returns the cached success response *without* ever hitting the payment gateway a second time."
+    },
+    {
+        "type": "question",
+        "content": "Bank Scenario: Two users try to withdraw the exact same last $100 from a joint account at the exact same millisecond. How do you handle this?"
+    },
+    {
+        "type": "theory",
+        "content": "This is a classic **Race Condition**. If both threads read the balance as $100 simultaneously, both will pass the validation check, resulting in the account illegally going to -$100.\n\n**Solution 1: Pessimistic Locking (Database Level)**\nUse `SELECT * FROM accounts WHERE id = 1 FOR UPDATE`. This strictly locks the physical database row. The first transaction acquires the lock, while the second transaction is forced to wait until the first commits or rolls back. It is incredibly safe, but severely degrades system performance under high load.\n\n**Solution 2: Optimistic Locking (Hibernate/Application Level - Preferred)**\nAdd a `@Version` column (an integer) to the Account entity. \n1. Both threads read the balance ($100) and version (`v=1`).\n2. Thread A deducts $100 and updates the row: `UPDATE accounts SET balance = 0, version = 2 WHERE id = 1 AND version = 1`. This fully succeeds.\n3. Thread B tries to update: `UPDATE accounts ... WHERE id = 1 AND version = 1`. Because Thread A already changed the database version to 2, Thread B's query affects 0 rows. \n4. Hibernate detects this 0 row update and violently throws an `OptimisticLockException`. You catch this exception and tell User B: \"Transaction failed due to concurrent modification, please try again.\""
+    },
+    {
+        "type": "question",
+        "content": "Bank Scenario: Distributed Transactions. Deducting money in 'Account Service', but adding money in 'Wallet Service' fails."
+    },
+    {
+        "type": "theory",
+        "content": "In a legacy monolithic application, you simply use Spring's `@Transactional` to roll back the entire database. However, in Microservices, the 'Account Service' and 'Wallet Service' have completely different, physically isolated databases. You cannot use a standard database transaction across the network.\n\n**Solution: The Saga Pattern (Event-Driven Architecture)**\nInstead of a single distributed lock (like the extremely slow Two-Phase Commit / 2PC), you use **Compensating Transactions**.\n1. Account Service deducts $100 and publishes a `PaymentDeductedEvent` to a Kafka broker.\n2. Wallet Service consumes the event and attempts to deposit $100. \n3. If Wallet Service's database is down and it fails, it publishes a `DepositFailedEvent` back to Kafka.\n4. Account Service listens for `DepositFailedEvent` and automatically executes a **Compensating Transaction**: it runs a brand new SQL query to refund the $100 back to the user's account, achieving **Eventual Consistency**."
+    },
+    {
+        "type": "question",
+        "content": "What is the difference between @Controller and @RestController?"
+    },
+    {
+        "type": "theory",
+        "content": "Both are Spring stereotypes used to handle incoming HTTP requests, but their return behavior differs drastically.\n\n<table>\n    <tr><th>Feature</th><th>@Controller</th><th>@RestController</th></tr>\n    <tr><td>Primary Use</td><td>Traditional Spring MVC applications rendering UI pages.</td><td>Modern RESTful Web Services returning data payloads.</td></tr>\n    <tr><td>Return Behavior</td><td>Methods return a String indicating a View name (HTML/JSP).</td><td>Methods return an Object that is automatically serialized into JSON or XML.</td></tr>\n    <tr><td>Composition</td><td>Standard Spring stereotype.</td><td>It is a meta-annotation that <b>combines @Controller and @ResponseBody</b> under the hood.</td></tr>\n</table>"
+    },
+    {
+        "type": "question",
+        "content": "What does @SpringBootApplication do? Can we run without it?"
+    },
+    {
+        "type": "theory",
+        "content": "The `@SpringBootApplication` annotation is the starting point of any Spring Boot application. It is a powerful meta-annotation that **combines three major annotations: @Configuration, @EnableAutoConfiguration, and @ComponentScan**.\n\n`@ComponentScan` scans the current package for Spring components (Controllers, Services). `@EnableAutoConfiguration` magically auto-configures Spring beans based on the jars present in the classpath (e.g., setting up a database if Tomcat and Hibernate are detected). You can absolutely run a Spring Boot app without it by manually declaring those three annotations, but it drastically reduces tedious boilerplate."
+    },
+    {
+        "type": "question",
+        "content": "Difference between @ControllerAdvice and @ExceptionHandler?"
+    },
+    {
+        "type": "theory",
+        "content": "Exception handling in Spring can be localized or global.\n\n<table>\n    <tr><th>Feature</th><th>@ExceptionHandler</th><th>@ControllerAdvice</th></tr>\n    <tr><td>Scope</td><td>Local to the specific Controller it is declared in.</td><td>Global across the entire Spring Boot application.</td></tr>\n    <tr><td>Usage</td><td>Good for controller-specific validation errors.</td><td><b>Centralizes exception handling across all controllers</b>, ensuring a perfectly consistent JSON error response structure.</td></tr>\n    <tr><td>Implementation</td><td>Annotated on a method inside a @RestController.</td><td>Annotated on a dedicated global class containing multiple @ExceptionHandler methods.</td></tr>\n</table>"
+    },
+    {
+        "type": "question",
+        "content": "What are Microservices? How would you migrate a Monolith to Microservices?"
+    },
+    {
+        "type": "theory",
+        "content": "Microservices architecture splits a massive, tightly coupled monolithic application into small, loosely coupled, independently deployable services that communicate via lightweight APIs. \n\nMigrating a monolith is extremely complex. It involves identifying bounded contexts (Domain-Driven Design), decoupling the monolithic database into per-service databases, and routing traffic through an API Gateway. **Data consistency, distributed transaction management, and complex distributed tracing are the biggest issues faced during migration.**"
+    },
+    {
+        "type": "question",
+        "content": "What is the Saga pattern?"
+    },
+    {
+        "type": "theory",
+        "content": "In a monolithic application, you rely on a single ACID database transaction to commit or rollback. In microservices, a single user request might modify databases across three different services. A traditional distributed transaction (2-Phase Commit) locks databases and ruins performance.\n\nThe **Saga pattern is used to manage distributed transactions** in microservices. It utilizes a sequence of local transactions. If Service A and Service B succeed, but Service C fails, the Saga pattern triggers 'Compensating Actions'\u2014automated rollback events sent back to Service B and A to undo their local commits and restore data consistency."
+    },
+    {
+        "type": "question",
+        "content": "What is the Circuit Breaker pattern?"
+    },
+    {
+        "type": "theory",
+        "content": "In a distributed system, if Service A calls Service B, and Service B is down, Service A will hang, waiting for a timeout. If a thousand requests come in, Service A exhausts all its threads and crashes too (cascading failure).\n\nThe Circuit Breaker (e.g., Resilience4j) solves this. If Service B fails consecutively past a threshold, the Circuit Breaker **trips to the 'Open' state, instantly rejecting new requests** and returning a fallback response. This prevents thread exhaustion and gives Service B time to recover before the circuit transitions to a 'Half-Open' probing state."
+    },
+    {
+        "type": "question",
+        "content": "What is JWT? How to handle expiration and verification? HS256 vs RS256?"
+    },
+    {
+        "type": "theory",
+        "content": "<p><strong>JSON Web Token (JWT)</strong> is an open standard for securely transmitting information between parties as a JSON object. It is completely <strong>stateless</strong>, meaning the server does not need to store active sessions in its database (unlike traditional session cookies).</p>\n\n<p><strong>The 3 Parts of a JWT:</strong></p>\n<ol>\n    <li><strong>Header:</strong> Specifies the token type (JWT) and the signing algorithm being used (e.g., HS256 or RS256).</li>\n    <li><strong>Payload (Claims):</strong> Contains the actual data you want to transmit (e.g., <code>{\"userId\": 123, \"role\": \"ADMIN\", \"exp\": 1699999999}</code>). <em>Crucially, this is merely Base64 encoded, NOT encrypted! Anyone can easily decode and read this data, so never put passwords or sensitive information here.</em></li>\n    <li><strong>Signature:</strong> The most critical security component. The server takes the Header, Payload, and its own secret Private Key, and hashes them together. When the client sends the token back on the next request, the server recalculates the signature. If a hacker maliciously altered the payload (e.g., changed \"role\" to \"SUPERADMIN\"), the signatures will immediately fail to match, and the server will instantly reject the token with a 401 Unauthorized error.</li>\n</ol>"
+    },
+    {
+        "type": "question",
+        "content": "Explain the role of tracing and correlation IDs in a distributed Spring Boot application?"
+    },
+    {
+        "type": "theory",
+        "content": "In a microservices ecosystem, a single user click might trigger requests across five different services. If an error occurs in the fourth service, diagnosing it by looking at scattered logs is impossible.\n\nA **Correlation ID** is a unique identifier generated at the API Gateway (the entry point) and attached to the HTTP headers of every downstream request. Distributed tracing tools (like Zipkin or Jaeger) use this ID to stitch the scattered logs together, providing a **full timeline view of the transaction across the entire distributed architecture**."
+    },
+    {
+        "type": "question",
+        "content": "Monolith to microservices. What design pattern are you using?"
+    },
+    {
+        "type": "theory",
+        "content": "The most common and effective pattern is the **Strangler Fig Pattern**. Instead of a risky \"big bang\" rewrite, you place an API Gateway in front of the monolith. You gradually extract specific domains (e.g., \"Billing\") into separate microservices. The API Gateway intercepts requests and routes \"Billing\" traffic to the new microservice, while routing everything else to the old monolith. Over time, the monolith shrinks until it is entirely \"strangled\" and decommissioned."
+    },
+    {
+        "type": "question",
+        "content": "Did you implement any REST API? How do you consume a REST API?"
+    },
+    {
+        "type": "theory",
+        "content": "Yes, I have extensively implemented REST APIs using Spring Boot's `@RestController`. To consume external REST APIs from another service, I have utilized Spring's `RestTemplate`, and more recently, the reactive `WebClient` (for non-blocking asynchronous calls) or declarative HTTP clients like **OpenFeign**, which drastically reduces boilerplate by letting you consume an API just by defining an interface."
+    },
+    {
+        "type": "question",
+        "content": "How did you implement exception handling in REST API?"
+    },
+    {
+        "type": "theory",
+        "content": "I implemented global exception handling using **`@ControllerAdvice` and `@ExceptionHandler`**. This acts as a centralized interceptor. If a `ResourceNotFoundException` is thrown anywhere in the application, the advice catches it and returns a consistent JSON payload (containing a timestamp, custom error message, and the correct HTTP status code like `404 Not Found`) wrapped in a `ResponseEntity`, preventing the server from leaking raw stack traces to the client."
+    },
+    {
+        "type": "question",
+        "content": "What type of authentication you used in REST API? What is Multi-Factor Authentication (MFA)?"
+    },
+    {
+        "type": "theory",
+        "content": "I primarily used stateless **JWT (JSON Web Token) authentication** combined with Spring Security. \n\n**Multi-Factor Authentication (MFA)** is a security system that requires more than one method of authentication to verify the user's identity. It usually combines \"something you know\" (a password) with \"something you have\" (an OTP sent to your phone or generated via Google Authenticator). On the server side, after validating the password, the server issues a temporary session, generates a secure random 6-digit OTP, stores its hash in Redis with a 2-minute TTL (Time-To-Live), and sends it to the user. The user is only issued a JWT once the OTP endpoint successfully matches the input against the Redis cache."
+    },
+    {
+        "type": "question",
+        "content": "How do you check if a JWT token is expired in cache?"
+    },
+    {
+        "type": "theory",
+        "content": "<p><strong>JSON Web Token (JWT)</strong> is an open standard for securely transmitting information between parties as a JSON object. It is completely <strong>stateless</strong>, meaning the server does not need to store active sessions in its database (unlike traditional session cookies).</p>\n\n<p><strong>The 3 Parts of a JWT:</strong></p>\n<ol>\n    <li><strong>Header:</strong> Specifies the token type (JWT) and the signing algorithm being used (e.g., HS256 or RS256).</li>\n    <li><strong>Payload (Claims):</strong> Contains the actual data you want to transmit (e.g., <code>{\"userId\": 123, \"role\": \"ADMIN\", \"exp\": 1699999999}</code>). <em>Crucially, this is merely Base64 encoded, NOT encrypted! Anyone can easily decode and read this data, so never put passwords or sensitive information here.</em></li>\n    <li><strong>Signature:</strong> The most critical security component. The server takes the Header, Payload, and its own secret Private Key, and hashes them together. When the client sends the token back on the next request, the server recalculates the signature. If a hacker maliciously altered the payload (e.g., changed \"role\" to \"SUPERADMIN\"), the signatures will immediately fail to match, and the server will instantly reject the token with a 401 Unauthorized error.</li>\n</ol>"
+    },
+    {
+        "type": "question",
+        "content": "Discuss the impact of Lombok in Spring Boot?"
+    },
+    {
+        "type": "theory",
+        "content": "Project Lombok acts as an annotation processor that plugs into the compiler to drastically reduce boilerplate code. \nInstead of writing 100 lines of Getters, Setters, Constructors, and Builders, you just add annotations like `@Data`, `@Builder`, and `@RequiredArgsConstructor`. The impact on Spring Boot is massive: it makes Domain Models and DTOs extremely clean and readable. However, teams must ensure IDE plugins are configured properly, and they should avoid over-using `@Data` on JPA Entities, as its generated `equals()` and `hashCode()` methods can cause severe memory issues with lazy-loaded relationships."
+    },
+    {
+        "type": "question",
+        "content": "How does Spring MVC flow work?"
+    },
+    {
+        "type": "theory",
+        "content": "1. An HTTP request hits the **DispatcherServlet** (the Front Controller).\n2. The DispatcherServlet consults the **HandlerMapping** to find the appropriate Controller for the URL.\n3. The **Controller** executes the business logic and returns a **ModelAndView** object.\n4. The DispatcherServlet consults the **ViewResolver** to map the logical view name to an actual HTML/JSP file.\n5. The Model data is injected into the View, and the final HTML response is returned to the client."
+    },
+    {
+        "type": "question",
+        "content": "Spring MVC vs Spring Boot?"
+    },
+    {
+        "type": "theory",
+        "content": "Spring MVC is a web framework built on top of the core Spring framework used to build web applications. It requires extensive manual XML or Java configuration (configuring DispatcherServlet, ViewResolvers, Tomcat server). \n\n**Spring Boot is an extension of the Spring framework** that eliminates this boilerplate. It provides \"Auto-Configuration\" (magically setting up beans based on classpath dependencies) and embeds an application server (like Tomcat) directly into the fat jar, allowing you to run a web app with a simple `java -jar` command."
+    },
+    {
+        "type": "question",
+        "content": "What are various bean scopes? Can we have two databases in a single application?"
+    },
+    {
+        "type": "theory",
+        "content": "Spring provides several bean scopes. The default is **Singleton** (one shared instance per Spring container). **Prototype** creates a brand new instance every time it is requested. Web-aware scopes include **Request** (one per HTTP request) and **Session** (one per HTTP session).\n\nYes, you can absolutely connect to multiple databases. You achieve this by configuring multiple `DataSource` beans in your configuration classes, assigning different `EntityManagerFactory` and `TransactionManager` beans to separate packages, and using `@Qualifier` to inject the correct database dependencies."
+    },
+    {
+        "type": "question",
+        "content": "What is HS256 and RS256? (256 Encryption in JWT)"
+    },
+    {
+        "type": "theory",
+        "content": "<table>\n<tr><th>Feature</th><th>HS256 (HMAC with SHA-256)</th><th>RS256 (RSA Signature with SHA-256)</th></tr>\n<tr><td><strong>Encryption Type</strong></td><td><strong>Symmetric Algorithm</strong>.</td><td><strong>Asymmetric Algorithm</strong>.</td></tr>\n<tr><td><strong>Key Usage</strong></td><td>Uses the exact same <strong>Shared Secret Key</strong> to both sign the token and verify the token.</td><td>Uses a <strong>Private Key</strong> (kept strictly on the Auth Server) to sign, and a <strong>Public Key</strong> (distributed everywhere) to verify.</td></tr>\n<tr><td><strong>Security Risk</strong></td><td>If one microservice is compromised, the shared secret key is leaked, allowing the hacker to forge valid admin tokens.</td><td>Extremely secure. If a microservice is compromised, the hacker only gets the Public Key (can only verify, cannot forge).</td></tr>\n<tr><td><strong>Best Use Case</strong></td><td>Small monolithic applications or tightly coupled internal services.</td><td>Large distributed Microservice architectures or public APIs (like Google OAuth).</td></tr>\n</table>"
+    },
+    {
+        "type": "question",
+        "content": "Share your experience with Core Java and Spring Boot?"
+    },
+    {
+        "type": "theory",
+        "content": "I have deep expertise in Core Java, particularly the Collections Framework and Java 8 Streams, which I use to build robust, thread-safe data pipelines. I pair this with Spring Boot to rapidly develop enterprise-grade REST APIs. I leverage Spring's vast ecosystem, utilizing `@ControllerAdvice` for global error handling, Spring Security for stateless JWT authentication, and Spring Data JPA for data persistence."
+    },
+    {
+        "type": "question",
+        "content": "What happens if multiple beans of the same type exist in Spring Boot? How do you resolve ambiguity using @Qualifier?"
+    },
+    {
+        "type": "theory",
+        "content": "In Spring Boot, if you autowire an interface (e.g., `@Autowired PaymentService`), but there are two implementations (`StripePaymentService` and `PayPalPaymentService`) both annotated with `@Service`, Spring will crash at startup with a **NoUniqueBeanDefinitionException** because it doesn't know which one to inject.\n\n**How to resolve it:**\n1. **@Qualifier Annotation**: You attach `@Qualifier(\"stripePaymentService\")` alongside `@Autowired` to explicitly tell Spring the exact bean name to inject (by default, the bean name is the class name in camelCase).\n2. **@Primary Annotation**: You can annotate one of the implementation classes with `@Primary`. If Spring finds multiple beans, it will automatically inject the one marked as Primary unless a Qualifier overrides it."
+    },
+    {
+        "type": "category",
+        "content": "Database & SQL"
+    },
+    {
+        "type": "question",
+        "content": "Stateless vs Stateful Architecture?"
+    },
+    {
+        "type": "theory",
+        "content": "<table>\n    <tr><th>Feature</th><th>Stateless Architecture</th><th>Stateful Architecture</th></tr>\n    <tr><td><strong>Definition</strong></td><td>The server does not store any client session data. Every single HTTP request contains all the information needed to process it independently.</td><td>The server explicitly remembers client data (session state) across multiple sequential requests.</td></tr>\n    <tr><td><strong>Authentication</strong></td><td>Uses <strong>JWT (JSON Web Tokens)</strong>. The client passes the full token in the Authorization header on every request.</td><td>Uses <strong>Session IDs</strong>. The server stores the heavy session object in memory, and the client just sends a tiny tracking Cookie.</td></tr>\n    <tr><td><strong>Scalability</strong></td><td>Extremely easy to scale horizontally. Because there is no state, a load balancer can route the user's next request to <em>any</em> available server instance.</td><td>Very difficult to scale. Requires configuring \"Sticky Sessions\" on the load balancer (forcing the user to hit the exact same server) or implementing an external distributed cache like Redis.</td></tr>\n    <tr><td><strong>REST Compliance</strong></td><td>Strictly adheres to REST principles.</td><td>Violates strict REST principles.</td></tr>\n</table>"
+    },
+    {
+        "type": "question",
+        "content": "What is the difference between ROWNUM and ROWID in SQL?"
+    },
+    {
+        "type": "theory",
+        "content": "- **ROWID**: A highly specific, physical hexadecimal address representing the exact location of a row on the database disk. It is permanent and never changes as long as the row exists. Querying by ROWID is the absolute fastest way to access a row in Oracle.\n- **ROWNUM**: A temporary, logical pseudo-column that assigns sequential integers (1, 2, 3) to the rows *after* they are fetched from the table, but *before* the `ORDER BY` sorting is applied. It is primarily used to restrict result sets (e.g., `WHERE ROWNUM <= 10`)."
+    },
+    {
+        "type": "question",
+        "content": "How exactly do you call a Stored Procedure versus a Function in SQL?"
+    },
+    {
+        "type": "theory",
+        "content": "- **Calling a Function**: Because functions must return a single value and are forbidden from modifying database state, they are invoked directly inline within standard DML statements like `SELECT` or `WHERE`.\n`SELECT employee_name, calculate_tax(salary) FROM employees;`\n\n- **Calling a Procedure**: Because procedures can return zero values (or multiple `OUT` parameters) and are actively used to modify database state (`INSERT`/`UPDATE`), they **cannot** be used inside a `SELECT` statement. They must be explicitly invoked using the `CALL` or `EXEC` commands.\n`CALL update_department_salaries(10, 5000);`"
+    },
+    {
+        "type": "question",
+        "content": "What is an Idempotent Operation?"
+    },
+    {
+        "type": "theory",
+        "content": "An operation is **idempotent** if executing it multiple times produces the exact same result as executing it once. \n\nIn REST APIs, `GET`, `PUT` (update entirely), and `DELETE` are idempotent. `POST` is NOT idempotent (clicking a checkout button twice creates two separate orders). \n\n**Real-World Scenario**: In payment gateways, clients send a unique \"Idempotency-Key\" in the HTTP header. If the network times out and the client retries the exact same payment request, the server checks the key, realizes it already processed that exact transaction, and simply returns the cached success response without charging the credit card twice."
+    },
+    {
+        "type": "question",
+        "content": "Ensuring OTP is the same for Client and Server (Validation Flow)?"
+    },
+    {
+        "type": "theory",
+        "content": "When a user requests an OTP:\n1. The server generates a random 6-digit secure string.\n2. The server hashes it (e.g., using SHA-256) and stores it in an in-memory cache like **Redis**, using the user's phone number or session ID as the key, with a strict 3-minute Time-To-Live (TTL).\n3. The raw OTP is sent to the client via SMS.\n4. When the client submits the OTP, the server hashes the input and compares it to the hash in Redis. \n5. If they match, authentication succeeds and the Redis key is immediately deleted to prevent **Replay Attacks**."
+    },
+    {
+        "type": "question",
+        "content": "Bank Scenario: ACID Properties & Atomicity"
+    },
+    {
+        "type": "theory",
+        "content": "ACID stands for Atomicity, Consistency, Isolation, Durability.\n\n**Atomicity** guarantees \"all or nothing\". \n**Scenario**: Transferring $100 from Account A to Account B involves two database queries:\n1. Deduct $100 from A.\n2. Add $100 to B.\nIf the server crashes after step 1 but before step 2, Atomicity ensures the database completely **rolls back** the entire transaction. The money isn't lost in the void. In Spring Boot, this is achieved by wrapping the service method in the `@Transactional` annotation."
+    },
+    {
+        "type": "question",
+        "content": "Bank Scenario: Auditing and Status Tracking"
+    },
+    {
+        "type": "theory",
+        "content": "In highly regulated financial systems, records are **never hard-deleted** (`DELETE FROM...`). \nInstead, a `status` column (e.g., 'PENDING', 'SUCCESS', 'FAILED', 'REVERSED') is used (Soft Deletion).\n\nTo ensure an immutable ledger, auditing tables (like `transaction_history`) track every state change. This is typically implemented at the database level using **AFTER UPDATE Triggers**, or at the application level using Hibernate Envers. Every modification logs the old value, new value, `updated_by` user ID, and exact timestamp."
+    },
+    {
+        "type": "question",
+        "content": "Trigger vs Procedure vs Function?"
+    },
+    {
+        "type": "theory",
+        "content": "- **Function**: Must return a single value. Can be executed inline within a `SELECT` statement. Generally cannot modify database state (No DML like INSERT/UPDATE).\n- **Procedure**: Can return zero or multiple values via `OUT` parameters. Used to execute complex business logic and DML operations. Cannot be used inside a `SELECT` statement (must be invoked via `CALL`).\n- **Trigger**: Cannot be called manually by a user. It executes **automatically** in response to specific DML events (INSERT/UPDATE/DELETE) on a table."
+    },
+    {
+        "type": "question",
+        "content": "What are the different Types of Triggers?"
+    },
+    {
+        "type": "theory",
+        "content": "1. **BEFORE Trigger**: Fires right before the DML operation executes. Extremely useful for data validation or sanitization (e.g., forcing an email string to lowercase before it hits the disk).\n2. **AFTER Trigger**: Fires immediately after the DML succeeds. Strictly used for cascading actions like auditing (e.g., inserting a copy of the old row into a history table).\n3. **INSTEAD OF Trigger**: Completely intercepts and replaces the DML operation. Most commonly used on complex Views to make them updatable, writing the data to the underlying base tables instead."
+    },
+    {
+        "type": "question",
+        "content": "View vs Materialized View?"
+    },
+    {
+        "type": "theory",
+        "content": "<table>\n<tr><th>Feature</th><th>View</th><th>Materialized View</th></tr>\n<tr><td><strong>Physical Storage</strong></td><td>Virtual. It does not physically store any data on the disk.</td><td>Physical. It actually executes the query and stores the physical result set on the disk.</td></tr>\n<tr><td><strong>Performance</strong></td><td>Slower. The database must re-execute the complex underlying <code>SELECT</code> query every single time it is called.</td><td>Lightning fast. Because the data is already computed and sitting on disk, retrieval is instant.</td></tr>\n<tr><td><strong>Data Freshness</strong></td><td>Always 100% up-to-date real-time data.</td><td>Data becomes stale. It must be manually refreshed (<code>REFRESH MATERIALIZED VIEW</code>) or updated via cron jobs/triggers.</td></tr>\n</table>"
+    },
+    {
+        "type": "question",
+        "content": "What are Temporary Tables?"
+    },
+    {
+        "type": "theory",
+        "content": "Temporary tables are specialized tables that exist entirely in memory (or a dedicated temp disk space) and only exist for the **duration of the database session or transaction**. \nOnce the connection closes, the table and all its data are automatically destroyed. They are highly efficient for storing intermediate results when performing complex data transformations inside a massive Stored Procedure."
+    },
+    {
+        "type": "question",
+        "content": "Pagination: SQL vs Hibernate"
+    },
+    {
+        "type": "theory",
+        "content": "Attempting to load 1 million rows into Java at once will cause an `OutOfMemoryError`. Pagination loads data in small chunks.\n\n**In SQL**: You use `LIMIT` and `OFFSET`. \n`SELECT * FROM employees ORDER BY id LIMIT 50 OFFSET 100` (Fetches 50 records, skipping the first 100. Ergo, Page 3).\n\n**In Spring Data JPA / Hibernate**: You pass a `Pageable` object.\n`Page<Employee> page = repo.findAll(PageRequest.of(2, 50));`\nSpring automatically translates this into the optimal database-specific pagination query and returns metadata like `getTotalPages()`."
+    },
+    {
+        "type": "question",
+        "content": "SQL Batch Inserts vs Single Inserts?"
+    },
+    {
+        "type": "theory",
+        "content": "If you need to insert 10,000 records, executing 10,000 separate `INSERT` statements causes massive network round-trip latency and immense transaction log overhead.\n\n**Batch Inserting** sends the data in one giant chunk over the network:\n`INSERT INTO my_table (col1, col2) VALUES (1,2), (3,4), (5,6)...`\n\nIn **Hibernate**, this is automated by setting `spring.jpa.properties.hibernate.jdbc.batch_size=50`. Hibernate will automatically queue up inserts in memory and flush them to the database in batches of 50, resulting in a 10x to 100x performance boost."
+    },
+    {
+        "type": "question",
+        "content": "Cursor vs Records in SQL?"
+    },
+    {
+        "type": "theory",
+        "content": "<table>\n<tr><th>Feature</th><th>Cursor</th><th>Record (RowType)</th></tr>\n<tr><td><strong>Purpose</strong></td><td>A control structure used to iterate through a massive result set <strong>row-by-row</strong> (like a while-loop).</td><td>A composite data type variable used to temporarily hold exactly <strong>one row</strong> of fetched data in memory.</td></tr>\n<tr><td><strong>Performance</strong></td><td>Extremely slow because relational databases are designed for Set-based operations, not procedural looping.</td><td>N/A (It is simply a variable type).</td></tr>\n<tr><td><strong>Analogy</strong></td><td>The <code>Iterator</code> object traversing a Java List.</td><td>The <code>Employee</code> object holding the data for one iteration.</td></tr>\n</table>"
+    },
+    {
+        "type": "question",
+        "content": "What is DECODE vs CASE? What is a Sequence?"
+    },
+    {
+        "type": "theory",
+        "content": "<table>\n<tr><th>Feature</th><th>DECODE()</th><th>CASE WHEN</th></tr>\n<tr><td><strong>SQL Standard</strong></td><td>Oracle-specific proprietary function.</td><td>Universal ANSI SQL standard (works in Postgres, MySQL, Oracle, SQL Server).</td></tr>\n<tr><td><strong>Evaluation Capability</strong></td><td>Can only evaluate strict equality (e.g., <code>status = 1</code>).</td><td>Can evaluate complex logic, inequalities, and multiple columns (e.g., <code>status > 1 AND age < 30</code>).</td></tr>\n<tr><td><strong>Readability</strong></td><td>Compact, but gets extremely messy and unreadable when nested.</td><td>Highly readable, structured like a standard programming switch/if-else block.</td></tr>\n</table>\n<br><strong>What is a Sequence?</strong> A Sequence is an independent database object that generates a continuous stream of unique integers. It is primarily used to auto-populate Primary Keys, akin to `AUTO_INCREMENT` in MySQL or the `SERIAL` pseudo-type in PostgreSQL."
+    },
+    {
+        "type": "question",
+        "content": "PostgreSQL vs MySQL?"
+    },
+    {
+        "type": "theory",
+        "content": "<table>\n    <tr><th>Feature</th><th>MySQL</th><th>PostgreSQL</th></tr>\n    <tr><td>Architecture</td><td>Purely Relational Database.</td><td>Object-Relational Database (supports custom types, inheritance).</td></tr>\n    <tr><td>Use Case</td><td>Extremely fast for read-heavy web apps (CRUD).</td><td>Superior for complex analytical queries, massive datasets, and data integrity.</td></tr>\n    <tr><td>JSON Support</td><td>Basic JSON support.</td><td><b>Provides superior JSONB support</b>, allowing indexing and high-speed querying of NoSQL-like documents within SQL.</td></tr>\n</table>"
+    },
+    {
+        "type": "question",
+        "content": "Write a SQL query to find the 3rd highest salary using Dense Rank."
+    },
+    {
+        "type": "code",
+        "lang": "sql",
+        "content": "SELECT salary FROM (\n    SELECT salary, DENSE_RANK() OVER (ORDER BY salary DESC) as rank \n    FROM employees\n) WHERE rank = 3;"
+    },
+    {
+        "type": "question",
+        "content": "What is the difference between Hibernate and JPA? Advantages of Hibernate?"
+    },
+    {
+        "type": "theory",
+        "content": "<table>\n    <tr><th>Feature</th><th>JPA (Java Persistence API)</th><th>Hibernate</th></tr>\n    <tr><td><strong>Definition</strong></td><td>A specification/standard that defines rules for ORM.</td><td>A concrete implementation of the JPA specification.</td></tr>\n    <tr><td><strong>Nature</strong></td><td>Contains only interfaces and annotations (no code).</td><td>Contains actual Java classes that execute the database logic.</td></tr>\n    <tr><td><strong>Dependency</strong></td><td>Cannot be used alone without an implementation provider.</td><td>Can be used standalone, but using it via JPA interfaces is standard practice.</td></tr>\n    <tr><td><strong>Query Language</strong></td><td>JPQL (Java Persistence Query Language).</td><td>HQL (Hibernate Query Language).</td></tr>\n</table>\n<br>\n<strong>Notes / Advantages of Hibernate:</strong>\n<ul>\n    <li><strong>Database Independence:</strong> By simply changing the Dialect in properties, Hibernate translates queries for MySQL, Oracle, or Postgres without rewriting Java code.</li>\n    <li><strong>Caching:</strong> Provides powerful First-Level (Session) and Second-Level (SessionFactory) caches to drastically reduce database hits.</li>\n    <li><strong>Lazy Loading:</strong> Delays fetching child entities until explicitly requested, saving massive amounts of memory.</li>\n</ul>"
+    },
+    {
+        "type": "question",
+        "content": "What do you pass in JpaRepository<>?"
+    },
+    {
+        "type": "theory",
+        "content": "The `JpaRepository<T, ID>` interface in Spring Data JPA requires two generic type arguments: \n1. **`T` (The Entity Type)**: The actual domain class mapped to the database table (e.g., `Employee`).\n2. **`ID` (The Primary Key Type)**: The wrapper class of the data type representing the entity's primary key (e.g., `Long`, `UUID`, `Integer`). \n\nExample: `public interface EmployeeRepo extends JpaRepository<Employee, Long> {}`"
+    },
+    {
+        "type": "question",
+        "content": "What is a Stored Procedure and how is it better than raw SQL? How do you execute it in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "A Stored Procedure is a compiled group of SQL statements stored directly on the database server. \nIt is better than raw SQL because it provides **pre-compiled execution plans**, resulting in massive performance gains for complex, heavy transactions. It also reduces network traffic (you send one procedure call instead of 50 lines of SQL) and enhances security by abstracting direct table access.\n\nIn standard Java (JDBC), you execute it using `CallableStatement cs = connection.prepareCall(\"{call MY_PROCEDURE(?, ?)}\");`. In Spring Data JPA, you can simply use the `@Procedure` annotation on a repository method."
+    },
+    {
+        "type": "question",
+        "content": "Rank vs Dense Rank? What is NVL()?"
+    },
+    {
+        "type": "theory",
+        "content": "<table>\n<tr><th>Feature</th><th>RANK()</th><th>DENSE_RANK()</th></tr>\n<tr><td><strong>Handling Ties</strong></td><td>Assigns the exact same rank to duplicate values.</td><td>Assigns the exact same rank to duplicate values.</td></tr>\n<tr><td><strong>Subsequent Rank Number</strong></td><td><strong>Skips</strong> the next rank number. (e.g., Ranks: 1, 1, 3).</td><td><strong>Does not skip</strong> the next rank number. (e.g., Ranks: 1, 1, 2).</td></tr>\n<tr><td><strong>Best Use Case</strong></td><td>General rankings where a \"tie for first\" officially eliminates second place.</td><td>Finding the \"Nth Highest Salary\" because it mathematically guarantees contiguous numbers.</td></tr>\n</table>\n<br><strong>What is NVL()?</strong> NVL() is an Oracle-specific SQL function used to gracefully handle NULL values. `NVL(column, 'default_value')` replaces nulls with a default. In standard SQL/Postgres, you use `COALESCE()`."
+    },
+    {
+        "type": "question",
+        "content": "Difference between Procedure and Function?"
+    },
+    {
+        "type": "theory",
+        "content": "<table>\n<tr><th>Feature</th><th>Stored Procedure</th><th>Function</th></tr>\n<tr><td><strong>Return Value</strong></td><td>Can return zero values, or multiple values via <code>OUT</code> parameters.</td><td><strong>Must</strong> return exactly one single value.</td></tr>\n<tr><td><strong>DML Operations</strong></td><td>Can actively modify database state using <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>.</td><td>Generally forbidden from modifying database state (read-only computations).</td></tr>\n<tr><td><strong>Invocation / Usage</strong></td><td>Cannot be used in a <code>SELECT</code> statement. Must be executed via <code>CALL</code> or <code>EXEC</code>.</td><td>Can be used smoothly inline inside <code>SELECT</code>, <code>WHERE</code>, or <code>HAVING</code> clauses.</td></tr>\n<tr><td><strong>Transaction Management</strong></td><td>Can manage complex transactions internally (can use <code>COMMIT</code> and <code>ROLLBACK</code>).</td><td>Cannot manage transactions.</td></tr>\n</table>"
+    },
+    {
+        "type": "question",
+        "content": "Write SQL to find the count of employees in each department."
+    },
+    {
+        "type": "code",
+        "lang": "sql",
+        "content": "SELECT deptid, COUNT(empid) as employee_count\nFROM employees\nGROUP BY deptid;"
+    },
+    {
+        "type": "question",
+        "content": "What all SQL functions do you know?"
+    },
+    {
+        "type": "theory",
+        "content": "I frequently use several categories of SQL functions:\n1. **Aggregate**: `COUNT()`, `SUM()`, `AVG()`, `MAX()`\n2. **String**: `CONCAT()`, `SUBSTRING()`, `UPPER()`, `TRIM()`\n3. **Date/Time**: `CURRENT_DATE`, `DATE_ADD()`, `EXTRACT()`\n4. **Window/Analytic**: `ROW_NUMBER()`, `RANK()`, `DENSE_RANK() OVER (PARTITION BY...)`\n5. **Control Flow**: `COALESCE()`, `NVL()`, `CASE WHEN... THEN`"
+    },
+    {
+        "type": "category",
+        "content": "Coding & Algorithms"
+    },
+    {
+        "type": "question",
+        "content": "Explain Big O Time Complexity with a cheat sheet table and code examples."
+    },
+    {
+        "type": "theory",
+        "content": "Big O notation mathematically describes the worst-case execution time of an algorithm as the input size (`n`) grows to infinity.\n\n<table>\n<tr><th>Big O</th><th>Name</th><th>Performance</th><th>Example Data Structure Operation</th></tr>\n<tr><td><strong>O(1)</strong></td><td>Constant Time</td><td>Excellent (Instant)</td><td><code>HashMap.get()</code>, <code>Array[index]</code></td></tr>\n<tr><td><strong>O(log n)</strong></td><td>Logarithmic Time</td><td>Great (Divides data in half)</td><td>Binary Search, <code>TreeSet.contains()</code></td></tr>\n<tr><td><strong>O(n)</strong></td><td>Linear Time</td><td>Fair (Reads every element)</td><td><code>LinkedList.search()</code>, standard <code>for</code> loop</td></tr>\n<tr><td><strong>O(n log n)</strong></td><td>Linearithmic Time</td><td>Bad (for large sets)</td><td>Merge Sort, Quick Sort, <code>Collections.sort()</code></td></tr>\n<tr><td><strong>O(n\u00b2)</strong></td><td>Quadratic Time</td><td>Horrible (Nested loops)</td><td>Bubble Sort, Comparing every item against every other item</td></tr>\n</table>"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "// 1. O(1) Constant Time (Instant lookup, no loops)\nint x = arr[0]; \nmap.get(\"key\");\n\n// 2. O(log n) Logarithmic Time (Binary Search - halving the array each step)\nwhile (low <= high) {\n    int mid = low + (high - low) / 2;\n    if (arr[mid] == target) return mid;\n    if (arr[mid] < target) low = mid + 1;\n    else high = mid - 1;\n}\n\n// 3. O(n) Linear Time (Iterating through everything exactly once)\nfor (int num : arr) {\n    if (num == target) return true;\n}\n\n// 4. O(n^2) Quadratic Time (Nested loops - Massive performance killer)\nfor (int i = 0; i < arr.length; i++) {\n    for (int j = 0; j < arr.length; j++) {\n        if (arr[i] == arr[j]) { /* do something */ }\n    }\n}"
+    },
+    {
+        "type": "question",
+        "content": "Find the maximum profit in stock prices with only a single buy and sell transaction."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "public static int maxProfit(int[] prices) {\n    if (prices == null || prices.length < 2) return 0;\n    \n    int minPrice = Integer.MAX_VALUE;\n    int maxProfit = 0;\n    \n    for (int price : prices) {\n        // Update lowest price found so far\n        if (price < minPrice) {\n            minPrice = price;\n        } \n        // Check if selling at current price beats global max profit\n        else if (price - minPrice > maxProfit) {\n            maxProfit = price - minPrice;\n        }\n    }\n    return maxProfit;\n}"
+    },
+    {
+        "type": "question",
+        "content": "Write a program to find if a number is prime or not (Optimal approach)."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "public static boolean isPrime(int n) {\n    if (n <= 1) return false;\n    if (n == 2 || n == 3) return true;\n    if (n % 2 == 0 || n % 3 == 0) return false;\n\n    // Check odd factors up to the square root of n\n    for (int i = 5; i * i <= n; i += 6) {\n        if (n % i == 0 || n % (i + 2) == 0) return false;\n    }\n    return true;\n}"
+    },
+    {
+        "type": "question",
+        "content": "Given a JSON object, write code to iterate over it and print the address array."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "// Assuming you are using Jackson's JsonNode\nObjectMapper mapper = new ObjectMapper();\nJsonNode rootNode = mapper.readTree(jsonString);\n\nJsonNode addressArray = rootNode.path(\"employee1\").path(\"address\");\n\nif (addressArray.isArray()) {\n    for (JsonNode address : addressArray) {\n        System.out.println(\"City: \" + address.path(\"city\").asText());\n        System.out.println(\"Street: \" + address.path(\"street\").asText());\n        System.out.println(\"Pincode: \" + address.path(\"pincode\").asText());\n    }\n}"
+    },
+    {
+        "type": "category",
+        "content": "HR & Behavioral"
+    },
+    {
+        "type": "question",
+        "content": "Can you share experience on technologies like Docker and Kubernetes and how you used them in projects?"
+    },
+    {
+        "type": "theory",
+        "content": "**Docker** is a platform for developing and running applications inside isolated containers, ensuring \"it works on my machine\" translates perfectly to production. We used Dockerfiles to package our Spring Boot jars along with the exact JRE version needed.\n\n**Kubernetes (K8s)** is a container orchestration tool. While Docker runs a container, Kubernetes manages thousands of them. We used K8s for **auto-scaling (HPA)**, spinning up new pod replicas when CPU usage spiked, and for self-healing (restarting failed pods automatically). We also used ConfigMaps for managing environment variables externally."
+    },
+    {
+        "type": "question",
+        "content": "Explain your project? / Where do you see yourself after 5 years? / What is your expected CTC? / Where did you get those 40% figures in your resume?"
+    },
+    {
+        "type": "theory",
+        "content": "*(Behavioral / Personal Questions)*\nThese questions require personalized answers. \n- **Project**: Use the STAR method (Situation, Task, Action, Result) to explain the architecture and your specific contributions.\n- **5 Years**: Focus on stepping into a Senior Architecture role, mentoring juniors, and mastering distributed system design.\n- **Resume Metrics**: Always back up percentage improvements (like \"reduced latency by 40%\") with technical facts (e.g., \"We achieved this by replacing synchronous REST calls with asynchronous Kafka events and implementing Redis caching\")."
+    },
+    {
+        "type": "question",
+        "content": "Can you describe your experience using RDBMS in application development?"
+    },
+    {
+        "type": "theory",
+        "content": "I have extensive experience with relational databases like PostgreSQL and MySQL. My workflow involves designing normalized schemas (3NF), writing complex optimized queries utilizing `INNER JOIN` and Window Functions (like `DENSE_RANK()`), and analyzing Execution Plans (`EXPLAIN ANALYZE`) to build proper B-Tree indexes. On the application side, I seamlessly interface with the database using Hibernate / Spring Data JPA."
+    },
+    {
+        "type": "category",
+        "content": "Other Important Concepts"
+    },
+    {
+        "type": "question",
+        "content": "What is the difference between checked and unchecked exceptions? Can you create custom exceptions?"
+    },
+    {
+        "type": "theory",
+        "content": "Exceptions in Java dictate how errors are handled during execution.\n\n<table>\n    <tr><th>Feature</th><th>Checked Exceptions</th><th>Unchecked Exceptions</th></tr>\n    <tr><td>Verification</td><td>Checked at compile-time by the compiler.</td><td>Checked at runtime (JVM).</td></tr>\n    <tr><td>Inheritance</td><td>Extends <code>Exception</code>.</td><td>Extends <code>RuntimeException</code>.</td></tr>\n    <tr><td>Handling</td><td>Must be caught in a try-catch block or declared in the method signature using <code>throws</code>.</td><td>Not strictly required to be caught or declared.</td></tr>\n    <tr><td>Examples</td><td><code>IOException</code>, <code>SQLException</code></td><td><code>NullPointerException</code>, <code>IllegalArgumentException</code></td></tr>\n</table>\n\nYou can definitely create custom exceptions to represent domain-specific errors. To do so, you simply create a class that **extends the Exception class (for checked) or RuntimeException class (for unchecked)**."
+    },
+    {
+        "type": "question",
+        "content": "Explain the mechanics of Garbage Collection (GC) in Java. How does the G1 Garbage Collector work?"
+    },
+    {
+        "type": "theory",
+        "content": "Garbage Collection (GC) is a daemon thread in the JVM that automatically reclaims heap memory by destroying objects that are no longer reachable by the application (i.e., they have no active references). \n\nThe traditional JVM Heap is divided into Generations: **Young Generation** (where new objects are born) and **Old Generation** (where long-surviving objects are moved). When the Young Generation fills up, a Minor GC occurs. When the Old Generation fills up, a Major GC (Stop-The-World pause) occurs, freezing all application threads.\n\n**Garbage-First (G1) GC** (default since Java 9) revolutionized this process. Instead of massive contiguous generational spaces, G1 partitions the entire heap into hundreds of small, equal-sized regions. During a GC cycle, G1 concurrently analyzes the regions and **prioritizes clearing the specific regions containing the most garbage first**. This drastically reduces Stop-The-World pause times and makes GC highly predictable.\n\n*Note: Overriding the `finalize()` method is highly discouraged because there is absolutely no guarantee when (or if) the GC will run it.*"
+    },
+    {
+        "type": "question",
+        "content": "Difference between REST and SOAP?"
+    },
+    {
+        "type": "theory",
+        "content": "<table>\n<tr><th>Feature</th><th>REST (Representational State Transfer)</th><th>SOAP (Simple Object Access Protocol)</th></tr>\n<tr><td><strong>Architecture</strong></td><td>Architectural Style / Guidelines.</td><td>Strict Protocol.</td></tr>\n<tr><td><strong>Data Format</strong></td><td>Supports JSON, XML, HTML, Plain Text (JSON is the absolute standard).</td><td>Strictly XML only.</td></tr>\n<tr><td><strong>Security</strong></td><td>Uses HTTPS and stateless JWT tokens.</td><td>Has built-in WS-Security (heavy enterprise-grade security protocols).</td></tr>\n<tr><td><strong>Performance & Bandwidth</strong></td><td>Lightweight, fast, uses less bandwidth (JSON is much smaller).</td><td>Heavyweight, slow parsing, extremely large XML payloads.</td></tr>\n</table>"
+    },
+    {
+        "type": "question",
+        "content": "What is the difference between PUT and PATCH? Can we use POST for updating?"
+    },
+    {
+        "type": "theory",
+        "content": "<table>\n    <tr><th>Method</th><th>Usage</th><th>Idempotent?</th></tr>\n    <tr><td>PUT</td><td>Replaces the entire resource representation. If a field is omitted, it sets it to null.</td><td>Yes</td></tr>\n    <tr><td>PATCH</td><td>Applies partial modifications to a resource. Only updates the provided fields.</td><td>No (usually)</td></tr>\n    <tr><td>POST</td><td>Creates brand new resources.</td><td>No</td></tr>\n</table>\n\nYou technically can use `POST` for updating a resource, but it violates REST architectural constraints. **POST is intended for creating new resources and is not idempotent** (calling it twice creates two resources), whereas updates should generally be idempotent."
+    },
+    {
+        "type": "question",
+        "content": "What is the difference between DELETE, DROP, and TRUNCATE?"
+    },
+    {
+        "type": "theory",
+        "content": "<table>\n    <tr><th>Feature</th><th>DELETE</th><th>TRUNCATE</th><th>DROP</th></tr>\n    <tr><td>Type</td><td>DML (Data Manipulation Language)</td><td>DDL (Data Definition Language)</td><td>DDL</td></tr>\n    <tr><td>Mechanism</td><td>Removes rows line-by-line. Can use WHERE clauses.</td><td>Rapidly deallocates memory pages. Cannot use WHERE.</td><td>Destroys the entire table schema and data.</td></tr>\n    <tr><td>Rollback</td><td>Can be rolled back (logged transaction).</td><td>Cannot be rolled back.</td><td>Cannot be rolled back.</td></tr>\n    <tr><td>Speed</td><td>Slow</td><td>Extremely Fast</td><td>Extremely Fast</td></tr>\n</table>"
+    },
+    {
+        "type": "question",
+        "content": "Difference between WHERE and HAVING?"
+    },
+    {
+        "type": "theory",
+        "content": "<table>\n    <tr><th>Feature</th><th>WHERE Clause</th><th>HAVING Clause</th></tr>\n    <tr><td>Application</td><td>Filters rows <b>before</b> any aggregation or grouping occurs.</td><td><b>Filters aggregated data after the GROUP BY clause is applied.</b></td></tr>\n    <tr><td>Aggregate Functions</td><td>Cannot be used with aggregate functions (like COUNT, SUM).</td><td>Explicitly designed to be used with aggregate functions.</td></tr>\n</table>"
+    },
+    {
+        "type": "question",
+        "content": "What improvement can you suggest in: `select * from orders where customer_id in (select customer_id from customers where status='active');`"
+    },
+    {
+        "type": "theory",
+        "content": "Using the `IN` clause with a correlated subquery can be highly inefficient on large datasets, as it may force the database to scan the inner query repeatedly. \n\n**It should be optimized using an INNER JOIN** or an `EXISTS` clause. An `INNER JOIN` allows the database engine's optimizer to build a far more efficient execution plan using indexes. Example: `SELECT o.* FROM orders o INNER JOIN customers c ON o.customer_id = c.customer_id WHERE c.status = 'active';`"
+    },
+    {
+        "type": "question",
+        "content": "Remove duplicates from a sorted array in-place, returning the count of unique elements."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "public static int removeDuplicates(int[] arr) {\n    if (arr.length == 0) return 0;\n    int j = 0;\n    for (int i = 1; i < arr.length; i++) {\n        // If elements are different, move unique element forward\n        if (arr[i] != arr[j]) {\n            j++;\n            arr[j] = arr[i];\n        }\n    }\n    return j + 1; // Number of unique elements\n}"
+    },
+    {
+        "type": "question",
+        "content": "Can we have multiple main methods?"
+    },
+    {
+        "type": "theory",
+        "content": "Yes, you can overload the `main` method in Java perfectly fine just like any other method, by changing the parameter types (e.g., `public static void main(int x)`). However, **the JVM will strictly look for the standard signature** `public static void main(String[] args)` as the entry point to launch the application. The overloaded main methods will never be executed unless explicitly called in your code."
+    },
+    {
+        "type": "question",
+        "content": "What are new features in Java 9?"
+    },
+    {
+        "type": "theory",
+        "content": "Java 9 introduced several critical architectural features:\n1. **Project Jigsaw (Java Platform Module System)**: Allows modularizing large codebases and strictly controlling which packages are visible to other modules, deeply improving security and reducing the JVM footprint.\n2. **JShell**: A REPL (Read-Eval-Print Loop) for instantly testing snippets of Java code without writing full classes.\n3. **Factory Methods for Collections**: Introduced `List.of()`, `Set.of()`, and `Map.of()` to create immutable collections seamlessly.\n4. **Private Methods in Interfaces**: Interfaces can now contain private methods to share common logic between `default` methods without exposing it to implementing classes."
+    },
+    {
+        "type": "question",
+        "content": "What are HTTP codes? 4xx stands for what status?"
+    },
+    {
+        "type": "theory",
+        "content": "HTTP Status Codes indicate the result of a request:\n- **2xx (Success)**: The action was successfully received and accepted (e.g., 200 OK, 201 Created).\n- **3xx (Redirection)**: Further action needs to be taken to complete the request.\n- **4xx (Client Error)**: **The request contains bad syntax or cannot be fulfilled.** (e.g., 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found).\n- **5xx (Server Error)**: The server failed to fulfill a valid request (e.g., 500 Internal Server Error)."
+    },
+    {
+        "type": "question",
+        "content": "How are you managing CI/CD pipeline? Is there a DevOps team?"
+    },
+    {
+        "type": "theory",
+        "content": "In a modern setup, while there is a dedicated DevOps team managing the underlying infrastructure, developers write and maintain the pipeline configurations. We used **Jenkins (or GitHub Actions/GitLab CI)**. \n\nThe CI (Continuous Integration) pipeline runs automatically on every Git push, compiling the code, running JUnit/Mockito tests, and checking SonarQube for code quality. If it passes, the CD (Continuous Deployment) pipeline builds a Docker image, pushes it to an artifact registry (like AWS ECR), and triggers Kubernetes to perform a zero-downtime rolling update."
+    },
+    {
+        "type": "question",
+        "content": "What are uses of pom.xml and application.yml file?"
+    },
+    {
+        "type": "theory",
+        "content": "The **`pom.xml` (Project Object Model)** is the core configuration file for Maven. It handles dependency management (downloading jars), defines the project build lifecycle, and configures plugins (like the Spring Boot Maven plugin).\n\nThe **`application.yml` (or .properties)** is the central configuration file for Spring Boot. It is used to externalize environment-specific variables like database connection URLs, server ports, logging levels, and custom business logic properties so they can be changed without recompiling the code."
+    },
+    {
+        "type": "question",
+        "content": "What is Load Factor in collections?"
+    },
+    {
+        "type": "theory",
+        "content": "Load Factor is a measure that decides when a hash-based collection (like `HashMap` or `HashSet`) should automatically resize its capacity. The default load factor in Java is `0.75`. This means that when the HashMap reaches 75% of its total bucket capacity, it triggers a \"rehash\" operation, immediately doubling its bucket size to maintain fast O(1) performance and reduce hash collisions."
+    },
+    {
+        "type": "question",
+        "content": "Which Java security have you implemented?"
+    },
+    {
+        "type": "theory",
+        "content": "I have implemented **Spring Security** combined with stateless JWT (JSON Web Tokens). This involved creating custom security filters to intercept incoming HTTP requests, extracting the JWT from the `Authorization: Bearer` header, verifying the cryptographic signature (using RS256/HS256), and setting the `SecurityContextHolder` with the authenticated user's roles for Role-Based Access Control (RBAC)."
+    },
+    {
+        "type": "question",
+        "content": "If you have a UserDetails class, sort first by name, and if the name is equal, sort by date."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "users.sort(Comparator.comparing(UserDetails::getName)\n    .thenComparing(UserDetails::getDate));"
+    },
+    {
+        "type": "question",
+        "content": "You said you used VSCode and GitHub Copilot, which models did you use? Which one is better?"
+    },
+    {
+        "type": "theory",
+        "content": "*(Tooling Question)*\nGitHub Copilot dynamically utilizes optimized versions of OpenAI's models (like GPT-3.5 and GPT-4). For rapid line-by-line autocomplete, smaller, heavily optimized models are used because latency is critical. However, for Copilot Chat (asking it to refactor a complex method or generate a massive SQL query), it switches to the much more capable **GPT-4**. GPT-4 is vastly superior for logic and architectural reasoning, whereas the smaller models are better for pure speed."
+    },
+    {
+        "type": "question",
+        "content": "What are User Defined Types (UDT) and their use?"
+    },
+    {
+        "type": "theory",
+        "content": "A User-Defined Type (UDT) allows developers to create custom, complex data types inside a relational database (like PostgreSQL). For example, instead of adding `address_city`, `address_zip`, and `address_street` as flat columns across multiple tables, you can execute `CREATE TYPE address_type AS (city VARCHAR, zip INT, street VARCHAR)`. \n\nThis allows you to strictly enforce a reusable schema definition across the database, bringing object-oriented structure directly into SQL."
+    },
+    {
+        "type": "question",
+        "content": "What is Encapsulation? Provide a detailed real-world example."
+    },
+    {
+        "type": "theory",
+        "content": "**Encapsulation** is the mechanism of wrapping the data (variables) and code acting on the data (methods) together as a single unit. It restricts direct access to some of an object's components, which prevents accidental modification of data. In Java, this is strictly achieved by declaring variables as `private` and providing `public` getter and setter methods to access and modify the data with validation.\n\n**Real-World Example (Bank ATM)**:\nA bank account balance is encapsulated. You cannot directly change your balance (e.g., `account.balance = 1000000`). You must use the ATM interface (the public method like `deposit()` or `withdraw()`). The ATM checks if you have sufficient funds and the correct PIN before it alters the internal balance.\n\n**Key Difference vs Abstraction**:\nAbstraction is about hiding **complexity** (What does it do?). Encapsulation is about hiding **data state** (How is the data protected?)."
+    },
+    {
+        "type": "question",
+        "content": "What is the Diamond Problem (Multiple Inheritance) in Java? How is it resolved?"
+    },
+    {
+        "type": "theory",
+        "content": "The **Diamond Problem** occurs in multiple inheritance when a class inherits from two parent classes that both have a method with the exact same signature. The compiler becomes confused about which parent's method to execute.\n\nJava completely prevents this with classes by **not allowing multiple inheritance for classes** (a class can only `extend` one parent). \n\nHowever, in **Java 8**, interfaces can now have `default` methods. If a class implements two interfaces (`InterfaceA` and `InterfaceB`), and both have a default method named `show()`, the Diamond Problem reappears! \n\n**Resolution**: Java forces the implementing class to **override the conflicting method** and explicitly choose which parent's method to call using the `super` keyword, like this: `InterfaceA.super.show();`."
+    },
+    {
+        "type": "category",
+        "content": "Top-Tier Tech Questions (Morgan Stanley, Deloitte, Wipro)"
+    },
+    {
+        "type": "question",
+        "content": "Why is the String class heavily strictly Immutable in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "This is an extremely common banking interview question. String is immutable for three critical reasons:\n1. **Security**: Strings are heavily used to store sensitive data like database URLs, usernames, and passwords. If String were mutable, a malicious thread could intercept and alter the string reference before it hits the database.\n2. **String Pool Caching**: Because Strings cannot change, Java can safely cache them in a special memory area called the String Constant Pool. If multiple variables contain the exact same text, they simply point to the exact same memory address, saving massive amounts of RAM.\n3. **Thread Safety**: Immutable objects are inherently completely thread-safe. Multiple threads can read a String simultaneously without requiring synchronized locks."
+    },
+    {
+        "type": "question",
+        "content": "ConcurrentHashMap vs Collections.synchronizedMap() - Why is one preferred?"
+    },
+    {
+        "type": "theory",
+        "content": "<table>\n<tr><th>Feature</th><th>Collections.synchronizedMap()</th><th>ConcurrentHashMap</th></tr>\n<tr><td><strong>Locking Mechanism</strong></td><td><strong>Object-Level Locking.</strong> Uses a single massive global lock for the entire map object.</td><td><strong>Segment-Level Locking (Lock Stripping).</strong> Divides the map into segments (usually 16 independent locks).</td></tr>\n<tr><td><strong>Concurrency / Throughput</strong></td><td>Terrible under load. If Thread A writes, Thread B is completely blocked from reading or writing anything until A finishes.</td><td>Incredible under load. Thread A can write to Segment 1 while Thread B simultaneously writes to Segment 2. Reads do not block at all.</td></tr>\n<tr><td><strong>Null Handling</strong></td><td>Allows one <code>null</code> key and multiple <code>null</code> values (if the underlying map is HashMap).</td><td>Strictly forbids <code>null</code> keys and <code>null</code> values (throws NullPointerException).</td></tr>\n</table>"
+    },
+    {
+        "type": "question",
+        "content": "Why use the ExecutorService framework instead of manually creating Threads?"
+    },
+    {
+        "type": "theory",
+        "content": "Manually doing `new Thread(() -> {}).start()` inside a web request loop is a massive anti-pattern.\n1. **Resource Exhaustion**: Threads are heavy OS-level objects. Spawning 10,000 unmanaged threads will crash the JVM with an `OutOfMemoryError`.\n2. **Context Switching Overhead**: The CPU spends more time switching between thousands of threads than actually executing logic.\n\nThe **ExecutorService** solves this by implementing a **Thread Pool**. It creates a fixed number of reusable threads (e.g., 50). When a task arrives, it is handed to an idle thread. When the task finishes, the thread doesn't die; it returns to the pool to process the next task, saving immense creation/destruction overhead."
+    },
+    {
+        "type": "question",
+        "content": "Fail-Fast vs Fail-Safe Iterators?"
+    },
+    {
+        "type": "theory",
+        "content": "- **Fail-Fast**: (e.g., `ArrayList`, `HashMap`). These iterate directly over the actual underlying collection. If Thread B attempts to structurally modify the collection (add or remove elements) while Thread A is currently iterating through it, the Iterator immediately aborts and throws a `ConcurrentModificationException`.\n- **Fail-Safe**: (e.g., `CopyOnWriteArrayList`, `ConcurrentHashMap`). These iterate over a **clone/snapshot** of the underlying collection. Therefore, if Thread B modifies the original collection during iteration, Thread A's iterator does not care and no exception is thrown."
+    },
+    {
+        "type": "category",
+        "content": "Tricky Core Java Deep Dive"
+    },
+    {
+        "type": "question",
+        "content": "What is the difference between == and equals() for objects in Java? Why is this a common interview trap?"
+    },
+    {
+        "type": "theory",
+        "content": "The <code>==</code> operator checks whether two references point to the exact same object in memory, while <code>equals()</code> checks logical equality based on the implementation of the class. In the <code>Object</code> class, <code>equals()</code> behaves exactly like <code>==</code>, but classes like <code>String</code>, <code>Integer</code>, and many domain objects override it to compare actual content rather than memory addresses.<div class=\"recall-anchor\">MEMORY HOOK: <code>==</code> means \"same box\", <code>equals()</code> means \"same value inside the box\".</div>The trap is that developers often remember the rule only for <code>String</code> but forget it for custom classes. If you create two separate <code>Employee</code> objects with the same id and name, <code>==</code> will be false because they are different objects. Unless you override <code>equals()</code>, even <code>equals()</code> will also return false. This is why collections like <code>HashSet</code> can behave unexpectedly for custom objects."
+    },
+    {
+        "type": "code",
+        "content": "class Employee {\n    int id;\n    Employee(int id) {\n        this.id = id;\n    }\n}\n\npublic class EqualityDemo {\n    public static void main(String[] args) {\n        String s1 = new String(\"java\");\n        String s2 = new String(\"java\");\n\n        System.out.println(s1 == s2);       // false\n        System.out.println(s1.equals(s2));  // true\n\n        Employee e1 = new Employee(101);\n        Employee e2 = new Employee(101);\n\n        System.out.println(e1 == e2);       // false\n        System.out.println(e1.equals(e2));  // false, because equals() not overridden\n    }\n}",
+        "lang": "java"
+    },
+    {
+        "type": "question",
+        "content": "Explain the equals() and hashCode() contract. Why must both be overridden together?"
+    },
+    {
+        "type": "theory",
+        "content": "The contract is simple but extremely important. If two objects are considered equal by <code>equals()</code>, they must return the same <code>hashCode()</code>. If you override only <code>equals()</code> and not <code>hashCode()</code>, hash-based collections like <code>HashMap</code> and <code>HashSet</code> break logically because they first use <code>hashCode()</code> to find the bucket and then use <code>equals()</code> to compare inside that bucket.<table><tr><th>Rule</th><th>Meaning</th></tr><tr><td><code>equals()</code> true</td><td><code>hashCode()</code> must be same</td></tr><tr><td><code>hashCode()</code> same</td><td><code>equals()</code> may be true or false</td></tr><tr><td>Override one</td><td>Override both for value objects</td></tr></table><div class=\"recall-anchor\">MEMORY HOOK: Hash first, equals next. Wrong hashCode means object goes to the wrong house before comparison even starts.</div>This is one of the most common real-world bugs in Java interviews. A candidate says \"Set removes duplicates\", but for custom objects it only works correctly if <code>equals()</code> and <code>hashCode()</code> are implemented consistently."
+    },
+    {
+        "type": "code",
+        "content": "import java.util.HashSet;\nimport java.util.Objects;\nimport java.util.Set;\n\nclass User {\n    private int id;\n    private String name;\n\n    User(int id, String name) {\n        this.id = id;\n        this.name = name;\n    }\n\n    @Override\n    public boolean equals(Object obj) {\n        if (this == obj) return true;\n        if (!(obj instanceof User)) return false;\n        User other = (User) obj;\n        return id == other.id && Objects.equals(name, other.name);\n    }\n\n    @Override\n    public int hashCode() {\n        return Objects.hash(id, name);\n    }\n}\n\npublic class HashContractDemo {\n    public static void main(String[] args) {\n        Set<User> set = new HashSet<>();\n        set.add(new User(1, \"Sagar\"));\n        set.add(new User(1, \"Sagar\"));\n\n        System.out.println(set.size()); // 1\n    }\n}",
+        "lang": "java"
+    },
+    {
+        "type": "question",
+        "content": "Why is String immutable in Java, and why is that considered a design advantage?"
+    },
+    {
+        "type": "theory",
+        "content": "A <code>String</code> object cannot be changed after creation. Every modification-like operation such as <code>concat()</code>, <code>replace()</code>, or <code>substring()</code> produces a new object rather than mutating the existing one. This design gives Java several powerful advantages: security, thread safety, hashcode caching, and efficient String Pool reuse. If Strings were mutable, a reference shared across modules could be altered unexpectedly, which would be dangerous for file paths, database URLs, class loading, and security credentials.<table><tr><th>Benefit</th><th>Why it matters</th></tr><tr><td>Security</td><td>Critical values cannot be silently modified</td></tr><tr><td>Thread Safety</td><td>Immutable objects are naturally safe to share</td></tr><tr><td>String Pool</td><td>Same literals can be reused safely</td></tr><tr><td>Hash caching</td><td>Useful when String is a HashMap key</td></tr></table><div class=\"recall-anchor\">MEMORY HOOK: Mutable key is dangerous. Immutable String makes reuse safe.</div>This is a favorite interview question because it tests whether you know both the language behavior and the design reasoning behind it."
+    },
+    {
+        "type": "question",
+        "content": "How do you create an immutable class in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "To make a class immutable, you typically follow five rules. Make the class <code>final</code> so it cannot be extended. Make all fields <code>private final</code>. Initialize all fields through the constructor. Provide only getters and no setters. If the class contains mutable objects like <code>Date</code>, <code>List</code>, or arrays, return defensive copies instead of exposing the original internal reference.<div class=\"recall-anchor\">MEMORY HOOK: final class, final fields, constructor only, no setters, defensive copy.</div>The real trap is not with primitives or Strings, but with mutable nested fields. Many candidates claim their class is immutable while returning the original <code>Date</code> or <code>List</code> reference from a getter, which completely breaks immutability."
+    },
+    {
+        "type": "code",
+        "content": "import java.util.ArrayList;\nimport java.util.Collections;\nimport java.util.List;\n\nfinal class Student {\n    private final int id;\n    private final String name;\n    private final List<String> skills;\n\n    public Student(int id, String name, List<String> skills) {\n        this.id = id;\n        this.name = name;\n        this.skills = new ArrayList<>(skills); // defensive copy\n    }\n\n    public int getId() {\n        return id;\n    }\n\n    public String getName() {\n        return name;\n    }\n\n    public List<String> getSkills() {\n        return Collections.unmodifiableList(skills);\n    }\n}",
+        "lang": "java"
+    },
+    {
+        "type": "question",
+        "content": "What is the difference between String, StringBuilder, and StringBuffer?"
+    },
+    {
+        "type": "theory",
+        "content": "All three represent character sequences, but their mutability and thread-safety differ greatly. <code>String</code> is immutable, so every modification creates a new object. <code>StringBuilder</code> is mutable and not synchronized, making it the fastest choice for single-threaded string manipulation. <code>StringBuffer</code> is mutable and synchronized, making it thread-safe but slower than <code>StringBuilder</code> in most cases.<table><tr><th>Type</th><th>Mutable?</th><th>Thread-safe?</th><th>Use case</th></tr><tr><td>String</td><td>No</td><td>Yes by immutability</td><td>Read-only text</td></tr><tr><td>StringBuilder</td><td>Yes</td><td>No</td><td>Fast single-threaded concatenation</td></tr><tr><td>StringBuffer</td><td>Yes</td><td>Yes</td><td>Multi-threaded mutable text</td></tr></table><div class=\"recall-anchor\">MEMORY HOOK: Builder is fast, Buffer is safe, String is fixed.</div>The interview trap is that people often answer only \"StringBuffer is thread-safe\" without explaining why <code>StringBuilder</code> is usually preferred in modern application code."
+    },
+    {
+        "type": "question",
+        "content": "What is the difference between final, finally, and finalize()?"
+    },
+    {
+        "type": "theory",
+        "content": "<code>final</code> is a keyword used to restrict classes, methods, or variables. <code>finally</code> is a block used with exception handling and is intended for cleanup code that should run whether an exception occurs or not. <code>finalize()</code> was a method called by the garbage collector before reclaiming an object, but it is unreliable and deprecated for removal in modern Java because its execution timing is unpredictable.<table><tr><th>Term</th><th>Purpose</th></tr><tr><td><code>final</code></td><td>Restriction on inheritance, overriding, or reassignment</td></tr><tr><td><code>finally</code></td><td>Cleanup block in exception handling</td></tr><tr><td><code>finalize()</code></td><td>Old GC hook, unreliable, should be avoided</td></tr></table><div class=\"recall-anchor\">MEMORY HOOK: final = lock it, finally = clean it, finalize = forget it.</div>This question is common because the three words sound similar but belong to completely different parts of the language."
+    },
+    {
+        "type": "question",
+        "content": "Does finally always execute in Java? What are the exceptions?"
+    },
+    {
+        "type": "theory",
+        "content": "In normal control flow, the <code>finally</code> block executes whether an exception occurs or not, even if there is a <code>return</code> inside <code>try</code> or <code>catch</code>. However, it may not execute in abnormal JVM termination scenarios such as <code>System.exit(0)</code>, JVM crash, power failure, or a fatal native error.<div class=\"recall-anchor\">MEMORY HOOK: finally is almost always executed, but not after the JVM is gone.</div>Interviewers love this question because many candidates say \"finally always runs\" without knowing the edge cases. The correct answer is: it runs in regular program control, but not when the process itself terminates before it gets the chance."
+    },
+    {
+        "type": "code",
+        "content": "public class FinallyDemo {\n    public static int test() {\n        try {\n            return 10;\n        } finally {\n            System.out.println(\"finally executed\");\n        }\n    }\n\n    public static void main(String[] args) {\n        System.out.println(test());\n    }\n}",
+        "lang": "java"
+    },
+    {
+        "type": "question",
+        "content": "What is the difference between checked and unchecked exceptions?"
+    },
+    {
+        "type": "theory",
+        "content": "Checked exceptions are verified by the compiler. If a method may throw one, you must either handle it with <code>try-catch</code> or declare it using <code>throws</code>. Unchecked exceptions are subclasses of <code>RuntimeException</code> and are not enforced by the compiler. They usually indicate programming errors such as null handling mistakes, illegal arguments, or index violations.<table><tr><th>Type</th><th>Checked by compiler?</th><th>Examples</th></tr><tr><td>Checked Exception</td><td>Yes</td><td><code>IOException</code>, <code>SQLException</code></td></tr><tr><td>Unchecked Exception</td><td>No</td><td><code>NullPointerException</code>, <code>ArithmeticException</code>, <code>IllegalArgumentException</code></td></tr></table><div class=\"recall-anchor\">MEMORY HOOK: Checked = recoverable external problem, Unchecked = coding bug or invalid usage.</div>The important interview point is not just the definition, but when to use each category while designing APIs."
+    },
+    {
+        "type": "question",
+        "content": "What is exception propagation in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "Exception propagation means that if a method does not handle an exception, it passes up the call stack to its caller. This continues until some method handles it, or until it reaches the JVM, which then terminates the program and prints the stack trace. Propagation mainly applies to unchecked exceptions automatically, while checked exceptions must still be declared or handled at compile time.<div class=\"recall-anchor\">MEMORY HOOK: If method A cannot handle it, the exception climbs upward looking for someone who can.</div>This concept matters in interviews because it explains why a bug may appear far away from the actual line where the wrong state began."
+    },
+    {
+        "type": "code",
+        "content": "public class PropagationDemo {\n    static void method3() {\n        int x = 10 / 0;\n    }\n\n    static void method2() {\n        method3();\n    }\n\n    static void method1() {\n        method2();\n    }\n\n    public static void main(String[] args) {\n        try {\n            method1();\n        } catch (ArithmeticException e) {\n            System.out.println(\"Handled in main: \" + e);\n        }\n    }\n}",
+        "lang": "java"
+    },
+    {
+        "type": "question",
+        "content": "What is the difference between throw and throws in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "<code>throw</code> is used inside a method body to explicitly throw a specific exception object. <code>throws</code> is used in a method signature to declare that the method may pass certain exceptions to the caller. One creates the exception flow; the other documents and delegates responsibility.<table><tr><th>Keyword</th><th>Used where?</th><th>Purpose</th></tr><tr><td><code>throw</code></td><td>Inside method body</td><td>Actually throws an exception object</td></tr><tr><td><code>throws</code></td><td>Method signature</td><td>Declares possible exceptions</td></tr></table><div class=\"recall-anchor\">MEMORY HOOK: throw = do it now, throws = warning for caller.</div>This is often asked with custom exceptions, so always be ready to explain both together."
+    },
+    {
+        "type": "code",
+        "content": "public class ThrowVsThrowsDemo {\n    static void validateAge(int age) throws Exception {\n        if (age < 18) {\n            throw new Exception(\"Age must be 18 or above\");\n        }\n    }\n\n    public static void main(String[] args) {\n        try {\n            validateAge(15);\n        } catch (Exception e) {\n            System.out.println(e.getMessage());\n        }\n    }\n}",
+        "lang": "java"
+    },
+    {
+        "type": "question",
+        "content": "Can we have try without catch in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "Yes, but only if it is followed by a <code>finally</code> block. A <code>try</code> block must be followed by either at least one <code>catch</code> block or a <code>finally</code> block. This is useful when you do not want to handle the exception locally but still want cleanup logic to run.<div class=\"recall-anchor\">MEMORY HOOK: try cannot stand alone. It needs catch or finally.</div>Interviewers ask this because many candidates think <code>catch</code> is mandatory after every <code>try</code>, which is not correct."
+    },
+    {
+        "type": "code",
+        "content": "public class TryFinallyDemo {\n    public static void main(String[] args) {\n        try {\n            System.out.println(\"Inside try\");\n        } finally {\n            System.out.println(\"Cleanup in finally\");\n        }\n    }\n}",
+        "lang": "java"
+    },
+    {
+        "type": "question",
+        "content": "Can we overload the main() method in Java? Which main method does JVM call?"
+    },
+    {
+        "type": "theory",
+        "content": "Yes, you can overload <code>main()</code> just like any other method by changing its parameter list. However, the JVM only looks for the exact entry-point signature <code>public static void main(String[] args)</code>. Any overloaded version is just a normal method and will not be used as the application starting point.<div class=\"recall-anchor\">MEMORY HOOK: You can overload main, but JVM has only one door key.</div>This is a classic tricky question because candidates confuse \"allowed by Java syntax\" with \"used by JVM as entry point\"."
+    },
+    {
+        "type": "code",
+        "content": "public class MainOverloadDemo {\n    public static void main(String[] args) {\n        System.out.println(\"JVM starts here\");\n        main(10);\n    }\n\n    public static void main(int x) {\n        System.out.println(\"Overloaded main: \" + x);\n    }\n}",
+        "lang": "java"
+    },
+    {
+        "type": "question",
+        "content": "Can static methods be overridden in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "No, static methods are not overridden because overriding is resolved at runtime using dynamic dispatch, and static methods belong to the class, not the object. If a subclass declares a static method with the same signature as the parent, it is called method hiding, not overriding. Which method gets called depends on the reference type, not the actual object type.<div class=\"recall-anchor\">MEMORY HOOK: Instance methods override, static methods hide.</div>This is a strong interview trap because candidates often say \"yes, overridden\", but the correct term is <strong>method hiding</strong>."
+    },
+    {
+        "type": "code",
+        "content": "class Parent {\n    static void show() {\n        System.out.println(\"Parent static\");\n    }\n}\n\nclass Child extends Parent {\n    static void show() {\n        System.out.println(\"Child static\");\n    }\n}\n\npublic class StaticHidingDemo {\n    public static void main(String[] args) {\n        Parent obj = new Child();\n        obj.show(); // Parent static\n    }\n}",
+        "lang": "java"
+    },
+    {
+        "type": "question",
+        "content": "Can private methods be overridden in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "No, private methods are not visible to subclasses, so they cannot be overridden. If a subclass defines a method with the same name and signature, it is an entirely new method unrelated to the parent's private method. Since overriding requires inheritance visibility, a private method is excluded from runtime polymorphism.<div class=\"recall-anchor\">MEMORY HOOK: If child cannot see it, child cannot override it.</div>This question is asked to test whether you understand visibility rules, not just memorized polymorphism definitions."
+    },
+    {
+        "type": "question",
+        "content": "What is method hiding and how is it different from overriding?"
+    },
+    {
+        "type": "theory",
+        "content": "Method overriding happens with instance methods and is resolved at runtime based on the actual object. Method hiding happens with static methods and is resolved at compile time based on the reference type. Overriding supports runtime polymorphism, while hiding does not.<table><tr><th>Feature</th><th>Overriding</th><th>Hiding</th></tr><tr><td>Applies to</td><td>Instance methods</td><td>Static methods</td></tr><tr><td>Resolution</td><td>Runtime</td><td>Compile time</td></tr><tr><td>Polymorphism</td><td>Yes</td><td>No</td></tr></table><div class=\"recall-anchor\">MEMORY HOOK: Overriding is object-based, hiding is reference-based.</div>"
+    },
+    {
+        "type": "question",
+        "content": "What is the difference between shallow copy and deep copy?"
+    },
+    {
+        "type": "theory",
+        "content": "A shallow copy duplicates the top-level object but still shares references to nested mutable objects. A deep copy duplicates both the top-level object and the nested objects, so changes in one copy do not affect the other. This matters in interviews because candidates often say \"copy created\" without specifying whether internal state is still shared.<div class=\"recall-anchor\">MEMORY HOOK: Shallow copy copies the house key, deep copy builds a new house.</div>Whenever a class contains arrays, lists, maps, or other mutable references, interviewers may ask whether your copy is truly independent."
+    },
+    {
+        "type": "code",
+        "content": "class Address {\n    String city;\n    Address(String city) {\n        this.city = city;\n    }\n}\n\nclass Employee {\n    String name;\n    Address address;\n\n    Employee(String name, Address address) {\n        this.name = name;\n        this.address = address;\n    }\n\n    Employee(Employee other) {\n        this.name = other.name;\n        this.address = new Address(other.address.city); // deep copy\n    }\n}",
+        "lang": "java"
+    },
+    {
+        "type": "question",
+        "content": "What is cloning in Java? Why is Cloneable considered tricky?"
+    },
+    {
+        "type": "theory",
+        "content": "Cloning in Java usually refers to creating an object copy using the <code>clone()</code> method inherited from <code>Object</code>. To make it work, the class must implement <code>Cloneable</code>; otherwise, <code>CloneNotSupportedException</code> is thrown. It is considered tricky because <code>clone()</code> performs only a shallow copy by default, has awkward design rules, and often leads to bugs with mutable fields. That is why many modern codebases prefer copy constructors or factory methods instead.<div class=\"recall-anchor\">MEMORY HOOK: clone() looks easy, but shared nested state makes it dangerous.</div>"
+    },
+    {
+        "type": "question",
+        "content": "What is serialization in Java? What is the use of transient?"
+    },
+    {
+        "type": "theory",
+        "content": "Serialization is the process of converting an object's state into a byte stream so it can be stored in a file, sent over the network, or cached. A class typically implements <code>Serializable</code> to indicate that its objects can be serialized. The <code>transient</code> keyword marks fields that should not be serialized, usually because they are sensitive, derived, temporary, or not meaningful outside the current runtime context.<div class=\"recall-anchor\">MEMORY HOOK: Serializable saves object state, transient tells Java what not to pack.</div>A classic interview example is passwords: even if an object is serialized, a password field marked <code>transient</code> will not be written to the stream."
+    },
+    {
+        "type": "code",
+        "content": "import java.io.Serializable;\n\nclass Account implements Serializable {\n    private String username;\n    private transient String password;\n\n    public Account(String username, String password) {\n        this.username = username;\n        this.password = password;\n    }\n}",
+        "lang": "java"
+    },
+    {
+        "type": "question",
+        "content": "Why is char[] preferred over String for storing passwords?"
+    },
+    {
+        "type": "theory",
+        "content": "A <code>String</code> is immutable, so once a password is created as a String, it stays in memory until the garbage collector removes it, and you cannot explicitly erase its contents. A <code>char[]</code> can be overwritten manually after use, reducing the time the sensitive data remains readable in memory. This is why security-focused APIs often prefer character arrays for passwords.<div class=\"recall-anchor\">MEMORY HOOK: String stays, char[] can be wiped.</div>This is a great question because it connects immutability, security, and practical API design in one answer."
+    },
+    {
+        "type": "question",
+        "content": "What is autoboxing and unboxing? What problem can it create in interviews?"
+    },
+    {
+        "type": "theory",
+        "content": "Autoboxing is the automatic conversion of a primitive like <code>int</code> into its wrapper class <code>Integer</code>. Unboxing is the reverse conversion from wrapper to primitive. The tricky part is that wrappers can be <code>null</code>, so unboxing a null value throws <code>NullPointerException</code>.<div class=\"recall-anchor\">MEMORY HOOK: Primitive cannot be null, wrapper can. Null + unboxing = crash.</div>This is especially dangerous in code involving maps, databases, and JSON parsing where wrapper values may legitimately be absent."
+    },
+    {
+        "type": "code",
+        "content": "public class AutoBoxingDemo {\n    public static void main(String[] args) {\n        Integer count = null;\n        int value = count; // NullPointerException during unboxing\n        System.out.println(value);\n    }\n}",
+        "lang": "java"
+    },
+    {
+        "type": "question",
+        "content": "Why does Integer comparison with == sometimes work and sometimes fail?"
+    },
+    {
+        "type": "theory",
+        "content": "The <code>Integer</code> class uses internal caching for values typically in the range -128 to 127. If you create wrapper objects using autoboxing within this range, Java may return the same cached object, so <code>==</code> may appear to work. Outside that range, different objects are usually created, so <code>==</code> becomes false even when the numeric values are equal. The correct way to compare wrapper values is <code>equals()</code> or explicit primitive unboxing.<div class=\"recall-anchor\">MEMORY HOOK: Small Integers are cached, large ones usually are not.</div>This is a famous interview trap because it produces inconsistent-looking results that reveal whether the candidate really understands reference comparison."
+    },
+    {
+        "type": "code",
+        "content": "public class IntegerCacheDemo {\n    public static void main(String[] args) {\n        Integer a = 127;\n        Integer b = 127;\n        Integer x = 128;\n        Integer y = 128;\n\n        System.out.println(a == b); // true\n        System.out.println(x == y); // false\n        System.out.println(x.equals(y)); // true\n    }\n}",
+        "lang": "java"
+    },
+    {
+        "type": "question",
+        "content": "What is a static block in Java? When does it execute?"
+    },
+    {
+        "type": "theory",
+        "content": "A static block is a block of code used for class-level initialization. It executes only once, when the class is first loaded into memory by the JVM, before any object is created and before the main method uses the class. It is typically used for one-time initialization of static variables or startup logic that belongs to the class itself.<div class=\"recall-anchor\">MEMORY HOOK: Constructor is for object birth, static block is for class birth.</div>Interviewers may combine this with execution-order questions involving static variables, instance blocks, and constructors."
+    },
+    {
+        "type": "code",
+        "content": "public class StaticBlockDemo {\n    static {\n        System.out.println(\"Static block executed\");\n    }\n\n    public static void main(String[] args) {\n        System.out.println(\"Main method executed\");\n    }\n}",
+        "lang": "java"
+    },
+    {
+        "type": "question",
+        "content": "What is the order of execution in Java: static block, instance block, constructor?"
+    },
+    {
+        "type": "theory",
+        "content": "The order is: static block executes first when the class is loaded, instance initialization block executes next whenever an object is created, and then the constructor runs. If multiple static or instance blocks exist, they execute in the order they appear in the class. This is a classic output-based interview question.<div class=\"recall-anchor\">MEMORY HOOK: Class loads first, object prepares next, constructor finishes last.</div>"
+    },
+    {
+        "type": "code",
+        "content": "public class ExecutionOrderDemo {\n    static {\n        System.out.println(\"1. Static block\");\n    }\n\n    {\n        System.out.println(\"2. Instance block\");\n    }\n\n    ExecutionOrderDemo() {\n        System.out.println(\"3. Constructor\");\n    }\n\n    public static void main(String[] args) {\n        new ExecutionOrderDemo();\n    }\n}",
+        "lang": "java"
+    },
+    {
+        "type": "question",
+        "content": "What is the difference between compile-time polymorphism and runtime polymorphism?"
+    },
+    {
+        "type": "theory",
+        "content": "Compile-time polymorphism is achieved through method overloading, where the compiler decides which method to call based on the method signature. Runtime polymorphism is achieved through method overriding, where the JVM decides at runtime which overridden method to execute based on the actual object type. The key distinction is when the decision is made.<table><tr><th>Type</th><th>Achieved by</th><th>Resolved when?</th></tr><tr><td>Compile-time polymorphism</td><td>Overloading</td><td>During compilation</td></tr><tr><td>Runtime polymorphism</td><td>Overriding</td><td>During execution</td></tr></table><div class=\"recall-anchor\">MEMORY HOOK: Overloading chooses early, overriding chooses late.</div>"
+    },
+    {
+        "type": "question",
+        "content": "Can a subclass throw a broader checked exception than the parent method while overriding?"
+    },
+    {
+        "type": "theory",
+        "content": "No. When overriding a method, the child class cannot declare a broader checked exception than the parent version. It may declare the same exception, a narrower checked exception, or no checked exception at all. For unchecked exceptions, there is no such restriction. This rule exists so that code using the parent reference is not forced to handle unexpected broader checked exceptions introduced by the child.<div class=\"recall-anchor\">MEMORY HOOK: Child can narrow checked exceptions, not widen them.</div>This is a favorite advanced core Java interview question because it mixes inheritance with exception rules."
+    },
+    {
+        "type": "question",
+        "content": "What is deadlock in Java and how do you explain it simply in an interview?"
+    },
+    {
+        "type": "theory",
+        "content": "Deadlock occurs when two or more threads wait forever for each other to release locks, so none of them can proceed. A common example is Thread A holding Lock 1 and waiting for Lock 2, while Thread B holds Lock 2 and waits for Lock 1. The system is not crashed, but progress has stopped completely.<div class=\"recall-anchor\">MEMORY HOOK: A waits for B's lock, B waits for A's lock, both freeze forever.</div>In interviews, the strongest answer is not just the definition but also the prevention idea: enforce consistent lock ordering, reduce nested locks, or use timeout-based locking APIs."
+    },
+    {
+        "type": "code",
+        "content": "public class DeadlockDemo {\n    private static final Object lock1 = new Object();\n    private static final Object lock2 = new Object();\n\n    public static void main(String[] args) {\n        Thread t1 = new Thread(() -> {\n            synchronized (lock1) {\n                synchronized (lock2) {\n                    System.out.println(\"Thread 1 acquired both locks\");\n                }\n            }\n        });\n\n        Thread t2 = new Thread(() -> {\n            synchronized (lock2) {\n                synchronized (lock1) {\n                    System.out.println(\"Thread 2 acquired both locks\");\n                }\n            }\n        });\n\n        t1.start();\n        t2.start();\n    }\n}",
+        "lang": "java"
+    },
+    {
+        "type": "question",
+        "content": "What is race condition in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "A race condition happens when multiple threads access and modify shared data concurrently and the final result depends on the unpredictable order of execution. The code may work sometimes and fail at other times, which makes the bug difficult to reproduce. Operations like <code>count++</code> are dangerous because they are not atomic; they involve read, modify, and write steps.<div class=\"recall-anchor\">MEMORY HOOK: If output depends on who runs first, you have a race.</div>This is one of the most frequently asked concurrency basics because it reveals whether the candidate understands why synchronization is needed, not just how to write it."
+    },
+    {
+        "type": "question",
+        "content": "What is volatile in Java? Does it make code thread-safe?"
+    },
+    {
+        "type": "theory",
+        "content": "The <code>volatile</code> keyword tells the JVM that reads and writes of a variable should go directly to main memory, improving visibility between threads. If one thread updates a volatile variable, another thread reading it is more likely to see the latest value immediately. However, <code>volatile</code> does not make compound operations like <code>count++</code> atomic, so it does not provide full thread safety for read-modify-write logic.<div class=\"recall-anchor\">MEMORY HOOK: volatile gives visibility, not atomicity.</div>This is a high-value interview question because many candidates incorrectly think <code>volatile</code> is a complete replacement for synchronization."
+    },
+    {
+        "type": "question",
+        "content": "What is the difference between synchronized method and synchronized block?"
+    },
+    {
+        "type": "theory",
+        "content": "A synchronized method locks the monitor of the whole object instance, or the Class object if the method is static, for the entire method duration. A synchronized block locks only a specific section of code and can lock on any chosen object. Because it gives finer control and smaller lock scope, a synchronized block is usually more efficient and flexible.<table><tr><th>Feature</th><th>Synchronized Method</th><th>Synchronized Block</th></tr><tr><td>Lock scope</td><td>Entire method</td><td>Specific code section</td></tr><tr><td>Flexibility</td><td>Less</td><td>More</td></tr><tr><td>Performance</td><td>May lock too much</td><td>Can reduce contention</td></tr></table><div class=\"recall-anchor\">MEMORY HOOK: Method lock is broad, block lock is surgical.</div>"
+    }
+]

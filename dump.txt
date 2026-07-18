@@ -1,0 +1,146 @@
+Arraylist vs linkedlist?
+What is functional interface?
+If we have 10 million elements and you want to insert, what will give better performance, arraylist or linkedlist?
+Can constructor be final or static?
+Can we create object of abstract class?
+Comparator vs comparable?
+Method Overriding?
+What are lambda expression?
+Can we have multiple main methods?
+@springbootapplication annotation? Can we run without it?
+Method vs constructor?
+What is stored procedure and how it is better than sql?
+Difference between rest controller and controller?
+@Springbootapplication?
+Maponobject and its syntax?
+What is linked BlockingQueue?
+What if thread calls notify method without holding lock?
+Lock safe and thread safe class?
+Reduce method in stream?
+What is try with resources?
+What is multi-threading and what are new feature in java 8 and 9?
+Difference between rest and soap?
+What are the method of stream api and can you explain them?
+Explain your project?
+String literals and new String method... what will be result using == operator?
+did you implement any rest api?
+how do you consume a rest api?
+how did you implement exception handling im rest api?
+what type of authentication you used in rest api?
+how to you check if jwt token is expired in cache?
+can we overload method by changing the return type?
+if you have userdetails class sort first by name and if name is equal then sort by date.
+what is functional interface and tell some interface?
+what are intermediate and terminal operations?
+difference between == and equals
+how will you verify hashcode generated on client side with hashcode on server side?
+how will you prevent man in middle attack if user tampers your request, on the server side?
+what is multi factor or two way authentication? how will you handle on server side?
+if otp is generated then how will you verify if it is correct otp on the server side?
+what is jwt?
+how will you make expiration for jwt token on server side?
+what is microservices?
+what is request Mapping?
+what are different http method? can we use post for updating ?
+have you generated hashcode in your application earlier?
+what Java 8 feature you have used in your application?
+what is rest controller?
+Explain mutlithreading in java and how you used in server side development?
+Can you describe your experience using RDBMS in application development?
+Share your experience with core java and springboot?
+can you tell what's the problem in below code and how can you improve it?
+what improvement can you suggest in below query?
+select * from orders where customer_id in (select customer_id from customers where status='active');
+Can you share experience on technologies like docker and kubernetes and how you used in your projects?
+jsonanysetter and jsonanygetter?
+mechanics of garbage first garbage collector in java?
+Overriding finalize method is discouraged in java and what alternative exists?
+explain role of tracing and correlation id's in distributed springboot application?
+Discuss impact of lombok in springboot?
+how can you debug deadlock using jstack in multithreading?
+Where did you get those figures  like 40%, 50% in resume?
+Difference between postgresql and mysql
+We have an array with values (2, 4 1 6 7 1  4 9 8) consider this as stock prices find maximum profit with only one buy and sell
+Print an array unique value (1,1,2,2,3,4,4,5) dont use hashset hashmap arraylist and java 8
+You said you used vscode and github copilot as well right, which models you used? which one is better?
+What is garbage collection? can we call methods for garbage collection? finalize keyword?
+what is  stream api?
+what is filter in stream and how many paramters we pass
+what is functional interface
+what is difference between interface and functional interface?
+diff between interface and abstract class?
+what is final variable method and class?
+what is finally block and why needed?
+what arr wrapper classes and why needed?
+abstract methods and classes?
+what is exceptions? checked unchecked and how you handle them ? can you create  custom exceptions?
+what is difference between hibernate and jpa. what are the advantages of hibernate?
+where do you see yourself after 5 years?
+what is expected ctc?
+find first repeating character in string
+write program to find if number is prime or not.
+What is reflection api?
+Singleton class? is it thread safe? how will you make it thread safe? how does serializarion effect it?
+Monolith to microservices. what design pattern you are using?
+What is saga pattern?
+what is circuit breaker pattern?
+if there are two system and one is failing, then what will you do?
+write sql to find third highest amount in order?
+why dense rank is preferred over sub query or limit and offset?
+what all sql functions do you know?
+dense rank vs rank?
+what is annotation required args?
+what is annotation noargs?
+difference between controlleradvice and exceptionhandler?
+What are different atomic variables in java?
+what is fail fast and fail safe iterators?
+Which java security have you implemented?
+What is jwt?
+What is hs256 and rs256?
+do you have knowdege of stored procedures? what is stored procedure?
+what is user defined types and its use?
+write a program to group person by age?
+what is design pattern you have used in monolithic to microservices?
+what features you imolemented in java8?
+what is marker interface?
+what is abstraction?
+what is encapsulation?
+difference between abstraction and encapsulation?
+difference between arraylist and linkedlist?
+what is load factor?
+Write a program to count each character using streams?
+Find first non repeating character in string?
+what is Function functional interface? give a scenario you will use it? what are the methods it has?
+what is optional class? what all methods it has?
+difference between string and string buffer?
+difference between arraylist and set?
+what all interfaces we have in collection framework?
+what is getorelsenull in map?
+How spring mvc  flow works?
+restcontroller vs controller?
+put vs patch?
+what are http codes? 4xx stand for what status?
+spring mvc vs springboot
+What are uses of pom.xml and application.yml file?
+What are various bean scopes?
+can we have two databases in single application?
+How would you migrate monolith to microservices? what are the issues you faced in migration?
+what is stored procedure?
+difference between procedure and function?
+how to you execute storedprocedure in java code?
+write program to group employees by department and total count of each employees in that department?
+write program to find maximum salary from employee list?
+write program to find average salary in each department?
+write program to find the frequency of each character in a string?
+what will be output of program? String str = new String("abc"); str = str.concat("xyz"); sysout(str)
+What is jpa? 
+what is hibernate?
+if i want to map my employee object to some database table how would  you do using? explain full flow?
+what do you pass in JpaRepository<>?
+how you are managing ci/cd pipeline? is there some devops team?
+write a sql to find count of employees in each department.
+empid deptid salary name
+what is nvl() in sql?
+delete vs drop vs truncate?
+diff between where and having?
+what is difference given an json object write code to iterate over this jsonobject and print address?

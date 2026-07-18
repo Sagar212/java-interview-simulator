@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Streams API Mastery — Interactive Learning</title>
+    <meta name="description" content="Master Java Stream API operations through interactive drag-and-drop chaining. Learn filter, map, collect, groupingBy, toMap, and more.">
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{
+            --bg:#090c14;--bg2:#0f1420;--bg3:#151b2d;--bg4:#1c2440;
+            --glass:rgba(17,22,38,0.72);--glass-border:rgba(255,255,255,0.08);
+            --blue:#3b82f6;--blue-g:rgba(59,130,246,0.25);--blue-dim:rgba(59,130,246,0.12);
+            --violet:#8b5cf6;--violet-g:rgba(139,92,246,0.25);
+            --emerald:#10b981;--emerald-g:rgba(16,185,129,0.25);
+            --teal:#06b6d4;--teal-g:rgba(6,182,212,0.25);
+            --amber:#f59e0b;--amber-g:rgba(245,158,11,0.25);
+            --red:#ef4444;--red-g:rgba(239,68,68,0.2);
+            --text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;
+            --font:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
+            --radius:12px;--radius-sm:8px;
+        }
+        body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6;overflow-x:hidden}
+        body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(59,130,246,0.08),transparent 50%),radial-gradient(ellipse at 80% 80%,rgba(139,92,246,0.08),transparent 50%);pointer-events:none;z-index:0}
+        .app{position:relative;z-index:1;max-width:1500px;margin:0 auto;padding:1.5rem 2rem 4rem}
+
+        /* ── Header ── */
+        .hero{text-align:center;padding:2.5rem 0 2rem;animation:fadeIn .8s ease-out}
+        .hero h1{font-size:3rem;font-weight:800;background:linear-gradient(135deg,#60a5fa,#a78bfa,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.5px}
+        .hero .tagline{color:var(--text2);font-size:1.1rem;margin-top:.5rem;font-weight:300}
+        .badge-row{display:flex;gap:.75rem;justify-content:center;margin-top:1rem;flex-wrap:wrap}
+        .badge{font-size:.75rem;padding:.35rem .8rem;border-radius:20px;font-weight:600;letter-spacing:.5px}
+        .badge.b-blue{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(59,130,246,.2)}
+        .badge.b-violet{background:rgba(139,92,246,.1);color:var(--violet);border:1px solid rgba(139,92,246,.2)}
+        .badge.b-emerald{background:rgba(16,185,129,.1);color:var(--emerald);border:1px solid rgba(16,185,129,.2)}
+
+        /* ── Glass Panel ── */
+        .glass{background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:var(--radius);padding:1.5rem;box-shadow:0 4px 30px rgba(0,0,0,.3)}
+        .glass h2{font-size:1.25rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+        .glass h2 .icon{font-size:1.3rem}
+        .glass h3{font-size:.85rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--text3);margin-bottom:.75rem;padding-bottom:.5rem;border-bottom:1px solid var(--glass-border)}
+
+        /* ── Workspace Grid ── */
+        .workspace{display:grid;grid-template-columns:280px 1fr;gap:1.5rem;margin-bottom:2rem;align-items:start}
+        @media(max-width:900px){.workspace{grid-template-columns:1fr}}
+
+        /* ── Palette ── */
+        .palette{position:sticky;top:1.5rem;max-height:calc(100vh - 3rem);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bg4) transparent}
+        .palette::-webkit-scrollbar{width:4px}
+        .palette::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:4px}
+        .palette-section{margin-bottom:1.25rem}
+        .op-pill{display:flex;align-items:center;gap:.6rem;padding:.6rem .8rem;border-radius:var(--radius-sm);cursor:grab;margin-bottom:.4rem;font-family:var(--mono);font-size:.82rem;font-weight:500;border:1px solid transparent;transition:all .2s ease;position:relative}
+        .op-pill:hover{transform:translateX(4px)}
+        .op-pill .op-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+        .op-pill.t-inter{background:var(--blue-dim);border-color:rgba(59,130,246,.15)}
+        .op-pill.t-inter:hover{border-color:var(--blue);box-shadow:0 0 12px var(--blue-g)}
+        .op-pill.t-inter .op-dot{background:var(--blue)}
+        .op-pill.t-term{background:rgba(139,92,246,.08);border-color:rgba(139,92,246,.15)}
+        .op-pill.t-term:hover{border-color:var(--violet);box-shadow:0 0 12px var(--violet-g)}
+        .op-pill.t-term .op-dot{background:var(--violet)}
+        .op-pill.t-coll{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.15)}
+        .op-pill.t-coll:hover{border-color:var(--emerald);box-shadow:0 0 12px var(--emerald-g)}
+        .op-pill.t-coll .op-dot{background:var(--emerald)}
+        .op-pill.disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
+        .op-pill .op-desc{font-family:var(--font);font-size:.7rem;color:var(--text3);font-weight:400;margin-left:auto;max-width:90px;text-align:right;line-height:1.2}
+        .op-pill .lock-icon{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:.7rem;opacity:.6}
+
+        /* ── Builder Panel ── */
+        .builder{display:flex;flex-direction:column;gap:1.25rem}
+
+        /* Pipeline */
+        .pipeline-zone{min-height:100px;border:2px dashed rgba(255,255,255,.08);border-radius:var(--radius);padding:1.25rem;display:flex;align-items:center;flex-wrap:wrap;gap:.5rem;transition:all .3s ease}
+        .pipeline-zone.drag-over{border-color:var(--blue);background:rgba(59,130,246,.04)}
+        .pipeline-zone.terminated{border-color:rgba(139,92,246,.3)}
+        .source-node{background:linear-gradient(135deg,rgba(6,182,212,.15),rgba(6,182,212,.05));border:1px solid rgba(6,182,212,.3);padding:.5rem 1rem;border-radius:var(--radius-sm);font-family:var(--mono);font-size:.85rem;font-weight:600;color:var(--teal);white-space:nowrap}
+        .arrow{color:var(--text3);font-size:1.1rem;display:flex;align-items:center;animation:pulse-arrow 2s infinite}
+        .chain-card{position:relative;padding:.5rem 1rem;border-radius:var(--radius-sm);font-family:var(--mono);font-size:.82rem;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap;border:1px solid}
+        .chain-card.t-inter{background:var(--blue-dim);border-color:rgba(59,130,246,.3);color:var(--blue)}
+        .chain-card.t-inter:hover{box-shadow:0 0 15px var(--blue-g)}
+        .chain-card.t-term{background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.3);color:var(--violet)}
+        .chain-card.t-term:hover{box-shadow:0 0 15px var(--violet-g)}
+        .chain-card.t-coll{background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.3);color:var(--emerald)}
+        .chain-card.selected{outline:2px solid var(--amber);outline-offset:2px}
+        .chain-card .x-btn{position:absolute;top:-7px;right:-7px;width:18px;height:18px;background:var(--red);color:#fff;border:none;border-radius:50%;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
+        .chain-card:hover .x-btn{opacity:1}
+        .empty-drop{color:var(--text3);font-size:.9rem;font-style:italic;width:100%;text-align:center;padding:1rem 0}
+
+        /* Suggestions */
+        .suggestions{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+        .suggestions .label{font-size:.8rem;color:var(--text3);font-weight:600;white-space:nowrap}
+        .sug-pill{font-size:.78rem;padding:.4rem .75rem;border-radius:20px;cursor:pointer;font-family:var(--mono);font-weight:500;border:1px solid;transition:all .2s;display:flex;align-items:center;gap:.4rem}
+        .sug-pill.s-inter{background:rgba(59,130,246,.06);border-color:rgba(59,130,246,.2);color:var(--blue)}
+        .sug-pill.s-inter:hover{background:var(--blue-dim);box-shadow:0 0 10px var(--blue-g)}
+        .sug-pill.s-term{background:rgba(139,92,246,.06);border-color:rgba(139,92,246,.2);color:var(--violet)}
+        .sug-pill.s-term:hover{background:rgba(139,92,246,.1);box-shadow:0 0 10px var(--violet-g)}
+        .sug-pill.s-coll{background:rgba(16,185,129,.06);border-color:rgba(16,185,129,.2);color:var(--emerald)}
+        .sug-pill.s-coll:hover{background:rgba(16,185,129,.1);box-shadow:0 0 10px var(--emerald-g)}
+        .sug-pill .sug-why{font-family:var(--font);font-size:.7rem;color:var(--text3);font-weight:400}
+        .terminated-msg{display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;background:var(--red-g);border:1px solid rgba(239,68,68,.2);border-radius:var(--radius-sm);font-size:.8rem;color:var(--red)}
+
+        /* Chain Description */
+        .chain-desc{padding:1rem;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:var(--radius-sm);font-size:.9rem;line-height:1.6;color:var(--amber)}
+        .chain-desc .desc-label{font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:.4rem;color:var(--text3)}
+        .chain-desc .desc-text{color:var(--text)}
+
+        /* Config Panel */
+        .config-panel{background:var(--bg3);border:1px solid var(--glass-border);border-radius:var(--radius-sm);padding:1rem}
+        .config-panel h3{text-transform:none;letter-spacing:0;font-size:.95rem;color:var(--text);border:none;padding:0;margin-bottom:.25rem}
+        .config-panel .op-meaning{font-size:.85rem;color:var(--text2);margin-bottom:.75rem}
+        .config-panel label{font-size:.8rem;color:var(--text3);font-weight:600;display:block;margin-bottom:.3rem}
+        .config-panel select,.config-panel input[type=text]{width:100%;background:var(--bg2);border:1px solid var(--glass-border);color:var(--text);font-family:var(--mono);font-size:.85rem;padding:.55rem .75rem;border-radius:6px;margin-bottom:.5rem}
+        .config-panel select:focus,.config-panel input[type=text]:focus{outline:none;border-color:var(--blue)}
+        .when-box{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.12);border-radius:6px;padding:.6rem .8rem;font-size:.8rem;color:var(--text2);margin-top:.5rem}
+        .when-box strong{color:var(--blue)}
+
+        /* Data Flow */
+        .data-flow{max-height:350px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bg4) transparent}
+        .flow-step{display:flex;gap:.75rem;margin-bottom:.5rem;align-items:flex-start}
+        .flow-step .step-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0;font-weight:700}
+        .flow-step .step-icon.source{background:var(--teal-g);color:var(--teal)}
+        .flow-step .step-icon.inter{background:var(--blue-dim);color:var(--blue)}
+        .flow-step .step-icon.term{background:rgba(139,92,246,.15);color:var(--violet)}
+        .flow-step .step-body{flex:1;min-width:0}
+        .flow-step .step-label{font-size:.75rem;font-weight:600;color:var(--text3);font-family:var(--mono)}
+        .flow-step .step-data{font-size:.8rem;color:var(--text2);font-family:var(--mono);background:var(--bg2);padding:.4rem .6rem;border-radius:6px;margin-top:.25rem;overflow-x:auto;white-space:nowrap}
+        .flow-connector{width:1px;height:12px;background:var(--glass-border);margin-left:14px;margin-bottom:.5rem}
+
+        /* Code Output */
+        .code-block{position:relative}
+        .code-block pre{background:var(--bg2)!important;padding:1.25rem;border-radius:var(--radius-sm);font-family:var(--mono);font-size:.85rem;line-height:1.7;color:#cbd5e1;overflow-x:auto;border:1px solid var(--glass-border);white-space:pre-wrap;word-break:break-word}
+        .code-block .copy-btn{position:absolute;top:8px;right:8px;background:var(--bg4);color:var(--text2);border:none;padding:.3rem .6rem;border-radius:4px;font-size:.7rem;cursor:pointer;font-family:var(--font);font-weight:600;transition:all .2s}
+        .code-block .copy-btn:hover{background:var(--blue);color:#fff}
+        .kw{color:#569cd6}.mt{color:#dcdcaa}.st{color:#ce9178}.cm{color:#6a9955}.tp{color:#4ec9b0}.nm{color:#b5cea8}
+
+        /* ── Quick Examples ── */
+        .examples-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-top:1rem}
+        .example-card{padding:1rem;border-radius:var(--radius-sm);cursor:pointer;transition:all .25s;border:1px solid var(--glass-border);background:var(--bg3)}
+        .example-card:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(0,0,0,.3);border-color:var(--blue)}
+        .example-card .ex-title{font-weight:700;font-size:.95rem;margin-bottom:.3rem;display:flex;align-items:center;gap:.5rem}
+        .example-card .ex-desc{font-size:.8rem;color:var(--text2);margin-bottom:.5rem}
+        .example-card .ex-code{font-family:var(--mono);font-size:.75rem;color:var(--text3);background:var(--bg2);padding:.4rem .6rem;border-radius:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+        /* ── Reference Section ── */
+        .ref-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.25rem;margin-top:1rem}
+        .ref-card{padding:1.25rem}
+        .ref-card .ref-header{display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem}
+        .ref-card .ref-dot{width:10px;height:10px;border-radius:50%}
+        .ref-card .ref-name{font-family:var(--mono);font-weight:700;font-size:1.05rem}
+        .ref-card .ref-sig{font-family:var(--mono);font-size:.78rem;color:var(--text3);background:var(--bg2);padding:.35rem .6rem;border-radius:4px;margin-bottom:.6rem;display:inline-block}
+        .ref-card .ref-desc{font-size:.85rem;color:var(--text2);margin-bottom:.5rem}
+        .ref-card .ref-when{font-size:.82rem;padding:.5rem .7rem;border-radius:6px;margin-top:.5rem}
+        .ref-card .ref-when.blue{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.1);color:var(--text2)}
+        .ref-card .ref-when strong{color:var(--blue)}
+        .ref-card pre{font-size:.78rem;margin-top:.6rem;padding:.75rem;background:var(--bg2);border-radius:6px;border:1px solid var(--glass-border);overflow-x:auto}
+
+        /* ── Section Headers ── */
+        .section{margin-top:3rem}
+        .section-header{display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem}
+        .section-header h2{font-size:1.5rem;font-weight:800;margin:0}
+        .section-header .sh-line{flex:1;height:1px;background:linear-gradient(to right,var(--glass-border),transparent)}
+        .section-header .sh-badge{font-size:.7rem;padding:.25rem .6rem;border-radius:12px;font-weight:600}
+
+        /* ── Controls ── */
+        .controls{display:flex;gap:.5rem;flex-wrap:wrap}
+        .btn{padding:.45rem .9rem;border-radius:6px;font-family:var(--font);font-size:.82rem;font-weight:600;cursor:pointer;border:1px solid;transition:all .2s}
+        .btn-ghost{background:transparent;border-color:var(--glass-border);color:var(--text2)}
+        .btn-ghost:hover{border-color:var(--text3);color:var(--text)}
+        .btn-blue{background:var(--blue);border-color:var(--blue);color:#fff}
+        .btn-blue:hover{opacity:.85}
+        .btn-red{background:transparent;border-color:rgba(239,68,68,.3);color:var(--red)}
+        .btn-red:hover{background:var(--red-g)}
+
+        /* ── Tabs ── */
+        .tabs{display:flex;gap:0;margin-bottom:1rem;background:var(--bg3);border-radius:var(--radius-sm);padding:4px;border:1px solid var(--glass-border)}
+        .tab{padding:.5rem 1.25rem;border-radius:6px;font-size:.85rem;font-weight:600;cursor:pointer;color:var(--text3);transition:all .2s;border:none;background:transparent}
+        .tab:hover{color:var(--text2)}
+        .tab.active{background:var(--blue);color:#fff}
+
+        /* ── Animations ── */
+        @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes pulse-arrow{0%,100%{opacity:.4}50%{opacity:1}}
+        @keyframes slideIn{from{opacity:0;transform:translateX(15px)}to{opacity:1;transform:translateX(0)}}
+        .animate-in{animation:fadeIn .4s ease-out}
+        .slide-in{animation:slideIn .3s ease-out}
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar{width:6px;height:6px}
+        ::-webkit-scrollbar-track{background:transparent}
+        ::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+
+        /* Source selector */
+        .source-select{background:var(--bg2);border:1px solid var(--glass-border);color:var(--text);font-family:var(--mono);font-size:.85rem;padding:.5rem;border-radius:6px;width:100%;margin-bottom:.75rem}
+        .source-select:focus{outline:none;border-color:var(--teal)}
+
+        /* Two-column in builder */
+        .builder-cols{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+        @media(max-width:1100px){.builder-cols{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useCallback, useMemo, useRef } = React;
+
+/* ═══════════════════════════════════════════
+   DATA: Employee dataset for simulation
+   ═══════════════════════════════════════════ */
+const EMPLOYEES = [
+    { id:1, name:"Alice",   dept:"Engineering", salary:85000,  skills:["Java","Python"], age:28 },
+    { id:2, name:"Bob",     dept:"Marketing",   salary:62000,  skills:["SEO","Content"], age:34 },
+    { id:3, name:"Charlie", dept:"Engineering", salary:95000,  skills:["Java","Go"],     age:31 },
+    { id:4, name:"Diana",   dept:"HR",          salary:58000,  skills:["Recruiting"],    age:26 },
+    { id:5, name:"Eve",     dept:"Engineering", salary:110000, skills:["Java","Rust","C++"], age:35 },
+    { id:6, name:"Frank",   dept:"Marketing",   salary:72000,  skills:["Analytics","SEO"], age:29 },
+    { id:7, name:"Grace",   dept:"HR",          salary:65000,  skills:["Training"],      age:32 },
+    { id:8, name:"Hank",    dept:"Engineering", salary:78000,  skills:["Python","ML"],   age:27 },
+];
+
+/* ═══════════════════════════════════════════
+   OPERATIONS REGISTRY
+   ═══════════════════════════════════════════ */
+const OPS = {
+    // Intermediate
+    filter:   { id:'filter',   type:'inter', name:'.filter()',   label:'filter',   sig:'Stream<T> filter(Predicate<T>)', desc:'Keeps only elements matching the predicate.', when:'When you need to remove unwanted elements from the stream.', defaultArg:'e -> e.getSalary() > 70000', presets:['e -> e.getSalary() > 70000','e -> "Engineering".equals(e.getDept())','e -> e.getAge() > 30','e -> e.getName().startsWith("A")'], simulate:(data,arg) => { const filters = {'e -> e.getSalary() > 70000': e=>e.salary>70000, 'e -> "Engineering".equals(e.getDept())': e=>e.dept==="Engineering", 'e -> e.getAge() > 30': e=>e.age>30, 'e -> e.getName().startsWith("A")': e=>e.name.startsWith("A")}; return data.filter(filters[arg] || (()=>true)); }},
+    map:      { id:'map',      type:'inter', name:'.map()',      label:'map',      sig:'Stream<R> map(Function<T,R>)', desc:'Transforms each element into something else.', when:'When you need to extract or convert data from each element.', defaultArg:'Employee::getName', presets:['Employee::getName','Employee::getSalary','Employee::getDept','e -> e.getName().toUpperCase()'], simulate:(data,arg) => { const maps = {'Employee::getName': e=>typeof e==='object'?e.name:e, 'Employee::getSalary': e=>typeof e==='object'?e.salary:e, 'Employee::getDept': e=>typeof e==='object'?e.dept:e, 'e -> e.getName().toUpperCase()': e=>typeof e==='object'?e.name.toUpperCase():String(e).toUpperCase()}; return data.map(maps[arg] || (e=>e)); }},
+    flatMap:  { id:'flatMap',  type:'inter', name:'.flatMap()',  label:'flatMap',  sig:'Stream<R> flatMap(Function<T,Stream<R>>)', desc:'Flattens nested collections into a single stream.', when:'When each element contains a list/array that you want to merge into one stream.', defaultArg:'e -> e.getSkills().stream()', presets:['e -> e.getSkills().stream()'], simulate:(data,arg) => data.flatMap(e => typeof e==='object' && e.skills ? e.skills : [e]) },
+    sorted:   { id:'sorted',   type:'inter', name:'.sorted()',   label:'sorted',   sig:'Stream<T> sorted() / sorted(Comparator<T>)', desc:'Sorts elements in natural order or by a comparator.', when:'When you need ordered output, e.g. for display or top-N queries.', defaultArg:'', presets:['','Comparator.comparing(Employee::getSalary)','Comparator.comparing(Employee::getName)','Comparator.comparing(Employee::getSalary).reversed()'], simulate:(data,arg) => { const copy=[...data]; if(!arg) return copy.sort((a,b)=>String(a).localeCompare(String(b))); const sorts={'Comparator.comparing(Employee::getSalary)': (a,b)=>(a.salary||0)-(b.salary||0), 'Comparator.comparing(Employee::getName)': (a,b)=>(a.name||'').localeCompare(b.name||''), 'Comparator.comparing(Employee::getSalary).reversed()': (a,b)=>(b.salary||0)-(a.salary||0)}; return copy.sort(sorts[arg] || (()=>0)); }},
+    distinct: { id:'distinct', type:'inter', name:'.distinct()', label:'distinct', sig:'Stream<T> distinct()', desc:'Removes duplicate elements (uses equals() & hashCode()).', when:'When your stream might contain duplicate values you want to eliminate.', defaultArg:'', presets:[], simulate:(data) => [...new Set(data.map(e=>typeof e==='object'?JSON.stringify(e):e))].map(e=>{try{return JSON.parse(e)}catch{return e}}) },
+    peek:     { id:'peek',     type:'inter', name:'.peek()',     label:'peek',     sig:'Stream<T> peek(Consumer<T>)', desc:'Performs a side-effect (like logging) without changing elements.', when:'For debugging — inspect elements as they flow through the stream.', defaultArg:'System.out::println', presets:['System.out::println'], simulate:(data) => data },
+    limit:    { id:'limit',    type:'inter', name:'.limit()',    label:'limit',    sig:'Stream<T> limit(long maxSize)', desc:'Truncates to at most maxSize elements.', when:'When you only need the first N results (especially after sorting).', defaultArg:'3', presets:['3','5','10'], simulate:(data,arg) => data.slice(0, parseInt(arg)||5) },
+    skip:     { id:'skip',     type:'inter', name:'.skip()',     label:'skip',     sig:'Stream<T> skip(long n)', desc:'Skips the first n elements.', when:'For pagination — skip the first page of results.', defaultArg:'2', presets:['2','5'], simulate:(data,arg) => data.slice(parseInt(arg)||0) },
+    mapToInt: { id:'mapToInt', type:'inter', name:'.mapToInt()', label:'mapToInt', sig:'IntStream mapToInt(ToIntFunction<T>)', desc:'Maps each element to an int, producing an IntStream.', when:'When you need numeric operations like sum(), average(), or summaryStatistics().', defaultArg:'Employee::getSalary', presets:['Employee::getSalary','Employee::getAge'], simulate:(data,arg) => data.map(e => typeof e==='object' ? (arg.includes('Age') ? e.age : e.salary) : Number(e)) },
+
+    // Terminal
+    collect:    { id:'collect',    type:'term', name:'.collect()',    label:'collect',    sig:'R collect(Collector<T,A,R>)', desc:'Transforms the stream into a collection or other result.', when:'The most versatile terminal op — use with Collectors for toList, toMap, groupingBy, etc.', defaultArg:'Collectors.toList()', presets:['Collectors.toList()','Collectors.toSet()','Collectors.joining(", ")'], simulate:(data,arg) => { if(arg.includes('joining')) return data.map(e=>typeof e==='object'?e.name:String(e)).join(', '); return data; }},
+    forEach:    { id:'forEach',    type:'term', name:'.forEach()',    label:'forEach',    sig:'void forEach(Consumer<T>)', desc:'Performs an action for each element. Returns void.', when:'When you want side-effects (printing, saving) but don\'t need a return value.', defaultArg:'System.out::println', presets:['System.out::println'], simulate:(data) => data },
+    count:      { id:'count',      type:'term', name:'.count()',      label:'count',      sig:'long count()', desc:'Returns the number of elements.', when:'When you just need to know how many elements match your criteria.', defaultArg:'', presets:[], simulate:(data) => data.length },
+    reduce:     { id:'reduce',     type:'term', name:'.reduce()',     label:'reduce',     sig:'Optional<T> reduce(BinaryOperator<T>)', desc:'Combines all elements into a single result.', when:'When you need to aggregate — sum, product, concatenation, etc.', defaultArg:'(a, b) -> a + b', presets:['(a, b) -> a + b','Integer::sum','Integer::max'], simulate:(data) => typeof data[0]==='number' ? data.reduce((a,b)=>a+b,0) : data.length },
+    toList:     { id:'toList',     type:'term', name:'.toList()',     label:'toList ☆',   sig:'List<T> toList()  // Java 16+', desc:'Collects into an unmodifiable List directly. No Collectors needed!', when:'Java 16+ shortcut replacing .collect(Collectors.toList()). Returns immutable list.', defaultArg:'', presets:[], simulate:(data) => data },
+    anyMatch:   { id:'anyMatch',   type:'term', name:'.anyMatch()',   label:'anyMatch',   sig:'boolean anyMatch(Predicate<T>)', desc:'Returns true if ANY element matches the predicate.', when:'Short-circuits: stops as soon as one match is found.', defaultArg:'e -> e.getSalary() > 100000', presets:['e -> e.getSalary() > 100000','e -> "HR".equals(e.getDept())'], simulate:(data,arg) => { const preds={'e -> e.getSalary() > 100000':e=>(e.salary||0)>100000, 'e -> "HR".equals(e.getDept())':e=>e.dept==="HR"}; return data.some(preds[arg]||(()=>true)); }},
+    findFirst:  { id:'findFirst',  type:'term', name:'.findFirst()', label:'findFirst',  sig:'Optional<T> findFirst()', desc:'Returns the first element wrapped in Optional.', when:'When you want the first matching result after filtering.', defaultArg:'', presets:[], simulate:(data) => data.length > 0 ? data[0] : 'Optional.empty()' },
+    min:        { id:'min',        type:'term', name:'.min()',        label:'min',        sig:'Optional<T> min(Comparator<T>)', desc:'Returns the minimum element.', when:'Finding the smallest value by a comparator.', defaultArg:'Comparator.comparing(Employee::getSalary)', presets:['Comparator.comparing(Employee::getSalary)','Comparator.comparingInt(e -> e)'], simulate:(data,arg) => { if(data.length===0) return 'Optional.empty()'; if(typeof data[0]==='number') return Math.min(...data); return data.reduce((m,e)=>(e.salary||0)<(m.salary||Infinity)?e:m, data[0]); }},
+    max:        { id:'max',        type:'term', name:'.max()',        label:'max',        sig:'Optional<T> max(Comparator<T>)', desc:'Returns the maximum element.', when:'Finding the largest value by a comparator.', defaultArg:'Comparator.comparing(Employee::getSalary)', presets:['Comparator.comparing(Employee::getSalary)'], simulate:(data,arg) => { if(data.length===0) return 'Optional.empty()'; if(typeof data[0]==='number') return Math.max(...data); return data.reduce((m,e)=>(e.salary||0)>(m.salary||0)?e:m, data[0]); }},
+
+    // Collectors (wraps inside collect())
+    groupingBy: { id:'groupingBy', type:'coll', name:'Collectors.groupingBy()', label:'groupingBy', sig:'Collector groupingBy(Function<T,K>)', desc:'Groups elements into a Map<K, List<T>> by a classifier.', when:'When you need to group elements by a property (e.g., employees by department).', defaultArg:'Employee::getDept', presets:['Employee::getDept','e -> e.getSalary() > 70000 ? "High" : "Low"'], simulate:(data,arg) => { const result = {}; data.forEach(e => { const key = arg.includes('Salary') ? ((e.salary||0)>70000?'High':'Low') : (typeof e==='object'?e.dept:String(e)); if(!result[key]) result[key]=[]; result[key].push(e); }); return result; }},
+    toMap:      { id:'toMap',      type:'coll', name:'Collectors.toMap()',      label:'toMap',      sig:'Collector toMap(Function<T,K>, Function<T,V>)', desc:'Creates a Map<K,V> from stream elements. Keys MUST be unique!', when:'When converting a List to a Map — e.g., mapping each employee\'s ID to their object.', defaultArg:'Employee::getId, Function.identity()', presets:['Employee::getId, Function.identity()','Employee::getName, Employee::getSalary'], simulate:(data,arg) => { const result = {}; data.forEach(e => { if(typeof e==='object') { if(arg.includes('getName')) result[e.name]=e.salary; else result[e.id]=e; } }); return result; }},
+    partitioningBy: { id:'partitioningBy', type:'coll', name:'Collectors.partitioningBy()', label:'partitioningBy', sig:'Collector partitioningBy(Predicate<T>)', desc:'Splits elements into two groups: true and false.', when:'When you need a binary split (e.g., passed vs failed).', defaultArg:'e -> e.getSalary() > 70000', presets:['e -> e.getSalary() > 70000'], simulate:(data,arg) => { const t=[],f=[]; data.forEach(e=>(e.salary||0)>70000?t.push(e):f.push(e)); return {true:t,false:f}; }},
+    counting:   { id:'counting',   type:'coll', name:'Collectors.counting()',   label:'counting',   sig:'Collector counting()', desc:'Counts elements in each group (used with groupingBy).', when:'Use as downstream collector: groupingBy(dept, counting()).', defaultArg:'', presets:[], simulate:(data) => data.length },
+};
+
+const INTER_OPS = Object.values(OPS).filter(o=>o.type==='inter');
+const TERM_OPS  = Object.values(OPS).filter(o=>o.type==='term');
+const COLL_OPS  = Object.values(OPS).filter(o=>o.type==='coll');
+
+/* ═══════════════════════════════════════════
+   SUGGESTIONS ENGINE
+   ═══════════════════════════════════════════ */
+const SUGGESTIONS = {
+    _start:   [{id:'filter',why:'Remove unwanted elements'},{id:'map',why:'Transform elements'},{id:'sorted',why:'Sort the data'},{id:'distinct',why:'Remove duplicates'},{id:'collect',why:'Collect into List/Map'},{id:'forEach',why:'Print each element'}],
+    filter:   [{id:'map',why:'Transform filtered results'},{id:'sorted',why:'Sort filtered results'},{id:'collect',why:'Collect filtered items'},{id:'filter',why:'Apply more filters'},{id:'count',why:'Count matching items'},{id:'findFirst',why:'Get first match'}],
+    map:      [{id:'collect',why:'Collect transformed data'},{id:'filter',why:'Filter transformed data'},{id:'sorted',why:'Sort transformed data'},{id:'distinct',why:'Remove duplicates'},{id:'toList',why:'Java 16+ collect to List'},{id:'reduce',why:'Combine all values'}],
+    flatMap:  [{id:'distinct',why:'Remove duplicates after flatten'},{id:'collect',why:'Collect flattened results'},{id:'sorted',why:'Sort flattened stream'},{id:'filter',why:'Filter flattened items'}],
+    sorted:   [{id:'collect',why:'Collect sorted results'},{id:'limit',why:'Take top N'},{id:'forEach',why:'Print in order'},{id:'toList',why:'Java 16+ collect to List'},{id:'findFirst',why:'Get first (smallest)'}],
+    distinct: [{id:'collect',why:'Collect unique items'},{id:'sorted',why:'Sort unique items'},{id:'count',why:'Count unique items'}],
+    limit:    [{id:'collect',why:'Collect limited results'},{id:'forEach',why:'Process limited set'},{id:'toList',why:'Java 16+ collect to List'}],
+    skip:     [{id:'limit',why:'Create a page window'},{id:'collect',why:'Collect remaining items'},{id:'forEach',why:'Process remaining'}],
+    peek:     [{id:'filter',why:'Continue processing'},{id:'collect',why:'Collect results'},{id:'map',why:'Transform elements'}],
+    mapToInt: [{id:'reduce',why:'Sum/aggregate values'},{id:'sorted',why:'Sort numbers'},{id:'collect',why:'Collect results'},{id:'min',why:'Find minimum'},{id:'max',why:'Find maximum'}],
+};
+
+function getSuggestions(chain) {
+    if(chain.length === 0) return SUGGESTIONS._start;
+    const last = chain[chain.length-1];
+    if(last.type === 'term' || last.type === 'coll') return [];
+    return SUGGESTIONS[last.id] || SUGGESTIONS._start;
+}
+
+/* ═══════════════════════════════════════════
+   CHAIN DESCRIPTION GENERATOR
+   ═══════════════════════════════════════════ */
+function describeChain(source, chain) {
+    if(chain.length === 0) return 'Start building your stream pipeline by dragging operations from the palette or clicking suggestions below.';
+    const parts = [];
+    const verbs = {
+        filter:'Filter elements where',map:'Transform each element using',flatMap:'Flatten nested collections via',
+        sorted:'Sort elements',distinct:'Remove duplicate elements',peek:'Debug/log each element',
+        limit:'Take only the first',skip:'Skip the first',mapToInt:'Convert to IntStream via',
+        collect:'Collect results into',forEach:'Iterate and perform action on each element',
+        count:'Count total elements',reduce:'Reduce/aggregate into a single value',
+        toList:'Collect into an unmodifiable List (Java 16+)',anyMatch:'Check if any element matches',
+        findFirst:'Get the first element',min:'Find the minimum element',max:'Find the maximum element',
+        groupingBy:'Group into a Map<K, List<V>> by',toMap:'Convert to a Map<K, V> using',
+        partitioningBy:'Partition into true/false groups by',counting:'Count elements in each group',
+    };
+    chain.forEach(node => {
+        let v = verbs[node.id] || node.id;
+        if(node.arg && ['filter','map','flatMap','limit','skip','mapToInt','anyMatch','groupingBy','toMap','partitioningBy','collect'].includes(node.id)) {
+            v += ` ${node.arg}`;
+        }
+        if(node.id === 'sorted' && node.arg) v += ` by ${node.arg}`;
+        parts.push(v);
+    });
+    return parts.join('  →  ');
+}
+
+/* ═══════════════════════════════════════════
+   CODE GENERATOR
+   ═══════════════════════════════════════════ */
+function generateCode(source, chain) {
+    if(chain.length === 0) return `${source.code};  // Add operations to build your pipeline`;
+    let lines = [`${source.code}`];
+    chain.forEach((node, i) => {
+        const isLast = i === chain.length - 1;
+        let call;
+        if(node.id === 'collect' && node.collectorId) {
+            const coll = OPS[node.collectorId];
+            call = `.collect(${coll ? coll.name.replace('Collectors.','Collectors.').replace('()','') : 'Collectors.toList'}(${node.arg || ''}))`;
+        } else if(node.arg) {
+            call = `.${node.id}(${node.arg})`;
+        } else {
+            call = `.${node.id}()`;
+        }
+        lines.push(`    ${call}${isLast ? ';' : ''}`);
+    });
+    return lines.join('\n');
+}
+
+/* ═══════════════════════════════════════════
+   DATA SIMULATOR
+   ═══════════════════════════════════════════ */
+function simulateFlow(chain) {
+    const steps = [{ label: 'Source: employeeList', data: EMPLOYEES, icon: 'source' }];
+    let current = [...EMPLOYEES];
+    for(const node of chain) {
+        const op = OPS[node.id];
+        if(!op || !op.simulate) { steps.push({ label: `.${node.id}(${node.arg||''})`, data: current, icon: node.type==='term'?'term':'inter' }); continue; }
+        try {
+            if(node.collectorId && OPS[node.collectorId]) {
+                current = OPS[node.collectorId].simulate(current, node.arg);
+            } else {
+                current = op.simulate(current, node.arg);
+            }
+        } catch(e) { current = `Error: ${e.message}`; }
+        steps.push({ label: `.${node.id}(${node.arg||''})`, data: current, icon: node.type==='inter'?'inter':'term' });
+        if(node.type === 'term' || node.type === 'coll') break;
+    }
+    return steps;
+}
+
+function formatData(data) {
+    if(data === null || data === undefined) return 'null';
+    if(typeof data === 'string') return `"${data}"`;
+    if(typeof data === 'number' || typeof data === 'boolean') return String(data);
+    if(Array.isArray(data)) {
+        if(data.length === 0) return '[]';
+        if(typeof data[0] === 'object') return `[${data.map(e => e.name ? `{${e.name}}` : JSON.stringify(e)).join(', ')}]`;
+        return `[${data.map(e => typeof e==='string' ? `"${e}"` : e).join(', ')}]`;
+    }
+    if(typeof data === 'object') {
+        const entries = Object.entries(data);
+        return `{${entries.map(([k,v]) => `${k}: ${Array.isArray(v) ? `[${v.map(e=>typeof e==='object'&&e.name?e.name:e).join(',')}]` : v}`).join(', ')}}`;
+    }
+    return String(data);
+}
+
+/* ═══════════════════════════════════════════
+   EXAMPLE PATTERNS
+   ═══════════════════════════════════════════ */
+const EXAMPLES = [
+    { title:'🔍 Filter & Collect', desc:'Filter employees by salary and collect into a List.', chain:[
+        {id:'filter',type:'inter',arg:'e -> e.getSalary() > 70000',uid:1},
+        {id:'collect',type:'term',arg:'Collectors.toList()',uid:2}
+    ]},
+    { title:'🗂️ Group By Department', desc:'Group employees into a Map by their department.', chain:[
+        {id:'collect',type:'term',arg:'Employee::getDept',collectorId:'groupingBy',uid:1}
+    ]},
+    { title:'📋 List → Map', desc:'Convert employee list to a Map of ID → Employee using toMap.', chain:[
+        {id:'collect',type:'term',arg:'Employee::getId, Function.identity()',collectorId:'toMap',uid:1}
+    ]},
+    { title:'🔄 Map + Sort + Limit', desc:'Get top 3 highest-paid employee names.', chain:[
+        {id:'sorted',type:'inter',arg:'Comparator.comparing(Employee::getSalary).reversed()',uid:1},
+        {id:'limit',type:'inter',arg:'3',uid:2},
+        {id:'map',type:'inter',arg:'Employee::getName',uid:3},
+        {id:'toList',type:'term',arg:'',uid:4}
+    ]},
+    { title:'📊 FlatMap Skills', desc:'Get all unique skills across all employees.', chain:[
+        {id:'flatMap',type:'inter',arg:'e -> e.getSkills().stream()',uid:1},
+        {id:'distinct',type:'inter',arg:'',uid:2},
+        {id:'sorted',type:'inter',arg:'',uid:3},
+        {id:'toList',type:'term',arg:'',uid:4}
+    ]},
+    { title:'🔢 Count Filtered', desc:'Count how many engineers earn over 80k.', chain:[
+        {id:'filter',type:'inter',arg:'e -> "Engineering".equals(e.getDept())',uid:1},
+        {id:'filter',type:'inter',arg:'e -> e.getSalary() > 70000',uid:2},
+        {id:'count',type:'term',arg:'',uid:3}
+    ]},
+    { title:'📈 Reduce Sum', desc:'Calculate total salary of all employees.', chain:[
+        {id:'mapToInt',type:'inter',arg:'Employee::getSalary',uid:1},
+        {id:'reduce',type:'term',arg:'(a, b) -> a + b',uid:2}
+    ]},
+    { title:'✂️ Partition', desc:'Split employees into high-paid (>70k) and low-paid groups.', chain:[
+        {id:'collect',type:'term',arg:'e -> e.getSalary() > 70000',collectorId:'partitioningBy',uid:1}
+    ]},
+];
+
+/* ═══════════════════════════════════════════
+   COMPONENTS
+   ═══════════════════════════════════════════ */
+
+function Header() {
+    return (
+        <header className="hero">
+            <h1>Java Streams Mastery</h1>
+            <p className="tagline">Build, visualize, and understand Stream API pipelines interactively</p>
+            <div className="badge-row">
+                <span className="badge b-blue">● Intermediate Ops</span>
+                <span className="badge b-violet">● Terminal Ops</span>
+                <span className="badge b-emerald">● Collectors</span>
+            </div>
+        </header>
+    );
+}
+
+function OperationPalette({ isTerminated, onDragStart, sources, source, setSource }) {
+    return (
+        <div className="glass palette">
+            <h2><span className="icon">⚡</span> Operations</h2>
+
+            <div className="palette-section">
+                <h3>Source</h3>
+                <select className="source-select" value={source.id} onChange={e => setSource(sources.find(s=>s.id===e.target.value))}>
+                    {sources.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+            </div>
+
+            <div className="palette-section">
+                <h3>Intermediate</h3>
+                {INTER_OPS.map(op => (
+                    <div key={op.id}
+                        className={`op-pill t-inter ${isTerminated ? 'disabled' : ''}`}
+                        draggable={!isTerminated}
+                        onDragStart={e => onDragStart(e, op)}>
+                        <span className="op-dot"></span>
+                        {op.label}
+                        {isTerminated && <span className="lock-icon">🔒</span>}
+                    </div>
+                ))}
+            </div>
+
+            <div className="palette-section">
+                <h3>Terminal</h3>
+                {TERM_OPS.map(op => (
+                    <div key={op.id}
+                        className={`op-pill t-term ${isTerminated ? 'disabled' : ''}`}
+                        draggable={!isTerminated}
+                        onDragStart={e => onDragStart(e, op)}>
+                        <span className="op-dot"></span>
+                        {op.label}
+                        {isTerminated && <span className="lock-icon">🔒</span>}
+                    </div>
+                ))}
+            </div>
+
+            <div className="palette-section">
+                <h3>Collectors</h3>
+                {COLL_OPS.map(op => (
+                    <div key={op.id}
+                        className={`op-pill t-coll ${isTerminated ? 'disabled' : ''}`}
+                        draggable={!isTerminated}
+                        onDragStart={e => onDragStart(e, op)}>
+                        <span className="op-dot"></span>
+                        {op.label}
+                        {isTerminated && <span className="lock-icon">🔒</span>}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function ConfigPanel({ node, onUpdate }) {
+    const op = OPS[node.id];
+    const collOp = node.collectorId ? OPS[node.collectorId] : null;
+    const displayOp = collOp || op;
+    if(!displayOp) return null;
+
+    return (
+        <div className="config-panel animate-in">
+            <h3>Configure: <span style={{fontFamily:'var(--mono)',color: node.type==='inter'?'var(--blue)':node.type==='term'?'var(--violet)':'var(--emerald)'}}>.{node.collectorId || node.id}()</span></h3>
+            <div className="op-meaning">{displayOp.desc}</div>
+            <div style={{fontSize:'.78rem',fontFamily:'var(--mono)',color:'var(--text3)',marginBottom:'.75rem'}}>{displayOp.sig}</div>
+
+            {displayOp.presets && displayOp.presets.length > 0 && (
+                <>
+                    <label>Preset Arguments:</label>
+                    <select value={node.arg} onChange={e => onUpdate(node.uid, e.target.value)}>
+                        {displayOp.presets.map((p,i) => <option key={i} value={p}>{p || '(no args)'}</option>)}
+                    </select>
+                </>
+            )}
+            <label>Custom Argument:</label>
+            <input type="text" value={node.arg} onChange={e => onUpdate(node.uid, e.target.value)} placeholder="e.g. e -> e.getName()" />
+
+            <div className="when-box">
+                <strong>📌 When to use:</strong> {displayOp.when}
+            </div>
+        </div>
+    );
+}
+
+function DataFlowView({ chain }) {
+    const steps = simulateFlow(chain);
+    return (
+        <div className="data-flow">
+            {steps.map((step, i) => (
+                <React.Fragment key={i}>
+                    {i > 0 && <div className="flow-connector"></div>}
+                    <div className="flow-step slide-in" style={{animationDelay:`${i*0.1}s`}}>
+                        <div className={`step-icon ${step.icon}`}>{i===0?'📥': step.icon==='term'?'📦':'⚙'}</div>
+                        <div className="step-body">
+                            <div className="step-label">{step.label}</div>
+                            <div className="step-data">{formatData(step.data)}</div>
+                        </div>
+                    </div>
+                </React.Fragment>
+            ))}
+        </div>
+    );
+}
+
+function App() {
+    const [chain, setChain] = useState([]);
+    const [selectedUid, setSelectedUid] = useState(null);
+    const [dragOver, setDragOver] = useState(false);
+    const [activeTab, setActiveTab] = useState('builder');
+    const uidRef = useRef(100);
+
+    const sources = [
+        { id:'list', name:'List<Employee>', code:'employeeList.stream()' },
+        { id:'set',  name:'Set<String>',    code:'nameSet.stream()' },
+        { id:'map',  name:'Map<K,V> entrySet', code:'myMap.entrySet().stream()' },
+        { id:'intstream', name:'IntStream.range()', code:'IntStream.range(1, 100)' },
+    ];
+    const [source, setSource] = useState(sources[0]);
+
+    const isTerminated = useMemo(() => chain.some(n => n.type==='term' || n.type==='coll'), [chain]);
+    const selectedNode = useMemo(() => chain.find(n => n.uid === selectedUid), [chain, selectedUid]);
+    const suggestions = useMemo(() => getSuggestions(chain), [chain]);
+    const code = useMemo(() => generateCode(source, chain), [source, chain]);
+    const chainDesc = useMemo(() => describeChain(source, chain), [source, chain]);
+
+    const addNode = useCallback((opDef) => {
+        if(isTerminated) return;
+        const uid = ++uidRef.current;
+        if(opDef.type === 'coll') {
+            // Wrap collector inside collect()
+            setChain(prev => [...prev, { id:'collect', type:'term', arg:opDef.defaultArg, collectorId:opDef.id, uid }]);
+        } else {
+            setChain(prev => [...prev, { id:opDef.id, type:opDef.type, arg:opDef.defaultArg, uid }]);
+        }
+        setSelectedUid(uid);
+    }, [isTerminated]);
+
+    const handleDragStart = (e, op) => e.dataTransfer.setData('text/plain', JSON.stringify(op));
+    const handleDrop = (e) => { e.preventDefault(); setDragOver(false); try { addNode(JSON.parse(e.dataTransfer.getData('text/plain'))); } catch{} };
+    const removeNode = (uid) => { setChain(c => c.filter(n=>n.uid!==uid)); if(selectedUid===uid) setSelectedUid(null); };
+    const updateArg = (uid, val) => setChain(c => c.map(n=>n.uid===uid?{...n,arg:val}:n));
+    const resetChain = () => { setChain([]); setSelectedUid(null); };
+    const loadExample = (ex) => { setChain(ex.chain.map(n=>({...n, uid:++uidRef.current}))); setSelectedUid(null); setSource(sources[0]); };
+    const copyCode = () => { navigator.clipboard?.writeText(code); };
+
+    const typeClass = (t) => t==='inter'?'t-inter':t==='term'?'t-term':'t-coll';
+    const sugClass = (id) => { const o=OPS[id]; if(!o) return 's-inter'; return o.type==='inter'?'s-inter':o.type==='term'?'s-term':'s-coll'; };
+
+    return (
+        <div className="app">
+            <Header />
+
+            {/* ── Tab Bar ── */}
+            <div className="tabs">
+                <button className={`tab ${activeTab==='builder'?'active':''}`} onClick={()=>setActiveTab('builder')}>🔧 Stream Builder</button>
+                <button className={`tab ${activeTab==='reference'?'active':''}`} onClick={()=>setActiveTab('reference')}>📖 Operations Guide</button>
+                <button className={`tab ${activeTab==='patterns'?'active':''}`} onClick={()=>setActiveTab('patterns')}>💡 Common Patterns</button>
+                <button className={`tab ${activeTab==='modern'?'active':''}`} onClick={()=>setActiveTab('modern')}>🚀 Java 16+ & Beyond</button>
+            </div>
+
+            {/* ════════════════════════════════════
+                TAB: STREAM BUILDER
+                ════════════════════════════════════ */}
+            {activeTab === 'builder' && (
+                <>
+                    <div className="workspace animate-in">
+                        <OperationPalette isTerminated={isTerminated} onDragStart={handleDragStart} sources={sources} source={source} setSource={setSource} />
+
+                        <div className="builder">
+                            {/* Pipeline Zone */}
+                            <div className="glass">
+                                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1rem'}}>
+                                    <h2><span className="icon">🔗</span> Pipeline</h2>
+                                    <div className="controls">
+                                        <button className="btn btn-ghost" onClick={()=>{ if(chain.length>0){setChain(c=>c.slice(0,-1)); setSelectedUid(null);} }}>↩ Undo</button>
+                                        <button className="btn btn-red" onClick={resetChain}>✕ Clear</button>
+                                    </div>
+                                </div>
+
+                                <div className={`pipeline-zone ${dragOver?'drag-over':''} ${isTerminated?'terminated':''}`}
+                                    onDrop={handleDrop}
+                                    onDragOver={e=>{e.preventDefault();setDragOver(true)}}
+                                    onDragLeave={()=>setDragOver(false)}>
+                                    <div className="source-node">{source.code}</div>
+                                    {chain.map((node) => (
+                                        <React.Fragment key={node.uid}>
+                                            <span className="arrow">→</span>
+                                            <div className={`chain-card ${typeClass(node.type)} ${selectedUid===node.uid?'selected':''}`}
+                                                onClick={()=>setSelectedUid(node.uid)}>
+                                                <button className="x-btn" onClick={e=>{e.stopPropagation();removeNode(node.uid)}}>×</button>
+                                                .{node.collectorId || node.id}({node.arg ? '…' : ''})
+                                            </div>
+                                        </React.Fragment>
+                                    ))}
+                                    {chain.length===0 && <div className="empty-drop">Drag operations here or click suggestions below ↓</div>}
+                                </div>
+
+                                {/* Suggestions or Terminated */}
+                                <div style={{marginTop:'1rem'}}>
+                                    {isTerminated ? (
+                                        <div className="terminated-msg">🔒 Stream terminated — no more operations can be added. Remove the terminal to extend.</div>
+                                    ) : (
+                                        <div className="suggestions">
+                                            <span className="label">Next →</span>
+                                            {suggestions.map(s => (
+                                                <div key={s.id} className={`sug-pill ${sugClass(s.id)}`} onClick={()=>addNode(OPS[s.id])}>
+                                                    .{s.id}() <span className="sug-why">{s.why}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Chain Description */}
+                            <div className="chain-desc">
+                                <div className="desc-label">🧠 What this chain does</div>
+                                <div className="desc-text">{chainDesc}</div>
+                            </div>
+
+                            {/* Config Panel */}
+                            {selectedNode && <ConfigPanel node={selectedNode} onUpdate={updateArg} />}
+
+                            {/* Code + Data Flow side by side */}
+                            <div className="builder-cols">
+                                <div className="glass">
+                                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'.75rem'}}>
+                                        <h2><span className="icon">📝</span> Generated Code</h2>
+                                        <button className="btn btn-ghost" onClick={copyCode} style={{fontSize:'.75rem'}}>📋 Copy</button>
+                                    </div>
+                                    <div className="code-block">
+                                        <pre>{code}</pre>
+                                    </div>
+                                </div>
+                                <div className="glass">
+                                    <h2><span className="icon">📊</span> Data Flow</h2>
+                                    <DataFlowView chain={chain} />
+                                </div>
+                            </div>
+
+                            {/* Quick Examples */}
+                            <div>
+                                <h2 style={{fontSize:'1.1rem',fontWeight:700,marginBottom:'.75rem',display:'flex',alignItems:'center',gap:'.5rem'}}><span>💡</span> Quick Examples — click to load</h2>
+                                <div className="examples-grid">
+                                    {EXAMPLES.map((ex,i) => (
+                                        <div key={i} className="example-card" onClick={()=>loadExample(ex)}>
+                                            <div className="ex-title">{ex.title}</div>
+                                            <div className="ex-desc">{ex.desc}</div>
+                                            <div className="ex-code">{generateCode(sources[0], ex.chain).split('\n').join(' ')}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {/* ════════════════════════════════════
+                TAB: OPERATIONS REFERENCE
+                ════════════════════════════════════ */}
+            {activeTab === 'reference' && (
+                <div className="animate-in">
+                    <div className="section-header"><h2>Intermediate Operations</h2><div className="sh-line"></div><span className="badge b-blue sh-badge">Returns Stream</span></div>
+                    <div className="ref-grid">
+                        {INTER_OPS.map(op => (
+                            <div key={op.id} className="glass ref-card">
+                                <div className="ref-header"><div className="ref-dot" style={{background:'var(--blue)'}}></div><span className="ref-name">.{op.id}()</span></div>
+                                <div className="ref-sig">{op.sig}</div>
+                                <div className="ref-desc">{op.desc}</div>
+                                <div className="ref-when blue"><strong>📌 When: </strong>{op.when}</div>
+                                <pre>{`// Example\nlist.stream()\n    .${op.id}(${op.defaultArg})\n    .collect(Collectors.toList());`}</pre>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="section-header" style={{marginTop:'2.5rem'}}><h2>Terminal Operations</h2><div className="sh-line"></div><span className="badge b-violet sh-badge">Ends Stream</span></div>
+                    <div className="ref-grid">
+                        {TERM_OPS.map(op => (
+                            <div key={op.id} className="glass ref-card">
+                                <div className="ref-header"><div className="ref-dot" style={{background:'var(--violet)'}}></div><span className="ref-name">.{op.id}()</span></div>
+                                <div className="ref-sig">{op.sig}</div>
+                                <div className="ref-desc">{op.desc}</div>
+                                <div className="ref-when blue"><strong>📌 When: </strong>{op.when}</div>
+                                <pre>{`// Example\nlist.stream()\n    .${op.id}(${op.defaultArg});`}</pre>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="section-header" style={{marginTop:'2.5rem'}}><h2>Collectors</h2><div className="sh-line"></div><span className="badge b-emerald sh-badge">Used inside .collect()</span></div>
+                    <div className="ref-grid">
+                        {COLL_OPS.map(op => (
+                            <div key={op.id} className="glass ref-card">
+                                <div className="ref-header"><div className="ref-dot" style={{background:'var(--emerald)'}}></div><span className="ref-name">{op.label}</span></div>
+                                <div className="ref-sig">{op.sig}</div>
+                                <div className="ref-desc">{op.desc}</div>
+                                <div className="ref-when blue"><strong>📌 When: </strong>{op.when}</div>
+                                <pre>{`// Example\nlist.stream()\n    .collect(${op.name.replace('Collectors.','')}(${op.defaultArg}));`}</pre>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* ════════════════════════════════════
+                TAB: COMMON PATTERNS
+                ════════════════════════════════════ */}
+            {activeTab === 'patterns' && (
+                <div className="animate-in">
+                    <div className="section-header"><h2>Function.identity() & Method References (::)</h2><div className="sh-line"></div></div>
+                    <div className="ref-grid">
+                        <div className="glass ref-card">
+                            <div className="ref-header"><span className="ref-name" style={{color:'var(--amber)'}}>Method Reference ::  </span></div>
+                            <div className="ref-desc">A method reference is a shorthand for a lambda that just calls an existing method. It makes your code cleaner and more readable.</div>
+                            <pre>{`// Lambda form:
+e -> e.getName()          // instance method
+e -> System.out.println(e) // static method
+
+// Method Reference form:
+Employee::getName          // Type::instanceMethod
+System.out::println        // instance::method
+
+// Constructor reference:
+ArrayList::new             // creates new ArrayList`}</pre>
+                            <div className="when-box"><strong>Rule:</strong> If your lambda simply calls one method and passes the argument through, use :: instead.</div>
+                        </div>
+                        <div className="glass ref-card">
+                            <div className="ref-header"><span className="ref-name" style={{color:'var(--amber)'}}>Function.identity()</span></div>
+                            <div className="ref-desc">Returns a function that always returns its input argument. Use it instead of <code>e -&gt; e</code> for cleaner code — especially in <code>Collectors.toMap()</code>.</div>
+                            <pre>{`// Using lambda e -> e
+map = list.stream()
+    .collect(Collectors.toMap(
+        e -> e.getId(),
+        e -> e               // identity lambda
+    ));
+
+// Using Function.identity()
+map = list.stream()
+    .collect(Collectors.toMap(
+        Employee::getId,
+        Function.identity()   // cleaner!
+    ));`}</pre>
+                            <div className="when-box"><strong>Interview tip:</strong> Always mention <code>Function.identity()</code> when discussing <code>toMap()</code> — interviewers love it.</div>
+                        </div>
+                    </div>
+
+                    <div className="section-header" style={{marginTop:'2.5rem'}}><h2>Conversion Patterns: List ↔ Map</h2><div className="sh-line"></div></div>
+                    <div className="ref-grid">
+                        <div className="glass ref-card">
+                            <div className="ref-header"><span className="ref-name" style={{color:'var(--emerald)'}}>List → Map (toMap)</span></div>
+                            <div className="ref-desc">Convert a List to a Map. <strong>Keys must be unique</strong> or you'll get IllegalStateException!</div>
+                            <pre>{`// ID → Employee (unique keys)
+Map<Integer, Employee> map = list.stream()
+    .collect(Collectors.toMap(
+        Employee::getId,
+        Function.identity()
+    ));
+
+// Handle duplicate keys with merge:
+Map<String, Integer> salaryByName = list.stream()
+    .collect(Collectors.toMap(
+        Employee::getName,
+        Employee::getSalary,
+        (v1, v2) -> v1  // keep first on conflict
+    ));`}</pre>
+                        </div>
+                        <div className="glass ref-card">
+                            <div className="ref-header"><span className="ref-name" style={{color:'var(--emerald)'}}>List → Map&lt;K, List&lt;V&gt;&gt; (groupingBy)</span></div>
+                            <div className="ref-desc">Group elements by a classifier. Unlike toMap, handles duplicate keys naturally by collecting into Lists.</div>
+                            <pre>{`// Group by department
+Map<String, List<Employee>> byDept = list.stream()
+    .collect(Collectors.groupingBy(
+        Employee::getDept
+    ));
+
+// Group + count
+Map<String, Long> countByDept = list.stream()
+    .collect(Collectors.groupingBy(
+        Employee::getDept,
+        Collectors.counting()
+    ));
+
+// Group + sum salaries
+Map<String, Integer> salaryByDept = list.stream()
+    .collect(Collectors.groupingBy(
+        Employee::getDept,
+        Collectors.summingInt(Employee::getSalary)
+    ));`}</pre>
+                        </div>
+                        <div className="glass ref-card">
+                            <div className="ref-header"><span className="ref-name" style={{color:'var(--blue)'}}>Filter a Map</span></div>
+                            <div className="ref-desc">To filter a Map, stream its entrySet() and reconstruct.</div>
+                            <pre>{`// Filter map entries where value > 70000
+Map<String, Integer> highSalary = salaryMap
+    .entrySet().stream()
+    .filter(e -> e.getValue() > 70000)
+    .collect(Collectors.toMap(
+        Map.Entry::getKey,
+        Map.Entry::getValue
+    ));`}</pre>
+                        </div>
+                        <div className="glass ref-card">
+                            <div className="ref-header"><span className="ref-name" style={{color:'var(--blue)'}}>Map → List</span></div>
+                            <div className="ref-desc">Extract keys, values, or transform entries into a List.</div>
+                            <pre>{`// Get all keys as list
+List<String> keys = map.keySet().stream()
+    .collect(Collectors.toList());
+
+// Get all values sorted
+List<Integer> sortedVals = map.values().stream()
+    .sorted()
+    .collect(Collectors.toList());
+
+// Transform entries
+List<String> display = map.entrySet().stream()
+    .map(e -> e.getKey() + ": " + e.getValue())
+    .toList();  // Java 16+`}</pre>
+                        </div>
+                    </div>
+
+                    <div className="section-header" style={{marginTop:'2.5rem'}}><h2>Primitive Streams</h2><div className="sh-line"></div></div>
+                    <div className="ref-grid">
+                        <div className="glass ref-card">
+                            <div className="ref-header"><span className="ref-name" style={{color:'var(--teal)'}}>IntStream / LongStream / DoubleStream</span></div>
+                            <div className="ref-desc">Specialized streams for primitives. Avoid boxing overhead and provide numeric operations.</div>
+                            <pre>{`// Create
+IntStream.range(1, 10)        // 1..9
+IntStream.rangeClosed(1, 10)  // 1..10
+IntStream.of(1, 2, 3)
+
+// Convert from object stream
+IntStream salaries = list.stream()
+    .mapToInt(Employee::getSalary);
+
+// Special operations
+int sum = salaries.sum();
+OptionalDouble avg = salaries.average();
+IntSummaryStatistics stats = salaries.summaryStatistics();
+// stats.getSum(), getAverage(), getMin(), getMax(), getCount()
+
+// Box back to Stream<Integer>
+Stream<Integer> boxed = IntStream.range(1,10).boxed();`}</pre>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ════════════════════════════════════
+                TAB: MODERN JAVA
+                ════════════════════════════════════ */}
+            {activeTab === 'modern' && (
+                <div className="animate-in">
+                    <div className="section-header"><h2>Java 16 — Stream Enhancements</h2><div className="sh-line"></div><span className="badge b-blue sh-badge">Java 16+</span></div>
+                    <div className="ref-grid">
+                        <div className="glass ref-card">
+                            <div className="ref-header"><span className="ref-name" style={{color:'var(--emerald)'}}>Stream.toList()</span></div>
+                            <div className="ref-desc">Directly collect into an <strong>unmodifiable</strong> List. No more <code>Collectors.toList()</code> needed for simple cases!</div>
+                            <pre>{`// Old way (Java 8)
+List<String> names = stream
+    .collect(Collectors.toList());
+
+// New way (Java 16+)
+List<String> names = stream
+    .toList();  // Returns UNMODIFIABLE list
+
+// ⚠️ Key difference:
+// Collectors.toList() → modifiable (can add/remove)
+// Stream.toList()     → unmodifiable (throws on modify)`}</pre>
+                            <div className="when-box"><strong>⚠️ Caution:</strong> The list from <code>.toList()</code> is unmodifiable. If you need to mutate it later, stick with <code>Collectors.toList()</code> or wrap in <code>new ArrayList&lt;&gt;(stream.toList())</code>.</div>
+                        </div>
+                        <div className="glass ref-card">
+                            <div className="ref-header"><span className="ref-name" style={{color:'var(--emerald)'}}>Stream.mapMulti()</span></div>
+                            <div className="ref-desc">Alternative to <code>flatMap</code>. Pushes elements imperatively instead of creating intermediate streams — often faster.</div>
+                            <pre>{`// flatMap approach (creates inner streams)
+list.stream()
+    .flatMap(e -> e.getSkills().stream())
+    .toList();
+
+// mapMulti approach (no inner streams)
+list.stream()
+    .<String>mapMulti((emp, consumer) -> {
+        for (String skill : emp.getSkills()) {
+            consumer.accept(skill);
+        }
+    })
+    .toList();`}</pre>
+                            <div className="when-box"><strong>When to use:</strong> Prefer <code>mapMulti</code> when the 1-to-N mapping is simple or when creating inner Streams would be wasteful (small number of output elements per input).</div>
+                        </div>
+                    </div>
+
+                    <div className="section-header" style={{marginTop:'2.5rem'}}><h2>Java 9 — Useful Additions</h2><div className="sh-line"></div><span className="badge b-violet sh-badge">Java 9+</span></div>
+                    <div className="ref-grid">
+                        <div className="glass ref-card">
+                            <div className="ref-header"><span className="ref-name" style={{color:'var(--violet)'}}>Stream.ofNullable()</span></div>
+                            <div className="ref-desc">Creates a stream of zero or one elements. Prevents NullPointerException in stream pipelines.</div>
+                            <pre>{`// Old: null check needed
+Stream<String> s = name != null
+    ? Stream.of(name) : Stream.empty();
+
+// New: clean
+Stream<String> s = Stream.ofNullable(name);`}</pre>
+                        </div>
+                        <div className="glass ref-card">
+                            <div className="ref-header"><span className="ref-name" style={{color:'var(--violet)'}}>Stream.takeWhile() / dropWhile()</span></div>
+                            <div className="ref-desc">Take elements while predicate is true, or drop elements while predicate is true. Works on <strong>ordered</strong> streams.</div>
+                            <pre>{`// takeWhile: stop when predicate fails
+Stream.of(1, 2, 3, 4, 5, 1, 2)
+    .takeWhile(n -> n < 4)
+    // Result: [1, 2, 3]
+
+// dropWhile: skip until predicate fails
+Stream.of(1, 2, 3, 4, 5, 1, 2)
+    .dropWhile(n -> n < 4)
+    // Result: [4, 5, 1, 2]`}</pre>
+                        </div>
+                        <div className="glass ref-card">
+                            <div className="ref-header"><span className="ref-name" style={{color:'var(--violet)'}}>Stream.iterate() (enhanced)</span></div>
+                            <div className="ref-desc">Java 9 added a predicate-based iterate — works like a for-loop.</div>
+                            <pre>{`// Java 8: infinite stream (need limit)
+Stream.iterate(0, n -> n + 2).limit(5);
+
+// Java 9: with hasNext predicate
+Stream.iterate(0, n -> n < 10, n -> n + 2);
+// Result: [0, 2, 4, 6, 8]`}</pre>
+                        </div>
+                    </div>
+
+                    <div className="section-header" style={{marginTop:'2.5rem'}}><h2>Java 21+ — Gatherers (Preview)</h2><div className="sh-line"></div><span className="badge b-emerald sh-badge">Java 22+</span></div>
+                    <div className="ref-grid">
+                        <div className="glass ref-card">
+                            <div className="ref-header"><span className="ref-name" style={{color:'var(--amber)'}}>Stream.gather()</span></div>
+                            <div className="ref-desc">A powerful new intermediate operation that enables custom stateful transformations — like a programmable intermediate op.</div>
+                            <pre>{`// Sliding window of size 3
+List<List<Integer>> windows = Stream.of(1,2,3,4,5)
+    .gather(Gatherers.windowSliding(3))
+    .toList();
+// [[1,2,3], [2,3,4], [3,4,5]]
+
+// Fixed-size groups
+List<List<Integer>> groups = Stream.of(1,2,3,4,5)
+    .gather(Gatherers.windowFixed(2))
+    .toList();
+// [[1,2], [3,4], [5]]`}</pre>
+                            <div className="when-box"><strong>Status:</strong> <code>Gatherers</code> API was finalized in Java 24. Requires <code>--enable-preview</code> in earlier versions.</div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>

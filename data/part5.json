@@ -1,0 +1,35 @@
+[
+    { "type": "category", "content": "Final Missing Elements & Edge Cases" },
+    { "type": "question", "content": "Can we overload a method by only changing the return type?" },
+    { "type": "theory", "content": "No, you **cannot** overload a method in Java by only changing its return type. The compiler uses the method signature (the method name and the parameter list) to differentiate methods. If two methods have the same name and identical parameters but different return types, the compiler will throw an ambiguous method error." },
+    
+    { "type": "question", "content": "If you have a UserDetails class, sort first by name, and if the name is equal, sort by date." },
+    { "type": "code", "lang": "java", "content": "users.sort(Comparator.comparing(UserDetails::getName)\n    .thenComparing(UserDetails::getDate));" },
+
+    { "type": "question", "content": "Have you generated hashcodes in your application earlier?" },
+    { "type": "theory", "content": "Yes, I regularly override `hashCode()` using `Objects.hash(field1, field2)` to ensure objects function correctly as keys in a `HashMap`. For security (e.g., password hashing or API signatures), I have used cryptographic hash functions like SHA-256 via libraries like Apache Commons Codec or Spring Security's `BCryptPasswordEncoder`." },
+
+    { "type": "question", "content": "What Java 8 features have you used in your application?" },
+    { "type": "theory", "content": "In my daily development, I heavily utilize:\n1. **Streams API**: For declarative data filtering and transformation.\n2. **Lambdas**: To implement Functional Interfaces cleanly.\n3. **Optional**: To explicitly handle potential null returns and eliminate `NullPointerException`.\n4. **java.time API**: Specifically `LocalDateTime` and `Instant`, fully replacing the legacy, mutable `java.util.Date` class." },
+
+    { "type": "question", "content": "Explain multithreading in Java and how you used it in server-side development?" },
+    { "type": "theory", "content": "Multithreading allows multiple threads to run concurrently, maximizing CPU usage. \nIn server-side development with Spring Boot, **multithreading is completely native**. The embedded Tomcat server maintains a thread pool and automatically assigns a new thread to every incoming HTTP request. I also manually utilize it using Spring's `@Async` annotation paired with a custom `ThreadPoolTaskExecutor` to offload heavy background tasks (like sending confirmation emails) without blocking the primary user request." },
+
+    { "type": "question", "content": "Can you describe your experience using RDBMS in application development?" },
+    { "type": "theory", "content": "I have extensive experience with relational databases like PostgreSQL and MySQL. My workflow involves designing normalized schemas (3NF), writing complex optimized queries utilizing `INNER JOIN` and Window Functions (like `DENSE_RANK()`), and analyzing Execution Plans (`EXPLAIN ANALYZE`) to build proper B-Tree indexes. On the application side, I seamlessly interface with the database using Hibernate / Spring Data JPA." },
+
+    { "type": "question", "content": "Share your experience with Core Java and Spring Boot?" },
+    { "type": "theory", "content": "I have deep expertise in Core Java, particularly the Collections Framework and Java 8 Streams, which I use to build robust, thread-safe data pipelines. I pair this with Spring Boot to rapidly develop enterprise-grade REST APIs. I leverage Spring's vast ecosystem, utilizing `@ControllerAdvice` for global error handling, Spring Security for stateless JWT authentication, and Spring Data JPA for data persistence." },
+
+    { "type": "question", "content": "How can you debug a deadlock using jstack in multithreading?" },
+    { "type": "theory", "content": "If an application freezes due to a deadlock, you first use the `jps` command in the terminal to find the Java Process ID (PID). Then, you execute `jstack <PID>`. \n\nThis generates a thread dump. You scroll to the bottom of the dump, and the tool will explicitly state **\"Found one Java-level deadlock:\"**. It prints out the exact thread names, the precise line of code where they are blocked, and the specific memory addresses of the monitor locks causing the cyclic dependency." },
+
+    { "type": "question", "content": "You said you used VSCode and GitHub Copilot, which models did you use? Which one is better?" },
+    { "type": "theory", "content": "*(Tooling Question)*\nGitHub Copilot dynamically utilizes optimized versions of OpenAI's models (like GPT-3.5 and GPT-4). For rapid line-by-line autocomplete, smaller, heavily optimized models are used because latency is critical. However, for Copilot Chat (asking it to refactor a complex method or generate a massive SQL query), it switches to the much more capable **GPT-4**. GPT-4 is vastly superior for logic and architectural reasoning, whereas the smaller models are better for pure speed." },
+
+    { "type": "question", "content": "What all SQL functions do you know?" },
+    { "type": "theory", "content": "I frequently use several categories of SQL functions:\n1. **Aggregate**: `COUNT()`, `SUM()`, `AVG()`, `MAX()`\n2. **String**: `CONCAT()`, `SUBSTRING()`, `UPPER()`, `TRIM()`\n3. **Date/Time**: `CURRENT_DATE`, `DATE_ADD()`, `EXTRACT()`\n4. **Window/Analytic**: `ROW_NUMBER()`, `RANK()`, `DENSE_RANK() OVER (PARTITION BY...)`\n5. **Control Flow**: `COALESCE()`, `NVL()`, `CASE WHEN... THEN`" },
+
+    { "type": "question", "content": "What are User Defined Types (UDT) and their use?" },
+    { "type": "theory", "content": "A User-Defined Type (UDT) allows developers to create custom, complex data types inside a relational database (like PostgreSQL). For example, instead of adding `address_city`, `address_zip`, and `address_street` as flat columns across multiple tables, you can execute `CREATE TYPE address_type AS (city VARCHAR, zip INT, street VARCHAR)`. \n\nThis allows you to strictly enforce a reusable schema definition across the database, bringing object-oriented structure directly into SQL." }
+]
