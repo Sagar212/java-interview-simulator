@@ -424,5 +424,5 @@ public class Main {
 final_html = html_template.replace("JSON_PAYLOAD_HERE", json.dumps(qa_list, indent=4))
 
 # Write final HTML
-with open('j:/Git repo/java-interview-simulator.html', 'w', encoding='utf-8') as f:
+with open('index.html', 'w', encoding='utf-8') as f:
     f.write(final_html)
