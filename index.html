@@ -31,12 +31,48 @@
             background-color: var(--bg-primary);
             color: var(--text-main);
             margin: 0;
-            padding: 60px 20px;
+            padding: 90px 20px 60px 20px; /* Increased top padding for fixed nav */
             font-family: var(--font-question);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             display: flex;
             justify-content: center;
+        }
+
+        /* Top Navigation Bar */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--bg-card);
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .top-nav a {
+            color: var(--text-theory);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            margin: 0 15px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .top-nav a:hover {
+            background-color: rgba(255,255,255,0.05);
+            color: #ffffff;
+        }
+
+        .top-nav a.active {
+            background-color: rgba(0, 230, 118, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(0, 230, 118, 0.2);
         }
 
         #app {
@@ -247,6 +283,10 @@
     </style>
 </head>
 <body>
+    <div class="top-nav">
+        <a href="index.html" class="active">Page 1: Core Java Simulator</a>
+        <a href="page2.html">Page 2: Spring & Master Q&A</a>
+    </div>
 
     <div id="app">
         <header>

@@ -1,0 +1,1666 @@
+[
+    {
+        "type": "theory",
+        "content": "JAVA & SPRING INTERVIEW MASTER QUESTION SET\nComplete One-Go Interview Prep File"
+    },
+    {
+        "type": "category",
+        "content": "1) VOLATILE KEYWORD"
+    },
+    {
+        "type": "question",
+        "content": "Constraint -> Pattern"
+    },
+    {
+        "type": "theory",
+        "content": "If the interview question is about visibility between threads, instruction ordering, or a simple shared flag, think: volatile. If the question is about compound operations like count++, think: volatile is not enough."
+    },
+    {
+        "type": "question",
+        "content": "Core Interview Answer"
+    },
+    {
+        "type": "theory",
+        "content": "volatile guarantees visibility and ordering for reads and writes of a variable across threads, but it does not guarantee atomicity for compound operations. A write to a volatile variable by one thread becomes visible to another thread reading that same variable, and the JVM also prevents certain instruction reordering around volatile accesses."
+    },
+    {
+        "type": "question",
+        "content": "What guarantees does volatile provide regarding visibility and ordering?"
+    },
+    {
+        "type": "theory",
+        "content": "- Visibility: when one thread updates a volatile variable, other threads see the latest value instead of a stale cached value.\n- Ordering: volatile establishes a happens-before relationship. A write to a volatile variable happens-before every subsequent read of that variable by another thread.\n- Reordering protection: the JVM inserts memory barriers so certain reads/writes cannot be reordered across volatile boundaries."
+    },
+    {
+        "type": "question",
+        "content": "How does volatile differ from synchronized?"
+    },
+    {
+        "type": "theory",
+        "content": "- volatile gives visibility and ordering only for a single variable.\n- synchronized gives mutual exclusion, visibility, and ordering.\n- volatile does not lock.\n- synchronized prevents two threads from executing a critical section at the same time.\n- volatile is usually lighter but weaker."
+    },
+    {
+        "type": "question",
+        "content": "Can volatile ensure atomicity? Why or why not?"
+    },
+    {
+        "type": "theory",
+        "content": "No. Atomicity means the whole operation happens as one indivisible unit. count++ is actually three steps:\n1. Read count\n2. Add 1\n3. Write count\nEven if count is volatile, two threads can still interleave these steps and lose updates."
+    },
+    {
+        "type": "question",
+        "content": "When is volatile unnecessary in multithreading?"
+    },
+    {
+        "type": "theory",
+        "content": "- When the variable is accessed only inside synchronized blocks or locks.\n- When the variable is thread-confined.\n- When you need atomicity, use synchronized, Lock, or atomic classes instead.\n- When the field is final and safely published, volatile may not be needed."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "class SharedFlag {\n    // visible to all threads immediately\n    private volatile boolean running = true;\n\n    public void stop() {\n        running = false;\n    }\n\n    public void work() {\n        while (running) {\n            // do work\n        }\n    }\n}"
+    },
+    {
+        "type": "question",
+        "content": "Memory Recall Table"
+    },
+    {
+        "type": "theory",
+        "content": "- volatile -> visibility yes\n- volatile -> ordering yes\n- volatile -> atomicity no\n- synchronized -> visibility yes\n- synchronized -> ordering yes\n- synchronized -> atomicity yes inside critical section"
+    },
+    {
+        "type": "question",
+        "content": "Why It Works + Memory Pointer"
+    },
+    {
+        "type": "theory",
+        "content": "Think of volatile like updating a shared office whiteboard instead of writing on your own sticky note. Every thread must read the whiteboard, but volatile does not stop two people from writing over each other at the same time."
+    },
+    {
+        "type": "question",
+        "content": "Pain Points + Java Pitfalls"
+    },
+    {
+        "type": "theory",
+        "content": "- Biggest trap: saying volatile makes code thread-safe. It does not.\n- volatile works well for status flags, shutdown signals, configuration refresh markers.\n- It is not enough for increment/decrement, check-then-act, read-modify-write logic."
+    },
+    {
+        "type": "question",
+        "content": "Follow-up Drills"
+    },
+    {
+        "type": "question",
+        "content": "- Why does volatile work for boolean stop flags?"
+    },
+    {
+        "type": "question",
+        "content": "- Why does volatile fail for count++?"
+    },
+    {
+        "type": "theory",
+        "content": "- Compare AtomicInteger vs volatile int."
+    },
+    {
+        "type": "category",
+        "content": "2) STATIC KEYWORD"
+    },
+    {
+        "type": "question",
+        "content": "Constraint -> Pattern"
+    },
+    {
+        "type": "theory",
+        "content": "If the question is about class-level data or behavior shared by all objects, think static."
+    },
+    {
+        "type": "question",
+        "content": "Core Interview Answer"
+    },
+    {
+        "type": "theory",
+        "content": "static members belong to the class, not to individual objects. They are loaded once per class loader, shared across all instances, and can be accessed without creating an object."
+    },
+    {
+        "type": "question",
+        "content": "How do static variables behave in multithreading?"
+    },
+    {
+        "type": "theory",
+        "content": "- static means shared per class, not thread-safe.\n- If multiple threads update a static field, race conditions can happen just like with any shared instance field.\n- static + mutable is a common concurrency bug source."
+    },
+    {
+        "type": "question",
+        "content": "Difference between static block and static method?"
+    },
+    {
+        "type": "theory",
+        "content": "- static block runs automatically when the class is initialized.\n- static method runs only when called.\n- static block is mostly used for class-level initialization.\n- static method contains reusable class-level behavior."
+    },
+    {
+        "type": "question",
+        "content": "Can static methods participate in polymorphism?"
+    },
+    {
+        "type": "theory",
+        "content": "Not true runtime polymorphism. Static methods are resolved at compile time based on reference type, not object type."
+    },
+    {
+        "type": "question",
+        "content": "What is method hiding vs overriding for static methods?"
+    },
+    {
+        "type": "theory",
+        "content": "- Instance methods are overridden.\n- Static methods are hidden.\n- If a subclass defines a static method with the same signature, it hides the parent static method rather than overriding it."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "class Parent {\n    static void show() {\n        System.out.println(\"Parent\");\n    }\n}\n\nclass Child extends Parent {\n    static void show() {\n        System.out.println(\"Child\");\n    }\n}"
+    },
+    {
+        "type": "question",
+        "content": "Memory Recall Table"
+    },
+    {
+        "type": "theory",
+        "content": "- static variable -> one copy per class loader\n- static method -> class-level behavior\n- static block -> class initialization\n- static method polymorphism -> no runtime overriding"
+    },
+    {
+        "type": "question",
+        "content": "Why It Works + Memory Pointer"
+    },
+    {
+        "type": "theory",
+        "content": "Think of static as a notice board mounted on the building, not inside each apartment. Everyone in that building sees the same board."
+    },
+    {
+        "type": "question",
+        "content": "Pain Points + Java Pitfalls"
+    },
+    {
+        "type": "theory",
+        "content": "- static does not mean thread-safe.\n- static methods cannot directly access instance fields because no object context exists.\n- Avoid mutable static state in Spring apps unless carefully managed."
+    },
+    {
+        "type": "question",
+        "content": "Follow-up Drills"
+    },
+    {
+        "type": "theory",
+        "content": "- Difference between static final and static mutable."
+    },
+    {
+        "type": "question",
+        "content": "- Why is utility class method usually static?"
+    },
+    {
+        "type": "question",
+        "content": "- Why can static methods not use this?"
+    },
+    {
+        "type": "category",
+        "content": "3) FUNCTIONAL INTERFACE"
+    },
+    {
+        "type": "question",
+        "content": "Constraint -> Pattern"
+    },
+    {
+        "type": "theory",
+        "content": "If the question mentions lambda, method reference, or Java 8 single abstract method, think functional interface."
+    },
+    {
+        "type": "question",
+        "content": "Core Interview Answer"
+    },
+    {
+        "type": "theory",
+        "content": "A functional interface is an interface with exactly one abstract method. It may still have multiple default and static methods because those do not count as abstract methods."
+    },
+    {
+        "type": "question",
+        "content": "How do default and static methods allow multiple methods?"
+    },
+    {
+        "type": "theory",
+        "content": "- Because the functional-interface rule counts only abstract methods.\n- default methods already have implementation.\n- static methods belong to the interface type and also do not count toward abstract method count."
+    },
+    {
+        "type": "question",
+        "content": "What happens if more than one abstract method exists?"
+    },
+    {
+        "type": "theory",
+        "content": "Then it is no longer a functional interface, so lambdas cannot target it."
+    },
+    {
+        "type": "question",
+        "content": "Can it extend another interface and still remain functional?"
+    },
+    {
+        "type": "theory",
+        "content": "Yes, if after inheritance there is still exactly one abstract method in total."
+    },
+    {
+        "type": "question",
+        "content": "How do lambdas depend on functional interfaces?"
+    },
+    {
+        "type": "theory",
+        "content": "A lambda expression needs a target type, and that target type is usually a functional interface. The lambda provides implementation for the single abstract method."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "@FunctionalInterface\ninterface Calculator {\n    int apply(int left, int right);\n\n    default void log() {\n        System.out.println(\"running\");\n    }\n\n    static void info() {\n        System.out.println(\"functional interface\");\n    }\n}\n\nclass Demo {\n    public static void main(String[] args) {\n        Calculator add = (left, right) -> left + right;\n        System.out.println(add.apply(2, 3));\n    }\n}"
+    },
+    {
+        "type": "question",
+        "content": "Memory Recall Table"
+    },
+    {
+        "type": "theory",
+        "content": "- one abstract method -> yes functional\n- default method -> allowed\n- static method -> allowed\n- second abstract method -> lambda breaks"
+    },
+    {
+        "type": "question",
+        "content": "Why It Works + Memory Pointer"
+    },
+    {
+        "type": "theory",
+        "content": "Imagine hiring one person for one job role. They may have handbook instructions and company-wide rules, but only one core responsibility defines the role."
+    },
+    {
+        "type": "question",
+        "content": "Pain Points + Java Pitfalls"
+    },
+    {
+        "type": "theory",
+        "content": "- Object class methods like toString do not count as extra abstract methods.\n- @FunctionalInterface is optional but recommended because compiler validates the contract."
+    },
+    {
+        "type": "question",
+        "content": "Follow-up Drills"
+    },
+    {
+        "type": "theory",
+        "content": "- Predicate, Function, Consumer, Supplier differences.\n- Lambda vs method reference.\n- Can private methods exist in interfaces? Yes in newer Java versions."
+    },
+    {
+        "type": "category",
+        "content": "4) GARBAGE COLLECTION"
+    },
+    {
+        "type": "question",
+        "content": "Constraint -> Pattern"
+    },
+    {
+        "type": "theory",
+        "content": "If the question is about memory cleanup, unreachable objects, or GC tuning, think reachability + generations + collector strategy."
+    },
+    {
+        "type": "question",
+        "content": "Core Interview Answer"
+    },
+    {
+        "type": "theory",
+        "content": "The JVM garbage collector automatically reclaims heap memory occupied by objects that are no longer reachable from live references. Modern collectors optimize for pause time, throughput, and memory footprint using generational memory management."
+    },
+    {
+        "type": "question",
+        "content": "How does JVM identify objects for GC?"
+    },
+    {
+        "type": "theory",
+        "content": "- It starts from GC roots: stack references, static references, active threads, JNI references.\n- Objects reachable from these roots are considered alive.\n- Unreachable objects become eligible for collection."
+    },
+    {
+        "type": "question",
+        "content": "Minor vs Major vs Full GC differences?"
+    },
+    {
+        "type": "theory",
+        "content": "- Minor GC: collects young generation.\n- Major GC: usually collects old generation.\n- Full GC: collects entire heap, often including young + old and sometimes metaspace-related cleanup depending on JVM behavior."
+    },
+    {
+        "type": "question",
+        "content": "How do G1, CMS, Serial GC differ?"
+    },
+    {
+        "type": "theory",
+        "content": "- Serial GC: one thread, simple, good for small heaps.\n- CMS: low-pause old-gen collector, largely deprecated in modern Java.\n- G1: region-based collector designed for predictable pause times and large heaps."
+    },
+    {
+        "type": "question",
+        "content": "How to monitor and tune GC?"
+    },
+    {
+        "type": "theory",
+        "content": "- Enable GC logs.\n- Watch pause times, allocation rate, old-gen pressure, promotion failures.\n- Tune heap sizes, region sizes, pause goals, collector choice.\n- Use tools like jstat, jcmd, VisualVM, JMC, Micrometer exporters, APM tools."
+    },
+    {
+        "type": "question",
+        "content": "Memory Recall Table"
+    },
+    {
+        "type": "theory",
+        "content": "- reachability -> GC basis\n- young gen -> minor GC\n- old gen -> major GC\n- whole heap -> full GC\n- low pause modern default -> G1 in many setups"
+    },
+    {
+        "type": "question",
+        "content": "Why It Works + Memory Pointer"
+    },
+    {
+        "type": "theory",
+        "content": "Think of memory like a hotel. GC checks which rooms are still connected to active guest records. Unregistered rooms get cleaned and reused."
+    },
+    {
+        "type": "question",
+        "content": "Pain Points + Java Pitfalls"
+    },
+    {
+        "type": "theory",
+        "content": "- finalize is obsolete and unreliable for core interview answers.\n- System.gc() is only a request, not a guarantee.\n- Memory leak in Java still happens when references remain reachable accidentally."
+    },
+    {
+        "type": "question",
+        "content": "Follow-up Drills"
+    },
+    {
+        "type": "theory",
+        "content": "- Strong vs weak vs soft vs phantom references."
+    },
+    {
+        "type": "question",
+        "content": "- Why do short-lived objects make generational GC efficient?"
+    },
+    {
+        "type": "question",
+        "content": "- What causes stop-the-world pauses?"
+    },
+    {
+        "type": "category",
+        "content": "5) SPRING BOOT LIFECYCLE"
+    },
+    {
+        "type": "question",
+        "content": "Constraint -> Pattern"
+    },
+    {
+        "type": "theory",
+        "content": "If the question is about startup sequence, bean creation, hooks, or runners, think SpringApplication -> context creation -> bean initialization -> post-start hooks."
+    },
+    {
+        "type": "question",
+        "content": "Core Interview Answer"
+    },
+    {
+        "type": "theory",
+        "content": "During Spring Boot startup, SpringApplication bootstraps the app, creates and refreshes the ApplicationContext, registers beans, performs dependency injection, runs initialization callbacks, and then invokes startup runners such as CommandLineRunner or ApplicationRunner."
+    },
+    {
+        "type": "question",
+        "content": "What happens during application startup?"
+    },
+    {
+        "type": "theory",
+        "content": "1. main method calls SpringApplication.run(...)\n2. Spring creates the Environment.\n3. ApplicationContext is created.\n4. Bean definitions are loaded.\n5. Beans are instantiated.\n6. Dependencies are injected.\n7. Bean lifecycle callbacks run.\n8. Application runners execute.\n9. Ready events are published."
+    },
+    {
+        "type": "question",
+        "content": "How are beans created and injected?"
+    },
+    {
+        "type": "theory",
+        "content": "- Component scanning or @Bean methods define beans.\n- Spring resolves dependencies from the context.\n- Constructor injection is preferred.\n- BeanPostProcessor and lifecycle callbacks can modify beans before/after initialization."
+    },
+    {
+        "type": "question",
+        "content": "How to hook into lifecycle events?"
+    },
+    {
+        "type": "theory",
+        "content": "- @PostConstruct\n- InitializingBean\n- BeanPostProcessor\n- ApplicationListener\n- @EventListener for events like ApplicationStartedEvent or ApplicationReadyEvent"
+    },
+    {
+        "type": "question",
+        "content": "ApplicationRunner vs CommandLineRunner?"
+    },
+    {
+        "type": "theory",
+        "content": "- Both run after context startup.\n- CommandLineRunner gets String[] args.\n- ApplicationRunner gets ApplicationArguments, which is richer and easier for option parsing."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "@Component\nclass StartupTask implements ApplicationRunner {\n    @Override\n    public void run(ApplicationArguments args) {\n        System.out.println(\"App started\");\n    }\n}"
+    },
+    {
+        "type": "question",
+        "content": "Memory Recall Table"
+    },
+    {
+        "type": "theory",
+        "content": "- SpringApplication.run -> bootstrap entry\n- ApplicationContext -> bean container\n- @PostConstruct -> bean init hook\n- CommandLineRunner -> String[] args\n- ApplicationRunner -> parsed args wrapper"
+    },
+    {
+        "type": "question",
+        "content": "Why It Works + Memory Pointer"
+    },
+    {
+        "type": "theory",
+        "content": "Think of Spring Boot startup like opening a factory: prepare environment, assemble machines, wire them together, test them, then start production tasks."
+    },
+    {
+        "type": "question",
+        "content": "Pain Points + Java Pitfalls"
+    },
+    {
+        "type": "theory",
+        "content": "- Do not put heavy blocking startup work everywhere; it can slow boot time.\n- Prefer constructor injection over field injection.\n- Know the difference between bean initialization and app-ready events."
+    },
+    {
+        "type": "question",
+        "content": "Follow-up Drills"
+    },
+    {
+        "type": "theory",
+        "content": "- @PostConstruct vs ApplicationReadyEvent.\n- Bean scope differences.\n- What happens on shutdown? @PreDestroy and lifecycle stop."
+    },
+    {
+        "type": "category",
+        "content": "6) SERIALIZATION"
+    },
+    {
+        "type": "question",
+        "content": "Constraint -> Pattern"
+    },
+    {
+        "type": "theory",
+        "content": "If the question is about converting object state into bytes and back, think Serializable + object stream + compatibility."
+    },
+    {
+        "type": "question",
+        "content": "Core Interview Answer"
+    },
+    {
+        "type": "theory",
+        "content": "Serialization is the process of converting an object's state into a byte stream so it can be stored or transmitted, and deserialization reconstructs the object from that byte stream. In Java, this typically uses the Serializable marker interface and ObjectOutputStream/ObjectInputStream."
+    },
+    {
+        "type": "question",
+        "content": "How does Serializable work internally?"
+    },
+    {
+        "type": "theory",
+        "content": "- Serializable is a marker interface with no methods.\n- JVM/Object stream checks whether a class implements it.\n- Non-transient, non-static fields are serialized by default.\n- During deserialization, object state is reconstructed without calling normal constructors in the usual way for serializable classes."
+    },
+    {
+        "type": "question",
+        "content": "What is serialVersionUID?"
+    },
+    {
+        "type": "theory",
+        "content": "- It is a version identifier for a serializable class.\n- During deserialization, JVM compares stream class version with local class version.\n- If incompatible and serialVersionUID differs, InvalidClassException may occur."
+    },
+    {
+        "type": "question",
+        "content": "How do readObject/writeObject customize behavior?"
+    },
+    {
+        "type": "theory",
+        "content": "- private void writeObject(ObjectOutputStream out)\n- private void readObject(ObjectInputStream in)\nThese hooks let you customize serialization logic, validate data, encrypt/decrypt fields, or rebuild derived fields."
+    },
+    {
+        "type": "question",
+        "content": "What happens when class structure changes?"
+    },
+    {
+        "type": "theory",
+        "content": "- Compatible changes may still deserialize.\n- Incompatible changes can fail, especially if serialVersionUID changes or important fields disappear/change type.\n- Explicit serialVersionUID gives you more control."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "class UserSession implements java.io.Serializable {\n    private static final long serialVersionUID = 1L;\n\n    private String username;\n    private transient String password;\n}"
+    },
+    {
+        "type": "question",
+        "content": "Memory Recall Table"
+    },
+    {
+        "type": "theory",
+        "content": "- Serializable -> marker interface\n- transient -> skip field\n- static -> not serialized\n- serialVersionUID -> version contract\n- readObject/writeObject -> custom logic"
+    },
+    {
+        "type": "question",
+        "content": "Why It Works + Memory Pointer"
+    },
+    {
+        "type": "theory",
+        "content": "Think of serialization like packing an object's suitcase for transport. transient fields are items you intentionally leave behind."
+    },
+    {
+        "type": "question",
+        "content": "Pain Points + Java Pitfalls"
+    },
+    {
+        "type": "theory",
+        "content": "- Do not use Java native serialization blindly in distributed systems; security and compatibility concerns exist.\n- transient is often forgotten.\n- serialVersionUID should be explicit for stable contracts."
+    },
+    {
+        "type": "question",
+        "content": "Follow-up Drills"
+    },
+    {
+        "type": "theory",
+        "content": "- transient vs static in serialization."
+    },
+    {
+        "type": "question",
+        "content": "- Why is native Java serialization often avoided in modern APIs?"
+    },
+    {
+        "type": "theory",
+        "content": "- Externalizable vs Serializable."
+    },
+    {
+        "type": "category",
+        "content": "7) RUNNABLE VS CALLABLE"
+    },
+    {
+        "type": "question",
+        "content": "Constraint -> Pattern"
+    },
+    {
+        "type": "theory",
+        "content": "If the task needs background execution only, Runnable may be enough. If it needs a return value or checked exception handling, think Callable."
+    },
+    {
+        "type": "question",
+        "content": "Core Interview Answer"
+    },
+    {
+        "type": "theory",
+        "content": "Runnable represents a task that does not return a result, while Callable represents a task that returns a result and may throw checked exceptions. Callable is usually submitted to ExecutorService and returns a Future."
+    },
+    {
+        "type": "question",
+        "content": "Difference between Runnable and Callable?"
+    },
+    {
+        "type": "theory",
+        "content": "- Runnable -> run(), returns void, cannot throw checked exception.\n- Callable<V> -> call(), returns V, can throw checked exception."
+    },
+    {
+        "type": "question",
+        "content": "When should you use Callable over Runnable?"
+    },
+    {
+        "type": "theory",
+        "content": "- When you need a result.\n- When you want checked exception propagation.\n- When the task is naturally query-like instead of fire-and-forget."
+    },
+    {
+        "type": "question",
+        "content": "What is Future and how does it work?"
+    },
+    {
+        "type": "theory",
+        "content": "- Future represents the result of an asynchronous computation.\n- You can check isDone(), cancel(), or get() the result.\n- get() blocks until completion unless using timeout."
+    },
+    {
+        "type": "question",
+        "content": "How does ExecutorService manage threads?"
+    },
+    {
+        "type": "theory",
+        "content": "- It decouples task submission from thread management.\n- It reuses threads through pools.\n- It improves scalability compared to creating raw threads manually."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "ExecutorService service = Executors.newFixedThreadPool(2);\nCallable<Integer> task = () -> 42;\nFuture<Integer> future = service.submit(task);\nint result = future.get();\nservice.shutdown();"
+    },
+    {
+        "type": "question",
+        "content": "Memory Recall Table"
+    },
+    {
+        "type": "theory",
+        "content": "- Runnable -> no result\n- Callable -> result + checked exception\n- Future -> async handle\n- ExecutorService -> thread pool manager"
+    },
+    {
+        "type": "question",
+        "content": "Why It Works + Memory Pointer"
+    },
+    {
+        "type": "theory",
+        "content": "Think of Runnable as giving someone a chore. Callable is giving them a task and expecting a report back."
+    },
+    {
+        "type": "question",
+        "content": "Pain Points + Java Pitfalls"
+    },
+    {
+        "type": "theory",
+        "content": "- Forgetting shutdown() causes thread pool leaks.\n- future.get() blocks; it is not magically non-blocking.\n- Prefer executors over manual thread creation in most production cases."
+    },
+    {
+        "type": "question",
+        "content": "Follow-up Drills"
+    },
+    {
+        "type": "theory",
+        "content": "- submit() vs execute().\n- Future vs CompletableFuture.\n- Fixed thread pool vs cached thread pool."
+    },
+    {
+        "type": "category",
+        "content": "8) @QUALIFIER ANNOTATION"
+    },
+    {
+        "type": "question",
+        "content": "Constraint -> Pattern"
+    },
+    {
+        "type": "theory",
+        "content": "If Spring finds multiple candidate beans of the same type and injection becomes ambiguous, think @Qualifier."
+    },
+    {
+        "type": "question",
+        "content": "Core Interview Answer"
+    },
+    {
+        "type": "theory",
+        "content": "@Qualifier is used in Spring to specify exactly which bean should be injected when multiple beans of the same type exist. It resolves ambiguity during dependency injection."
+    },
+    {
+        "type": "question",
+        "content": "Why is @Qualifier needed?"
+    },
+    {
+        "type": "theory",
+        "content": "Because type-based autowiring alone fails when more than one matching bean exists."
+    },
+    {
+        "type": "question",
+        "content": "How does it resolve ambiguity in Spring?"
+    },
+    {
+        "type": "theory",
+        "content": "It narrows the candidate bean set by bean name or qualifier value."
+    },
+    {
+        "type": "question",
+        "content": "Difference between @Primary and @Qualifier?"
+    },
+    {
+        "type": "theory",
+        "content": "- @Primary marks a default bean when multiple candidates exist.\n- @Qualifier explicitly selects a bean.\n- @Qualifier is stronger and more specific at injection point."
+    },
+    {
+        "type": "question",
+        "content": "Can you use it with constructor injection?"
+    },
+    {
+        "type": "theory",
+        "content": "Yes, and that is a common best practice."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "@Service(\"emailService\")\nclass EmailService implements MessageService {}\n\n@Service(\"smsService\")\nclass SmsService implements MessageService {}\n\n@Component\nclass NotificationManager {\n    private final MessageService messageService;\n\n    public NotificationManager(@Qualifier(\"emailService\") MessageService messageService) {\n        this.messageService = messageService;\n    }\n}"
+    },
+    {
+        "type": "question",
+        "content": "Memory Recall Table"
+    },
+    {
+        "type": "theory",
+        "content": "- multiple beans same type -> ambiguity\n- @Primary -> default winner\n- @Qualifier -> exact winner\n- constructor injection -> preferred"
+    },
+    {
+        "type": "question",
+        "content": "Why It Works + Memory Pointer"
+    },
+    {
+        "type": "theory",
+        "content": "Think of @Primary as the default contact in your phone, while @Qualifier is choosing a specific contact by name."
+    },
+    {
+        "type": "question",
+        "content": "Pain Points + Java Pitfalls"
+    },
+    {
+        "type": "theory",
+        "content": "- Bean name mismatch causes injection errors.\n- Overusing qualifiers everywhere can make config noisy.\n- Prefer clear bean design before piling on qualifiers."
+    },
+    {
+        "type": "question",
+        "content": "Follow-up Drills"
+    },
+    {
+        "type": "theory",
+        "content": "- @Resource vs @Autowired + @Qualifier.\n- Collection injection of all beans of same type.\n- Custom qualifier annotations."
+    },
+    {
+        "type": "category",
+        "content": "9) INTERFACE VS ABSTRACT CLASS (JAVA 8+)"
+    },
+    {
+        "type": "question",
+        "content": "Constraint -> Pattern"
+    },
+    {
+        "type": "theory",
+        "content": "If the interview asks shared contract vs shared state/partial implementation, compare interface and abstract class."
+    },
+    {
+        "type": "question",
+        "content": "Core Interview Answer"
+    },
+    {
+        "type": "theory",
+        "content": "After Java 8, interfaces can contain default and static methods, but they still mainly represent a contract, while abstract classes are better for shared state, constructors, and partial base implementation."
+    },
+    {
+        "type": "question",
+        "content": "What differences still exist after default methods?"
+    },
+    {
+        "type": "theory",
+        "content": "- Abstract class can have instance state.\n- Abstract class can have constructors.\n- A class can extend only one abstract class.\n- A class can implement multiple interfaces.\n- Interfaces are still more flexible for multiple inheritance of type."
+    },
+    {
+        "type": "question",
+        "content": "When should you prefer abstract class?"
+    },
+    {
+        "type": "theory",
+        "content": "- When subclasses share common state.\n- When base constructor logic is needed.\n- When you want to provide protected helper methods and partial implementation."
+    },
+    {
+        "type": "question",
+        "content": "Multiple inheritance via interfaces vs abstract class?"
+    },
+    {
+        "type": "theory",
+        "content": "- Java allows multiple interface implementation.\n- Java does not allow multiple class inheritance."
+    },
+    {
+        "type": "question",
+        "content": "State management differences?"
+    },
+    {
+        "type": "theory",
+        "content": "- Interface fields are implicitly public static final constants.\n- Abstract classes can hold mutable instance fields."
+    },
+    {
+        "type": "question",
+        "content": "Memory Recall Table"
+    },
+    {
+        "type": "theory",
+        "content": "- interface -> contract\n- abstract class -> contract + state + partial implementation\n- multiple inheritance -> interfaces yes, classes no"
+    },
+    {
+        "type": "question",
+        "content": "Why It Works + Memory Pointer"
+    },
+    {
+        "type": "theory",
+        "content": "Interface is like a job description. Abstract class is like a partially built machine with reusable internal parts."
+    },
+    {
+        "type": "question",
+        "content": "Pain Points + Java Pitfalls"
+    },
+    {
+        "type": "theory",
+        "content": "- Do not say interfaces fully replace abstract classes after Java 8.\n- Default methods help evolution but do not make interfaces ideal for shared mutable state."
+    },
+    {
+        "type": "question",
+        "content": "Follow-up Drills"
+    },
+    {
+        "type": "theory",
+        "content": "- Diamond problem with default methods.\n- Marker interface vs annotation.\n- Sealed interfaces/classes in modern Java."
+    },
+    {
+        "type": "category",
+        "content": "10) OOP CONCEPTS"
+    },
+    {
+        "type": "question",
+        "content": "Constraint -> Pattern"
+    },
+    {
+        "type": "theory",
+        "content": "If asked OOP basics, answer with definition + Java implementation + real-world example."
+    },
+    {
+        "type": "question",
+        "content": "Core Interview Answer"
+    },
+    {
+        "type": "theory",
+        "content": "Encapsulation bundles data and methods together while restricting direct access, abstraction hides internal complexity and shows only essential behavior, and polymorphism lets the same interface behave differently based on the actual implementation."
+    },
+    {
+        "type": "question",
+        "content": "Real-world examples of each?"
+    },
+    {
+        "type": "theory",
+        "content": "- Encapsulation: BankAccount hides balance updates behind deposit/withdraw methods.\n- Abstraction: Car driver uses steering/brake without knowing engine internals.\n- Polymorphism: PaymentService can process CardPayment, UpiPayment, or WalletPayment through common interface."
+    },
+    {
+        "type": "question",
+        "content": "Compile-time vs runtime polymorphism?"
+    },
+    {
+        "type": "theory",
+        "content": "- Compile-time polymorphism -> method overloading.\n- Runtime polymorphism -> method overriding resolved by actual object type."
+    },
+    {
+        "type": "question",
+        "content": "How does abstraction differ from encapsulation?"
+    },
+    {
+        "type": "theory",
+        "content": "- Abstraction focuses on what to expose.\n- Encapsulation focuses on how to protect internal state."
+    },
+    {
+        "type": "question",
+        "content": "How are these implemented in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "- Encapsulation -> private fields + getters/setters/behavior methods.\n- Abstraction -> interfaces and abstract classes.\n- Polymorphism -> overriding and interface-based programming."
+    },
+    {
+        "type": "question",
+        "content": "Memory Recall Table"
+    },
+    {
+        "type": "theory",
+        "content": "- encapsulation -> protect state\n- abstraction -> hide complexity\n- polymorphism -> one contract, many behaviors"
+    },
+    {
+        "type": "question",
+        "content": "Why It Works + Memory Pointer"
+    },
+    {
+        "type": "theory",
+        "content": "Encapsulation is a capsule. Abstraction is a dashboard. Polymorphism is one remote controlling different devices."
+    },
+    {
+        "type": "question",
+        "content": "Pain Points + Java Pitfalls"
+    },
+    {
+        "type": "theory",
+        "content": "- Students often mix abstraction and encapsulation.\n- Overusing getters/setters without real invariants is weak encapsulation."
+    },
+    {
+        "type": "question",
+        "content": "Follow-up Drills"
+    },
+    {
+        "type": "theory",
+        "content": "- Inheritance vs composition."
+    },
+    {
+        "type": "question",
+        "content": "- Why favor composition over inheritance?"
+    },
+    {
+        "type": "theory",
+        "content": "- Is method overloading truly polymorphism? Interviewers may call it compile-time polymorphism."
+    },
+    {
+        "type": "category",
+        "content": "11) METHOD OVERLOADING VS OVERRIDING"
+    },
+    {
+        "type": "question",
+        "content": "Core Interview Answer"
+    },
+    {
+        "type": "theory",
+        "content": "Overloading means same method name with different parameter lists in the same class or hierarchy, resolved at compile time. Overriding means subclass provides a new implementation of an inherited instance method with same signature, resolved at runtime."
+    },
+    {
+        "type": "question",
+        "content": "Key differences?"
+    },
+    {
+        "type": "theory",
+        "content": "- Overloading -> compile-time binding.\n- Overriding -> runtime binding.\n- Overloading changes parameters.\n- Overriding keeps same signature, compatible return type."
+    },
+    {
+        "type": "question",
+        "content": "Rules for overriding?"
+    },
+    {
+        "type": "theory",
+        "content": "- Same method signature.\n- Return type same or covariant.\n- Access cannot be more restrictive.\n- Checked exceptions cannot be broader than parent declaration.\n- final/private methods cannot be overridden."
+    },
+    {
+        "type": "question",
+        "content": "Can static methods be overridden?"
+    },
+    {
+        "type": "theory",
+        "content": "No. They are hidden, not overridden."
+    },
+    {
+        "type": "question",
+        "content": "How does compile-time vs runtime binding work?"
+    },
+    {
+        "type": "theory",
+        "content": "- Compiler decides overloaded method based on reference type and argument list.\n- JVM chooses overridden instance method based on actual object type."
+    },
+    {
+        "type": "question",
+        "content": "Memory Recall Table"
+    },
+    {
+        "type": "theory",
+        "content": "- overload -> same name, different params\n- override -> same signature, new child logic\n- static -> hiding, not overriding"
+    },
+    {
+        "type": "question",
+        "content": "Why It Works + Memory Pointer"
+    },
+    {
+        "type": "theory",
+        "content": "Overloading is choosing a tool shape before work starts. Overriding is same button label doing different work depending on which machine you are using."
+    },
+    {
+        "type": "question",
+        "content": "Pain Points + Java Pitfalls"
+    },
+    {
+        "type": "theory",
+        "content": "- Changing only return type does not overload.\n- private methods are not overridden."
+    },
+    {
+        "type": "question",
+        "content": "Follow-up Drills"
+    },
+    {
+        "type": "theory",
+        "content": "- Can you overload main? Yes.\n- Can constructors be overridden? No.\n- What is bridge method? Advanced generic topic."
+    },
+    {
+        "type": "category",
+        "content": "12) METHOD HIDING"
+    },
+    {
+        "type": "question",
+        "content": "Core Interview Answer"
+    },
+    {
+        "type": "theory",
+        "content": "Method hiding happens when a subclass defines a static method with the same signature as a static method in the parent class. The method called depends on the reference type, not the actual object type."
+    },
+    {
+        "type": "question",
+        "content": "Difference between hiding and overriding?"
+    },
+    {
+        "type": "theory",
+        "content": "- Hiding applies to static methods.\n- Overriding applies to instance methods.\n- Hiding uses compile-time binding.\n- Overriding uses runtime dispatch."
+    },
+    {
+        "type": "question",
+        "content": "How does static binding work?"
+    },
+    {
+        "type": "theory",
+        "content": "The compiler binds the static method call to the declared reference type."
+    },
+    {
+        "type": "question",
+        "content": "When is method hiding used?"
+    },
+    {
+        "type": "theory",
+        "content": "Usually not as a design goal. It appears when subclasses define same-named utility or factory-like static methods.\n\nExample\nParent ref = new Child();\nref.show(); // Parent.show if show is static"
+    },
+    {
+        "type": "question",
+        "content": "Memory Recall Table"
+    },
+    {
+        "type": "theory",
+        "content": "- static + same signature -> hiding\n- instance + same signature -> overriding\n- reference type decides hidden method"
+    },
+    {
+        "type": "question",
+        "content": "Why It Works + Memory Pointer"
+    },
+    {
+        "type": "theory",
+        "content": "Static methods belong to the class label on the box, not the object inside the box."
+    },
+    {
+        "type": "question",
+        "content": "Pain Points + Java Pitfalls"
+    },
+    {
+        "type": "theory",
+        "content": "- Many candidates incorrectly say static methods override.\n- Using object reference to call static methods is legal but poor style."
+    },
+    {
+        "type": "category",
+        "content": "13) COVARIANT RETURN TYPE"
+    },
+    {
+        "type": "question",
+        "content": "Core Interview Answer"
+    },
+    {
+        "type": "theory",
+        "content": "Covariant return type means an overriding method in a subclass can return a more specific type than the method declared in the parent class."
+    },
+    {
+        "type": "question",
+        "content": "What is it and why is it useful?"
+    },
+    {
+        "type": "theory",
+        "content": "It improves type safety and reduces casting for callers."
+    },
+    {
+        "type": "question",
+        "content": "Rules for covariant return types?"
+    },
+    {
+        "type": "theory",
+        "content": "- Same method signature.\n- Child return type must be a subtype of parent return type.\n- Applies to overriding, not arbitrary overload changes."
+    },
+    {
+        "type": "question",
+        "content": "How does it help in method overriding?"
+    },
+    {
+        "type": "theory",
+        "content": "The subclass can return a richer, more specific object while still honoring parent contract."
+    },
+    {
+        "type": "question",
+        "content": "Real-world use cases?"
+    },
+    {
+        "type": "theory",
+        "content": "- Factory methods.\n- Fluent APIs.\n- Clone/copy methods in inheritance hierarchies.\n\nExample\nclass Animal {}\nclass Dog extends Animal {}\n\nclass Parent {\n    Animal getPet() { return new Animal(); }\n}\n\nclass Child extends Parent {\n    @Override\n    Dog getPet() { return new Dog(); }\n}"
+    },
+    {
+        "type": "question",
+        "content": "Memory Recall Table"
+    },
+    {
+        "type": "theory",
+        "content": "- parent returns broad type\n- child may return narrower subtype\n- safer API, fewer casts"
+    },
+    {
+        "type": "category",
+        "content": "14) CLASS WITHOUT MAIN METHOD"
+    },
+    {
+        "type": "question",
+        "content": "Core Interview Answer"
+    },
+    {
+        "type": "theory",
+        "content": "A normal standalone Java application requires a valid main method as JVM entry point. However, code can still execute without writing your own main when a framework, test runner, servlet container, or launcher provides the entry point."
+    },
+    {
+        "type": "question",
+        "content": "Can Java run without main method?"
+    },
+    {
+        "type": "theory",
+        "content": "- Standalone class directly with java command: needs main.\n- Framework-driven execution: your business class may not need its own main."
+    },
+    {
+        "type": "question",
+        "content": "How do frameworks like Spring Boot run apps?"
+    },
+    {
+        "type": "theory",
+        "content": "Spring Boot apps still usually have a main method that calls SpringApplication.run. After that, Spring manages the lifecycle and execution flow."
+    },
+    {
+        "type": "question",
+        "content": "What is the actual JVM entry point?"
+    },
+    {
+        "type": "theory",
+        "content": "public static void main(String[] args)"
+    },
+    {
+        "type": "question",
+        "content": "Can static blocks execute without main?"
+    },
+    {
+        "type": "theory",
+        "content": "Static blocks run when class loads, but for a standard application some entry mechanism still has to trigger class loading. In very old interview tricks, people used static blocks with older JVM behavior, but modern Java requires proper entry structure for direct execution."
+    },
+    {
+        "type": "question",
+        "content": "Memory Recall Table"
+    },
+    {
+        "type": "theory",
+        "content": "- JVM app entry -> main\n- framework hides flow, not JVM rule\n- static block != official app entry"
+    },
+    {
+        "type": "category",
+        "content": "15) ANONYMOUS CLASS"
+    },
+    {
+        "type": "question",
+        "content": "Core Interview Answer"
+    },
+    {
+        "type": "theory",
+        "content": "An anonymous class is a one-time class declaration and instantiation written inline, typically used when a short custom implementation is needed without creating a separate named class."
+    },
+    {
+        "type": "question",
+        "content": "When should you use it?"
+    },
+    {
+        "type": "theory",
+        "content": "- Small one-off implementations.\n- Event handlers.\n- Temporary interface or abstract-class implementations.\n- Less common now when lambdas fit better."
+    },
+    {
+        "type": "question",
+        "content": "Anonymous class vs lambda?"
+    },
+    {
+        "type": "theory",
+        "content": "- Anonymous class creates an actual class body.\n- Lambda is a compact function-like implementation for functional interfaces.\n- Anonymous class can define extra fields/methods.\n- Lambda is cleaner for single abstract method behavior."
+    },
+    {
+        "type": "question",
+        "content": "Limitations of anonymous classes?"
+    },
+    {
+        "type": "theory",
+        "content": "- Cannot have explicit constructors.\n- Harder to read when large.\n- Cannot be reused by name.\n- this refers to anonymous class instance, unlike lambda where this refers to enclosing instance.\n\nExample\nRunnable task = new Runnable() {\n    @Override\n    public void run() {\n        System.out.println(\"running\");\n    }\n};"
+    },
+    {
+        "type": "question",
+        "content": "Memory Recall Table"
+    },
+    {
+        "type": "theory",
+        "content": "- one-off implementation -> anonymous class\n- SAM compact behavior -> lambda\n- big body -> readability drops"
+    },
+    {
+        "type": "category",
+        "content": "16) HASHMAP INTERNAL WORKING"
+    },
+    {
+        "type": "question",
+        "content": "Constraint -> Pattern"
+    },
+    {
+        "type": "theory",
+        "content": "If the interview asks storage, collisions, hashing, Java 8 treeification, think array + bucket + node chain/tree."
+    },
+    {
+        "type": "question",
+        "content": "Core Interview Answer"
+    },
+    {
+        "type": "theory",
+        "content": "HashMap stores key-value pairs in an internal array of buckets. It uses a key's hash to compute bucket index, stores entries as nodes, handles collisions by placing multiple entries in the same bucket, and in Java 8 can convert heavily-collided buckets from linked list form to a balanced tree for better worst-case lookup."
+    },
+    {
+        "type": "question",
+        "content": "How does HashMap store data?"
+    },
+    {
+        "type": "theory",
+        "content": "- Internal array called table.\n- Each bucket holds nodes.\n- Node stores hash, key, value, next.\n- Index derived from processed hash and table size."
+    },
+    {
+        "type": "question",
+        "content": "How are collisions handled?"
+    },
+    {
+        "type": "theory",
+        "content": "- Multiple keys may map to same bucket.\n- Bucket entries are traversed by equals comparison after hash matching.\n- Historically linked list, Java 8 may treeify under heavy collision."
+    },
+    {
+        "type": "question",
+        "content": "What changed in Java 8 (treeification)?"
+    },
+    {
+        "type": "theory",
+        "content": "- Long collision chains can become red-black trees.\n- This improves worst-case bucket lookup from O(n) to O(log n).\n- Treeification happens only beyond threshold and sufficient capacity."
+    },
+    {
+        "type": "question",
+        "content": "Difference from ConcurrentHashMap?"
+    },
+    {
+        "type": "theory",
+        "content": "- HashMap is not thread-safe.\n- ConcurrentHashMap supports concurrent access with finer-grained synchronization/CAS strategies.\n- ConcurrentHashMap disallows null keys and null values; HashMap allows one null key and multiple null values."
+    },
+    {
+        "type": "question",
+        "content": "Memory Recall Table"
+    },
+    {
+        "type": "theory",
+        "content": "- hashCode -> bucket index\n- equals -> exact key match\n- collision -> chain/tree in bucket\n- Java 8 -> treeification\n- HashMap -> not thread-safe"
+    },
+    {
+        "type": "question",
+        "content": "Why It Works + Memory Pointer"
+    },
+    {
+        "type": "theory",
+        "content": "Think of HashMap as apartment buildings (buckets). hashCode picks the building, equals finds the exact flat."
+    },
+    {
+        "type": "question",
+        "content": "Pain Points + Java Pitfalls"
+    },
+    {
+        "type": "theory",
+        "content": "- Equal objects must have equal hashCode.\n- Mutable keys are dangerous.\n- Worst interview mistake: saying HashMap is always O(1) with no caveat."
+    },
+    {
+        "type": "question",
+        "content": "Follow-up Drills"
+    },
+    {
+        "type": "question",
+        "content": "- Why are immutable keys preferred?"
+    },
+    {
+        "type": "question",
+        "content": "- What triggers resize?"
+    },
+    {
+        "type": "question",
+        "content": "- Why capacity often power of two?"
+    },
+    {
+        "type": "category",
+        "content": "17) DESIGN PATTERNS"
+    },
+    {
+        "type": "question",
+        "content": "Core Interview Answer"
+    },
+    {
+        "type": "theory",
+        "content": "Design patterns are reusable, proven solution templates for recurring software design problems. They are broadly grouped into creational, structural, and behavioral patterns."
+    },
+    {
+        "type": "question",
+        "content": "What are creational, structural, behavioral patterns?"
+    },
+    {
+        "type": "theory",
+        "content": "- Creational -> object creation (Singleton, Factory, Builder).\n- Structural -> class/object composition (Adapter, Decorator, Facade).\n- Behavioral -> object interaction/responsibility flow (Strategy, Observer, Command)."
+    },
+    {
+        "type": "question",
+        "content": "Singleton pitfalls in multithreading?"
+    },
+    {
+        "type": "theory",
+        "content": "- Lazy singleton without synchronization can create multiple instances.\n- Double-checked locking requires volatile.\n- Overuse of singleton can harm testability and design."
+    },
+    {
+        "type": "question",
+        "content": "Factory vs Abstract Factory?"
+    },
+    {
+        "type": "theory",
+        "content": "- Factory Method usually creates one product type through inheritance or overridden creation.\n- Abstract Factory creates families of related objects."
+    },
+    {
+        "type": "question",
+        "content": "When to use Builder pattern?"
+    },
+    {
+        "type": "theory",
+        "content": "- Many optional parameters.\n- Immutable object construction.\n- Better readability than telescoping constructors.\n\nScenario-based design patterns\n- Object creation flexibility -> Factory / Builder / Abstract Factory.\n- Decoupling systems -> Observer / Adapter / Facade / Dependency Injection.\n- Dynamic behavior changes -> Strategy / State / Decorator.\n- How to choose right pattern? Start from problem: creation, structure, or behavior. Do not force patterns unnecessarily."
+    },
+    {
+        "type": "question",
+        "content": "Memory Recall Table"
+    },
+    {
+        "type": "theory",
+        "content": "- create -> creational\n- connect -> structural\n- communicate/change behavior -> behavioral"
+    },
+    {
+        "type": "question",
+        "content": "Why It Works + Memory Pointer"
+    },
+    {
+        "type": "theory",
+        "content": "Patterns are like standard machine blueprints. You do not reinvent the engine mount every time."
+    },
+    {
+        "type": "question",
+        "content": "Pain Points + Java Pitfalls"
+    },
+    {
+        "type": "theory",
+        "content": "- Pattern names without problem context sound memorized.\n- Explain trade-off, not just definition."
+    },
+    {
+        "type": "category",
+        "content": "18) STRING == VS EQUALS"
+    },
+    {
+        "type": "question",
+        "content": "Core Interview Answer"
+    },
+    {
+        "type": "theory",
+        "content": "For Strings, == compares references, while equals() compares character content. Two different String objects with same text may be equals() true but == false unless they refer to the same pooled object."
+    },
+    {
+        "type": "question",
+        "content": "Difference between == and equals?"
+    },
+    {
+        "type": "question",
+        "content": "- == -> same object reference?"
+    },
+    {
+        "type": "question",
+        "content": "- equals -> same logical content?"
+    },
+    {
+        "type": "question",
+        "content": "What is string pool?"
+    },
+    {
+        "type": "theory",
+        "content": "It is a special memory area where JVM reuses string literals and interned strings to avoid duplicate objects."
+    },
+    {
+        "type": "question",
+        "content": "How does interning work?"
+    },
+    {
+        "type": "theory",
+        "content": "intern() returns the canonical pooled representation of the string. If equivalent content already exists in pool, it returns that reference; otherwise it adds it to the pool."
+    },
+    {
+        "type": "question",
+        "content": "Why are Strings immutable?"
+    },
+    {
+        "type": "theory",
+        "content": "- Security.\n- Hashing stability.\n- Pooling support.\n- Thread-safety benefits.\n\nExample\nString a = \"java\";\nString b = \"java\";\nString c = new String(\"java\");\n\na == b      // true\na == c      // false\na.equals(c) // true"
+    },
+    {
+        "type": "question",
+        "content": "Memory Recall Table"
+    },
+    {
+        "type": "theory",
+        "content": "- == -> address/reference\n- equals -> content\n- intern -> pooled canonical reference\n- immutable -> safe and reusable"
+    },
+    {
+        "type": "category",
+        "content": "19) OVERLOADING MAIN METHOD"
+    },
+    {
+        "type": "question",
+        "content": "Core Interview Answer"
+    },
+    {
+        "type": "theory",
+        "content": "Yes, main can be overloaded, but JVM calls only the standard signature public static void main(String[] args) as the application entry point."
+    },
+    {
+        "type": "question",
+        "content": "Can main be overloaded?"
+    },
+    {
+        "type": "theory",
+        "content": "Yes, like any static method."
+    },
+    {
+        "type": "question",
+        "content": "Will JVM call overloaded main?"
+    },
+    {
+        "type": "theory",
+        "content": "No, not as startup entry. JVM looks for the exact standard main signature."
+    },
+    {
+        "type": "question",
+        "content": "Use cases for overloading main?"
+    },
+    {
+        "type": "theory",
+        "content": "- Internal testing helpers.\n- Teaching/demo code.\n- Convenience wrappers called manually from standard main."
+    },
+    {
+        "type": "question",
+        "content": "What if standard main is missing?"
+    },
+    {
+        "type": "theory",
+        "content": "The class cannot start as a normal Java application using java command."
+    },
+    {
+        "type": "question",
+        "content": "Should you overload main?"
+    },
+    {
+        "type": "theory",
+        "content": "Usually avoid it in production code because it hurts readability more than it helps."
+    },
+    {
+        "type": "question",
+        "content": "Practical use cases?"
+    },
+    {
+        "type": "theory",
+        "content": "- Small demo programs.\n- Interview explanation.\n- Delegating parsing logic from main to helper methods, though separate helper names are usually clearer."
+    },
+    {
+        "type": "question",
+        "content": "Testing scenarios?"
+    },
+    {
+        "type": "theory",
+        "content": "Better use JUnit tests than overloaded main methods."
+    },
+    {
+        "type": "question",
+        "content": "Readability concerns?"
+    },
+    {
+        "type": "theory",
+        "content": "Overloaded main can confuse maintainers about real entry path."
+    },
+    {
+        "type": "question",
+        "content": "Alternative approaches?"
+    },
+    {
+        "type": "theory",
+        "content": "Use helper methods, test classes, or command parser services."
+    },
+    {
+        "type": "category",
+        "content": "20) THREAD CREATION"
+    },
+    {
+        "type": "question",
+        "content": "Constraint -> Pattern"
+    },
+    {
+        "type": "theory",
+        "content": "If the question is about creating concurrent execution in Java, think Thread, Runnable, Callable, Executor framework, and lifecycle states."
+    },
+    {
+        "type": "question",
+        "content": "Core Interview Answer"
+    },
+    {
+        "type": "theory",
+        "content": "Threads in Java can be created by extending Thread, implementing Runnable, using Callable with ExecutorService, or using higher-level concurrency abstractions. In modern applications, Executor framework is generally preferred over manual thread creation."
+    },
+    {
+        "type": "question",
+        "content": "Ways to create threads in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "- Extend Thread.\n- Implement Runnable.\n- Implement Callable and submit to ExecutorService.\n- Use thread pools via Executors.\n- Use CompletableFuture or parallel abstractions for higher-level async tasks."
+    },
+    {
+        "type": "question",
+        "content": "Runnable vs Thread class?"
+    },
+    {
+        "type": "theory",
+        "content": "- Extending Thread couples task and thread.\n- Runnable separates task from execution mechanism.\n- Runnable is more flexible because class can still extend something else."
+    },
+    {
+        "type": "question",
+        "content": "Executor framework benefits?"
+    },
+    {
+        "type": "theory",
+        "content": "- Thread reuse.\n- Better resource management.\n- Queueing and scheduling support.\n- Cleaner production-grade concurrency."
+    },
+    {
+        "type": "question",
+        "content": "Thread lifecycle states?"
+    },
+    {
+        "type": "theory",
+        "content": "- NEW\n- RUNNABLE\n- BLOCKED\n- WAITING\n- TIMED_WAITING\n- TERMINATED"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "class Task implements Runnable {\n    @Override\n    public void run() {\n        System.out.println(Thread.currentThread().getName());\n    }\n}\n\npublic class Demo {\n    public static void main(String[] args) {\n        Thread thread = new Thread(new Task());\n        thread.start();\n    }\n}"
+    },
+    {
+        "type": "question",
+        "content": "Memory Recall Table"
+    },
+    {
+        "type": "theory",
+        "content": "- extend Thread -> simplest demo, less flexible\n- Runnable -> preferred basic style\n- Callable -> result needed\n- ExecutorService -> production style"
+    },
+    {
+        "type": "question",
+        "content": "Why It Works + Memory Pointer"
+    },
+    {
+        "type": "theory",
+        "content": "Creating Thread manually is like hiring one worker each time. ExecutorService is like using a managed staffing agency."
+    },
+    {
+        "type": "question",
+        "content": "Pain Points + Java Pitfalls"
+    },
+    {
+        "type": "theory",
+        "content": "- Never call run() directly when you mean concurrent execution; call start().\n- Too many raw threads can hurt performance.\n- Shared mutable data still needs synchronization even when using executors.\n\n============================================================\nFINAL RAPID FIRE REVISION GRID\n============================================================\n\n- volatile -> visibility/order, not atomicity\n- static -> class-level, not thread-safe by itself\n- functional interface -> exactly one abstract method\n- GC -> unreachable objects from GC roots are collected\n- Spring Boot lifecycle -> context creation, bean wiring, runners, events\n- serialization -> object to byte stream\n- Callable -> returns result, Runnable does not\n- @Qualifier -> resolve bean ambiguity\n- interface vs abstract class -> contract vs contract + state\n- OOP -> encapsulation, abstraction, polymorphism\n- overloading vs overriding -> compile-time vs runtime\n- method hiding -> static method same signature in child\n- covariant return -> child can return subtype\n- class without main -> framework may hide flow, JVM entry still matters\n- anonymous class -> one-off inline class\n- HashMap -> hash -> bucket -> equals -> collision handling\n- patterns -> creational, structural, behavioral\n- String == vs equals -> reference vs content\n- overloaded main -> allowed, JVM ignores as entry\n- thread creation -> prefer executors in real systems\n\n============================================================\nMOCK INTERVIEW MICRO-ANSWERS\n============================================================"
+    },
+    {
+        "type": "question",
+        "content": "Q: Why not use volatile for counter?"
+    },
+    {
+        "type": "theory",
+        "content": "A: Because increment is read-modify-write, which is not atomic."
+    },
+    {
+        "type": "question",
+        "content": "Q: Is static thread-safe?"
+    },
+    {
+        "type": "theory",
+        "content": "A: No, static only means shared per class, not synchronized."
+    },
+    {
+        "type": "question",
+        "content": "Q: Can functional interface have many methods?"
+    },
+    {
+        "type": "theory",
+        "content": "A: It can have many default/static methods, but only one abstract method."
+    },
+    {
+        "type": "question",
+        "content": "Q: Why use ApplicationRunner?"
+    },
+    {
+        "type": "theory",
+        "content": "A: It gives parsed application arguments and runs after context startup."
+    },
+    {
+        "type": "question",
+        "content": "Q: Why explicit serialVersionUID?"
+    },
+    {
+        "type": "theory",
+        "content": "A: To control compatibility during deserialization."
+    },
+    {
+        "type": "question",
+        "content": "Q: Why prefer Runnable over extending Thread?"
+    },
+    {
+        "type": "theory",
+        "content": "A: Better separation of task from execution and avoids single inheritance limitation."
+    },
+    {
+        "type": "question",
+        "content": "Q: Why @Qualifier when @Primary exists?"
+    },
+    {
+        "type": "theory",
+        "content": "A: @Primary is default preference; @Qualifier selects a specific bean explicitly."
+    },
+    {
+        "type": "question",
+        "content": "Q: Why abstract class if interfaces have default methods?"
+    },
+    {
+        "type": "theory",
+        "content": "A: Abstract classes still support shared state, constructors, and protected reusable logic."
+    },
+    {
+        "type": "question",
+        "content": "Q: Why are Strings immutable?"
+    },
+    {
+        "type": "theory",
+        "content": "A: Security, pooling, stable hashCode, and safer sharing."
+    },
+    {
+        "type": "question",
+        "content": "Q: Why not raw Thread in production?"
+    },
+    {
+        "type": "theory",
+        "content": "A: Poor resource management and no pooling; executors scale better.\n\n============================================================\nNEXT BEST FOLLOW-UP PRACTICE\n============================================================\n\n1. Rewrite all rapid-fire answers from memory.\n2. For each topic, explain one real project example from your own Spring/Java experience.\n3. Practice pair questions:\n   - volatile vs synchronized\n   - HashMap vs ConcurrentHashMap\n   - Runnable vs Callable\n   - interface vs abstract class\n   - overloading vs overriding\n4. For senior interviews, add one production caveat for every topic.\n5. Record yourself answering each in under 60 seconds."
+    }
+]
