@@ -1,7 +1,20 @@
 import json
 import re
+import sys
+import os
 
-with open('JAVA & SPRING INTERVIEW MASTER QUES.txt', 'r', encoding='utf-8') as f:
+if len(sys.argv) != 3:
+    print("Usage: python parse_master_txt.py <input_file> <output_file>")
+    sys.exit(1)
+
+input_file = sys.argv[1]
+output_file = sys.argv[2]
+
+if not os.path.exists(input_file):
+    print(f"Error: Input file {input_file} not found.")
+    sys.exit(1)
+
+with open(input_file, 'r', encoding='utf-8') as f:
     lines = f.readlines()
 
 output = []
@@ -25,7 +38,7 @@ while i < len(lines):
     line = lines[i].rstrip()
     
     # Check for category header
-    if line.startswith("======") and i + 1 < len(lines) and re.match(r'^\d+\)', lines[i+1].strip()):
+    if line.startswith("======") and i + 1 < len(lines) and (re.match(r'^\d+\)', lines[i+1].strip()) or re.match(r'^[A-Z]', lines[i+1].strip())):
         flush_content()
         i += 1
         category_name = lines[i].strip()
@@ -68,6 +81,9 @@ while i < len(lines):
 
 flush_content()
 
-with open('data/page2.json', 'w', encoding='utf-8') as f:
+# Create output directory if it doesn't exist
+os.makedirs(os.path.dirname(output_file), exist_ok=True)
+
+with open(output_file, 'w', encoding='utf-8') as f:
     json.dump(output, f, indent=4)
-print("Generated data/page2.json from JAVA & SPRING INTERVIEW MASTER QUES.txt")
+print(f"Generated {output_file} from {input_file}")

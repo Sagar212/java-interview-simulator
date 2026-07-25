@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Interview Q&A & Scenario Simulator</title>
+    
+    <!-- Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Syntax Highlighting (PrismJS) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    
+    <style>
+        :root {
+            --bg-primary: #121316;
+            --bg-card: #1a1c23;
+            --text-main: #e3e4e8;
+            --text-theory: #cbd5e1;
+            --accent: #00e676;
+            --bg-code: #0f1115;
+            
+            --font-question: 'Inter', sans-serif;
+            --font-theory: 'Merriweather', serif;
+            --font-code: 'Fira Code', monospace;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            margin: 0;
+            padding: 90px 20px 60px 20px; /* Increased top padding for fixed nav */
+            font-family: var(--font-question);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Top Navigation Bar */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--bg-card);
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .top-nav a {
+            color: var(--text-theory);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            margin: 0 15px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .top-nav a:hover {
+            background-color: rgba(255,255,255,0.05);
+            color: #ffffff;
+        }
+
+        .top-nav a.active {
+            background-color: rgba(0, 230, 118, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(0, 230, 118, 0.2);
+        }
+
+        #app {
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        header {
+            margin-bottom: 50px;
+            text-align: center;
+        }
+
+        h1 {
+            font-family: var(--font-question);
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0 0 10px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-family: var(--font-theory);
+            font-size: 18px;
+            color: var(--text-theory);
+            line-height: 1.68;
+        }
+
+        .category-header {
+            font-family: var(--font-question);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent);
+            margin-top: 60px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+
+        .qa-container {
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            padding: 40px 35px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .qa-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+
+        .question {
+            font-family: var(--font-question);
+            font-size: 26px;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0 0 25px 0;
+            padding-left: 20px;
+            border-left: 4px solid var(--accent);
+            line-height: 1.4;
+        }
+
+        .theory {
+            font-family: var(--font-theory);
+            font-size: 18.5px;
+            color: var(--text-theory);
+            line-height: 1.7;
+            margin: 0 0 20px 0;
+        }
+        
+        .theory strong {
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-family: var(--font-question);
+            font-size: 16.5px;
+            background-color: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        th, td {
+            padding: 14px 18px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            line-height: 1.5;
+        }
+        
+        th {
+            background-color: rgba(0, 230, 118, 0.08);
+            color: var(--accent);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 1px;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover td {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .recall-anchor {
+            background-color: rgba(0, 230, 118, 0.06);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 6px 6px 0;
+            padding: 16px 20px;
+            margin: 25px 0;
+            font-family: var(--font-question);
+            font-size: 15.5px;
+            font-weight: 700;
+            color: var(--accent);
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .recall-anchor::before {
+            content: '⚡ KEY RECALL';
+            display: block;
+            font-size: 11px;
+            letter-spacing: 1.2px;
+            opacity: 0.8;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .code-container {
+            background-color: var(--bg-code);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0 0 0;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        pre[class*="language-"] {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: transparent !important;
+        }
+
+        code[class*="language-"], pre[class*="language-"] {
+            font-family: var(--font-code) !important;
+            font-size: 15.5px !important;
+            line-height: 1.5 !important;
+            text-shadow: none !important;
+        }
+        
+        p.theory code, td code, div.theory code {
+            background: rgba(255,255,255,0.08);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: var(--font-code);
+            font-size: 0.85em;
+            color: #fff;
+        }
+
+        .run-btn {
+            background-color: var(--accent);
+            color: #121316;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-family: var(--font-question);
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .run-btn:hover {
+            opacity: 0.9;
+        }
+        .run-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .console-output {
+            background-color: #0d0d0d;
+            border-left: 3px solid #666;
+            padding: 12px;
+            margin-top: 10px;
+            font-family: var(--font-code);
+            font-size: 14.5px;
+            color: #00ff00;
+            display: none;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            border-radius: 0 4px 4px 0;
+        }
+        .console-output.error {
+            border-left-color: #ff4444;
+            color: #ffaa00;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-nav">
+        <a href="index.html">Page 1: Core Java Simulator</a>
+        <a href="page2.html">Page 2: Spring & Master Q&A</a>
+        <a href="page3.html" class="active">Page 3: Spring Boot Deep Dive</a>
+    </div>
+
+    <div id="app">
+        <header>
+            <h1>Spring & Master Q&A</h1>
+            <div class="subtitle">Complete One-Go Interview Prep</div>
+        </header>
+        <main id="content-track"></main>
+    </div>
+
+    <!-- Syntax Highlighting Script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+
+    <script>
+        const interviewData = [
+    {
+        "type": "category",
+        "content": "1) AUTO-CONFIGURATION"
+    },
+    {
+        "type": "question",
+        "content": "How does Spring Boot auto-configuration work internally?"
+    },
+    {
+        "type": "theory",
+        "content": "Spring Boot auto-configuration attempts to automatically configure your Spring application based on the jar dependencies that you have added.\n- **Decision Process:** It looks at `@Conditional` annotations on `@AutoConfiguration` classes.\n- **Conditions:** Conditions include `@ConditionalOnClass` (is a class in classpath?), `@ConditionalOnMissingBean` (did the user already define this bean?), and `@ConditionalOnProperty` (is a property set?).\n- **Starters:** Starter dependencies simply pull in the necessary jars. Their presence triggers `@ConditionalOnClass` in the auto-config classes.\n- **Debugging:** You can debug by running with `--debug` or setting `logging.level.org.springframework.boot.autoconfigure=DEBUG` to see the Auto-configuration report."
+    },
+    {
+        "type": "category",
+        "content": "2) SPRING BOOT APPLICATION"
+    },
+    {
+        "type": "question",
+        "content": "What exactly happens when @SpringBootApplication is used?"
+    },
+    {
+        "type": "theory",
+        "content": "`@SpringBootApplication` is a convenience annotation that combines three powerful features:\n1. `@EnableAutoConfiguration`: Enables Spring Boot's auto-configuration mechanism.\n2. `@ComponentScan`: Enables component scanning in the package where the application class is located and its sub-packages.\n3. `@SpringBootConfiguration`: Flags the class as a configuration class (a specialized `@Configuration`).\n- **Package Location:** It should be placed in the root package above other classes. If placed in a sub-package (e.g., `com.app.main`), it will only scan that sub-package, missing controllers or services in `com.app.services`."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "import org.springframework.boot.SpringApplication;\nimport org.springframework.boot.autoconfigure.SpringBootApplication;\n\n@SpringBootApplication\npublic class MyApplication {\n    public static void main(String[] args) {\n        SpringApplication.run(MyApplication.class, args);\n    }\n}"
+    },
+    {
+        "type": "category",
+        "content": "3) BEAN CREATION"
+    },
+    {
+        "type": "question",
+        "content": "How does Spring Boot decide which beans to auto-configure?"
+    },
+    {
+        "type": "theory",
+        "content": "Spring Boot leverages `@Conditional` annotations to determine bean creation.\n- **@Conditional:** Allows registering beans only if certain criteria are met.\n- **Classpath:** `@ConditionalOnClass` checks if a specific library is present. E.g., if `DataSource.class` is on the classpath, it attempts to configure a database.\n- **Fallback:** `@ConditionalOnMissingBean` ensures that auto-configured beans are only created if the developer hasn't manually defined a bean of the same type. This allows easy overriding.\n- **Overriding:** Simply declare a `@Bean` in your own `@Configuration` class, and the auto-configured fallback will back off."
+    },
+    {
+        "type": "category",
+        "content": "4) AUTO-CONFIGURATION DISCOVERY"
+    },
+    {
+        "type": "question",
+        "content": "What is the role of spring.factories or AutoConfiguration.imports?"
+    },
+    {
+        "type": "theory",
+        "content": "They are the discovery mechanisms for Auto-Configuration classes.\n- **Purpose:** They list the fully qualified names of configuration classes that Spring Boot should evaluate on startup.\n- **Discovery:** Spring Boot's `SpringFactoriesLoader` reads `META-INF/spring.factories` (or `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` in Spring Boot 2.7/3.0+) across all jars.\n- **Changes:** In Spring Boot 3.0, `spring.factories` was completely replaced by `AutoConfiguration.imports` for auto-configuration specifically, making it cleaner.\n- **Customization:** To register your own, create the `imports` file in `META-INF/spring/` and list your custom `@AutoConfiguration` class."
+    },
+    {
+        "type": "category",
+        "content": "5) SCANNING VS AUTO-CONFIG"
+    },
+    {
+        "type": "question",
+        "content": "What is the difference between @ComponentScan and @EnableAutoConfiguration?"
+    },
+    {
+        "type": "theory",
+        "content": "A:\n- **@ComponentScan:** Scans your application's source code packages for custom components (`@Controller`, `@Service`, `@Repository`). It only finds what *you* wrote.\n- **@EnableAutoConfiguration:** Scans the classpath (jars) and evaluates pre-defined configuration classes to set up infrastructure (like Web Servers, DataSources, Message Brokers) based on conditions.\n- **Overlap:** They don't overlap in responsibilities, but they work together.\n- **Problems:** If `@ComponentScan` is set too broad (e.g., scanning `org` or `com`), it drastically increases startup time and might load unintended beans."
+    },
+    {
+        "type": "category",
+        "content": "6) EMBEDDED SERVERS"
+    },
+    {
+        "type": "question",
+        "content": "How does Spring Boot embedded Tomcat start internally?"
+    },
+    {
+        "type": "theory",
+        "content": "A:\n- **Creation:** During startup, if a web environment is detected, Spring Boot creates an `AnnotationConfigServletWebServerApplicationContext`.\n- **Binding:** A `ServletWebServerFactory` bean (auto-configured for Tomcat if `tomcat-embed-core` is present) is used to create and start the `WebServer`.\n- **Switching:** Exclude `spring-boot-starter-tomcat` and include `spring-boot-starter-undertow` or `jetty`.\n- **Graceful Shutdown:** When enabled, the server stops accepting new connections but allows active requests a grace period (e.g., 30s) to finish before shutting down."
+    },
+    {
+        "type": "category",
+        "content": "7) LIFECYCLE"
+    },
+    {
+        "type": "question",
+        "content": "What happens during the Spring Boot application startup lifecycle?"
+    },
+    {
+        "type": "theory",
+        "content": "A:\n1. **Bootstrap:** `SpringApplication` instantiates and sets up `ApplicationListeners`.\n2. **Environment:** The `Environment` is prepared (properties, profiles).\n3. **Context Creation:** The `ApplicationContext` is created based on the environment (Web, Reactive, or Standard).\n4. **Bean Initialization:** Classes are scanned, auto-configuration runs, and singletons are instantiated.\n5. **Runners:** `ApplicationRunner` and `CommandLineRunner` beans are executed.\n- **Hooks:** You can hook into events like `ApplicationStartingEvent` or `ApplicationReadyEvent`."
+    },
+    {
+        "type": "category",
+        "content": "8) DEPENDENCY INJECTION"
+    },
+    {
+        "type": "question",
+        "content": "How does dependency injection work under the hood in Spring Boot?"
+    },
+    {
+        "type": "theory",
+        "content": "A:\n- **Resolution:** Spring builds a graph of dependencies. When Bean A needs Bean B, the `BeanFactory` checks if B exists. If not, it creates B first.\n- **BeanFactory:** It is the core engine responsible for instantiating, configuring, and managing beans.\n- **Constructor vs Field:** Constructor injection enforces immutability and guarantees dependencies are not null. Field injection uses reflection post-instantiation, allowing circular dependencies but making testing harder.\n- **Circular Dependencies:** Constructor circular dependencies fail at startup. Setter/Field circular dependencies can be resolved by Spring using early proxies, though it's bad practice."
+    },
+    {
+        "type": "category",
+        "content": "9) CONTEXT VS FACTORY"
+    },
+    {
+        "type": "question",
+        "content": "What is the difference between ApplicationContext and BeanFactory?"
+    },
+    {
+        "type": "theory",
+        "content": "A:\n- **BeanFactory:** The fundamental IoC container. It uses lazy initialization by default (creates beans only when requested).\n- **ApplicationContext:** A sub-interface of BeanFactory. It adds enterprise features: Event publishing, Message resolution (i18n), Environment properties, and eager instantiation of singletons.\n- **Usage:** Spring Boot almost exclusively uses `ApplicationContext` because web applications need eager initialization and robust event systems."
+    },
+    {
+        "type": "category",
+        "content": "10) EXTERNAL CONFIGURATION"
+    },
+    {
+        "type": "question",
+        "content": "How does Spring Boot handle externalized configuration?"
+    },
+    {
+        "type": "theory",
+        "content": "A:\n- **Sources:** `application.properties`, `application.yml`, Environment Variables, Command-line args, Config Servers.\n- **Merging:** Properties are merged, with higher-precedence sources overriding lower ones.\n- **Profiles:** `application-{profile}.yml` is loaded if that profile is active, overriding defaults.\n- **Binding:** Use `@ConfigurationProperties` to strongly type configuration into Java record/class objects."
+    },
+    {
+        "type": "category",
+        "content": "11) PROPERTY RESOLUTION"
+    },
+    {
+        "type": "question",
+        "content": "What is the order of property resolution in Spring Boot?"
+    },
+    {
+        "type": "theory",
+        "content": "Spring Boot has a strict precedence order (highest to lowest):\n1. Command-line arguments (`--server.port=8081`).\n2. JVM System properties (`-Dserver.port=8081`).\n3. OS Environment variables (`SERVER_PORT=8081`).\n4. Profile-specific application properties outside packaged jar.\n5. Profile-specific application properties inside packaged jar.\n6. Standard application properties outside jar.\n7. Standard application properties inside jar.\n8. `@PropertySource` annotations.\n9. Default properties."
+    },
+    {
+        "type": "category",
+        "content": "12) BEAN LIFECYCLE"
+    },
+    {
+        "type": "question",
+        "content": "How does Spring Boot manage bean creation and bean lifecycle internally?"
+    },
+    {
+        "type": "theory",
+        "content": "A:\n1. **Instantiation:** Memory allocated (Constructor called).\n2. **Populate Properties:** Dependencies injected.\n3. **BeanPostProcessors (Before):** Framework modifies the bean (e.g., injecting ApplicationContext).\n4. **Initialization:** `@PostConstruct` methods execute, followed by `InitializingBean.afterPropertiesSet()`.\n5. **BeanPostProcessors (After):** Proxies (like AOP/Transactions) are wrapped around the bean.\n6. **Destruction:** On shutdown, `@PreDestroy` executes."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "import jakarta.annotation.PostConstruct;\nimport jakarta.annotation.PreDestroy;\nimport org.springframework.stereotype.Component;\n\n@Component\npublic class LifecycleDemo {\n    public LifecycleDemo() {\n        System.out.println(\"1. Constructor called\");\n    }\n\n    @PostConstruct\n    public void init() {\n        System.out.println(\"2. @PostConstruct called\");\n    }\n\n    @PreDestroy\n    public void destroy() {\n        System.out.println(\"3. @PreDestroy called on shutdown\");\n    }\n}"
+    },
+    {
+        "type": "category",
+        "content": "13) BEAN VS COMPONENT"
+    },
+    {
+        "type": "question",
+        "content": "What is the difference between @Bean and @Component?"
+    },
+    {
+        "type": "theory",
+        "content": "A:\n- **@Component:** A class-level annotation. Spring creates the bean automatically during classpath scanning. Best for your own code.\n- **@Bean:** A method-level annotation inside `@Configuration` classes. You manually instantiate and return the object. Best for third-party classes (e.g., `RestTemplate`) where you can't add `@Component`.\n- **Proxy Behavior:** `@Configuration` classes are proxied using CGLIB. Calling a `@Bean` method directly from another method in the same class returns the singleton from the container, not a new instance."
+    },
+    {
+        "type": "category",
+        "content": "14) ACTUATOR"
+    },
+    {
+        "type": "question",
+        "content": "How does Spring Boot Actuator work internally?"
+    },
+    {
+        "type": "theory",
+        "content": "A:\n- **Endpoints:** It auto-configures HTTP and JMX endpoints (`/actuator/health`, `/actuator/metrics`).\n- **Security:** By default, only `/health` and `/info` are exposed over HTTP. You secure them via Spring Security and configure exposure via `management.endpoints.web.exposure.include=*`.\n- **Metrics:** It integrates with Micrometer to collect JVM, Tomcat, and application metrics, which can be exported to Prometheus, Datadog, etc."
+    },
+    {
+        "type": "category",
+        "content": "15) HEALTH INDICATORS"
+    },
+    {
+        "type": "question",
+        "content": "How do you create custom health indicators in Actuator?"
+    },
+    {
+        "type": "theory",
+        "content": "A:\n- **Usage:** Useful for checking connectivity to external APIs or custom databases not supported out-of-the-box.\n- **Implementation:** Implement `HealthIndicator` or extend `AbstractHealthIndicator`. Return `Health.up()` or `Health.down().withDetail(...)`.\n- **Liveness vs Readiness:** Spring Boot 2.3+ separates these. Liveness means the app is running. Readiness means it's ready to accept traffic."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "import org.springframework.boot.actuate.health.Health;\nimport org.springframework.boot.actuate.health.HealthIndicator;\nimport org.springframework.stereotype.Component;\n\n@Component\npublic class CustomApiHealthIndicator implements HealthIndicator {\n    @Override\n    public Health health() {\n        boolean isApiUp = checkExternalApi();\n        if (isApiUp) {\n            return Health.up().withDetail(\"External API\", \"Available\").build();\n        }\n        return Health.down().withDetail(\"External API\", \"Unreachable\").build();\n    }\n\n    private boolean checkExternalApi() {\n        return true; // Mock implementation\n    }\n}"
+    },
+    {
+        "type": "category",
+        "content": "16) GRACEFUL SHUTDOWN"
+    },
+    {
+        "type": "question",
+        "content": "How does Spring Boot support graceful shutdown?"
+    },
+    {
+        "type": "theory",
+        "content": "A:\n- **Protection:** Prevents dropping active user requests when the application is killed (e.g., during Kubernetes rolling updates).\n- **Mechanism:** When a SIGTERM is received, the embedded web server stops accepting new connections but lets active threads finish.\n- **Configuration:** `server.shutdown=graceful` and `spring.lifecycle.timeout-per-shutdown-phase=30s`."
+    },
+    {
+        "type": "category",
+        "content": "17) TRANSACTIONS"
+    },
+    {
+        "type": "question",
+        "content": "How do @Transactional and transaction propagation work in real applications?"
+    },
+    {
+        "type": "theory",
+        "content": "A:\n- **Default Propagation:** `REQUIRED` - join existing transaction if present, else create a new one.\n- **Proxies:** Spring generates a CGLIB proxy around the class. The proxy opens a transaction, calls the real method, and then commits/rolls back.\n- **Rollbacks:** Rolls back on `RuntimeException` and `Error` automatically. Checked exceptions DO NOT trigger rollback unless explicitly configured with `rollbackFor = Exception.class`."
+    },
+    {
+        "type": "category",
+        "content": "18) TRANSACTION PROXY ISSUES"
+    },
+    {
+        "type": "question",
+        "content": "Why does @Transactional fail in self-invocation?"
+    },
+    {
+        "type": "theory",
+        "content": "A:\n- **Proxy Bypass:** Spring AOP works via proxies. If Method A calls Method B within the same class, the call goes directly via `this.MethodB()`, bypassing the proxy. Therefore, any `@Transactional` on Method B is ignored.\n- **Fix:** Move Method B to a different service class, or inject `ApplicationContext` to retrieve the proxy (anti-pattern), or use AspectJ weaving instead of Spring AOP proxies."
+    },
+    {
+        "type": "category",
+        "content": "19) FILTERS VS INTERCEPTORS"
+    },
+    {
+        "type": "question",
+        "content": "How do filters and interceptors differ in request flow?"
+    },
+    {
+        "type": "theory",
+        "content": "A:\n- **Filter:** Part of the Servlet API. Executes BEFORE requests reach the DispatcherServlet. Good for raw HTTP modifications, CORS, and early authentication (Spring Security uses Filter Chains).\n- **Interceptor:** Part of the Spring MVC framework. Executes AFTER DispatcherServlet but before the Controller. Good for application-level logic, checking Controller annotations, or accessing model/view data."
+    },
+    {
+        "type": "category",
+        "content": "20) ASYNC PROCESSING"
+    },
+    {
+        "type": "question",
+        "content": "How does Spring Boot handle async processing, and what happens when an async method fails?"
+    },
+    {
+        "type": "theory",
+        "content": "A:\n- **Execution:** `@Async` tells Spring to execute the method in a separate thread pool.\n- **Executor:** If no custom `Executor` is defined, Spring uses a `SimpleAsyncTaskExecutor` (creates a new thread for every request - very bad for production). You should define a `ThreadPoolTaskExecutor` bean.\n- **Results & Errors:** Return `CompletableFuture<T>`. Exceptions in `void` methods are logged but swallowed unless an `AsyncUncaughtExceptionHandler` is configured."
+    },
+    {
+        "type": "category",
+        "content": "21) HIKARICP"
+    },
+    {
+        "type": "question",
+        "content": "Why is HikariCP the default connection pool in Spring Boot?"
+    },
+    {
+        "type": "theory",
+        "content": "A:\n- **Performance:** It is exceptionally fast and lightweight due to bytecode-level optimizations, custom array structures, and minimal lock contention.\n- **Tuning:** Key settings include `maximumPoolSize` (to prevent DB overload) and `connectionTimeout`.\n- **Auto-config:** `DataSourceAutoConfiguration` detects Hikari in the classpath and configures it automatically using `spring.datasource.hikari.*` properties."
+    },
+    {
+        "type": "category",
+        "content": "22) CIRCULAR DEPENDENCIES"
+    },
+    {
+        "type": "question",
+        "content": "How does Spring Boot handle circular dependencies?"
+    },
+    {
+        "type": "theory",
+        "content": "A:\n- **Constructor Injection:** Fails immediately with `BeanCurrentlyInCreationException`. A needs B, B needs A; neither can be instantiated.\n- **Setter/Field Injection:** Spring can resolve this using early references. It creates a blank A, exposes an early reference, creates B injecting A, then finishes A by injecting B.\n- **Spring Boot 2.6+:** Circular dependencies are disabled by default. You must refactor or set `spring.main.allow-circular-references=true`."
+    },
+    {
+        "type": "category",
+        "content": "23) CONFIGURATION PROPERTIES"
+    },
+    {
+        "type": "question",
+        "content": "What happens internally when @ConfigurationProperties is used?"
+    },
+    {
+        "type": "theory",
+        "content": "A:\n- **Binding:** A `ConfigurationPropertiesBindingPostProcessor` binds the environment properties to the bean fields using reflection or constructors.\n- **Relaxed Binding:** Spring allows `kebab-case`, `camelCase`, or `SNAKE_CASE` in properties to map to `camelCase` java fields seamlessly.\n- **Validation:** Combine with `@Validated` and JSR-303 annotations (`@NotNull`, `@Min`) to fail startup if config is invalid."
+    },
+    {
+        "type": "category",
+        "content": "24) PROFILES"
+    },
+    {
+        "type": "question",
+        "content": "How do profiles work internally in Spring Boot?"
+    },
+    {
+        "type": "theory",
+        "content": "A:\n- **Selection:** Active profiles are set via `spring.profiles.active=dev,mysql`.\n- **Loading:** `@Profile(\"dev\")` ensures a bean is only created if `dev` is active. Spring also loads `application-dev.yml` automatically, overriding keys in `application.yml`.\n- **Testing:** Use `@ActiveProfiles(\"test\")` on test classes to isolate test configuration."
+    },
+    {
+        "type": "category",
+        "content": "25) STARTUP OPTIMIZATION"
+    },
+    {
+        "type": "question",
+        "content": "How do you optimize Spring Boot startup time in production?"
+    },
+    {
+        "type": "theory",
+        "content": "A:\n- **Lazy Init:** Set `spring.main.lazy-initialization=true`. Beans are created on first request, drastically cutting startup time (but delaying first-request latency).\n- **Scanning:** Limit `@ComponentScan` and `@EntityScan` strictly to necessary packages.\n- **JIT vs AOT:** Use GraalVM Native Image (Spring Boot 3) to compile the app Ahead-Of-Time, reducing startup to milliseconds.\n- **Measurement:** Use the Actuator `/actuator/startup` endpoint or application startup tracking to identify slow beans."
+    }
+];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const track = document.getElementById('content-track');
+            let currentContainer = null;
+
+            interviewData.forEach(item => {
+                if (item.type === 'category') {
+                    const catEl = document.createElement('div');
+                    catEl.className = 'category-header';
+                    catEl.textContent = item.content;
+                    track.appendChild(catEl);
+                    currentContainer = null;
+                    return;
+                }
+
+                if (item.type === 'question') {
+                    currentContainer = document.createElement('div');
+                    currentContainer.className = 'qa-container';
+                    track.appendChild(currentContainer);
+
+                    const qEl = document.createElement('h2');
+                    qEl.className = 'question';
+                    qEl.textContent = item.content;
+                    currentContainer.appendChild(qEl);
+                    return;
+                }
+
+                if (!currentContainer) {
+                    currentContainer = document.createElement('div');
+                    currentContainer.className = 'qa-container';
+                    track.appendChild(currentContainer);
+                }
+
+                if (item.type === 'theory') {
+                    const hookRegex = /\*\*(.*?)\*\*/g;
+                    let theoryHTML = item.content;
+                    let match;
+                    const hooks = [];
+
+                    while ((match = hookRegex.exec(item.content)) !== null) {
+                        hooks.push(match[1]);
+                    }
+
+                    theoryHTML = theoryHTML.replace(/(?<!<[^>]*?)`([^`]+)`(?![^<]*?>)/g, '<code>$1</code>');
+                    theoryHTML = theoryHTML.replace(hookRegex, '<strong>$1</strong>');
+
+                    const tEl = document.createElement('div');
+                    tEl.className = 'theory';
+                    let formattedHTML = theoryHTML.replace(/\n\n/g, '<br><br>');
+                    tEl.innerHTML = formattedHTML;
+                    currentContainer.appendChild(tEl);
+
+                    hooks.forEach(hookText => {
+                        const anchorEl = document.createElement('aside');
+                        anchorEl.className = 'recall-anchor';
+                        anchorEl.textContent = hookText;
+                        currentContainer.appendChild(anchorEl);
+                    });
+                }
+
+                if (item.type === 'code') {
+                    const codeBlock = document.createElement('div');
+                    codeBlock.className = 'code-container';
+                    
+                    const pre = document.createElement('pre');
+                    const code = document.createElement('code');
+                    const lang = item.lang ? item.lang : 'java';
+                    code.className = `language-${lang}`;
+                    code.textContent = item.content;
+                    
+                    pre.appendChild(code);
+                    codeBlock.appendChild(pre);
+                    currentContainer.appendChild(codeBlock);
+
+                    if (lang === 'java') {
+                        const runBtn = document.createElement('button');
+                        runBtn.className = 'run-btn';
+                        runBtn.innerHTML = '▶ Run Code';
+                        
+                        const consoleOut = document.createElement('div');
+                        consoleOut.className = 'console-output';
+                        
+                        runBtn.onclick = () => executeJava(item.content, runBtn, consoleOut);
+                        
+                        currentContainer.appendChild(runBtn);
+                        currentContainer.appendChild(consoleOut);
+                    }
+                }
+            });
+
+            if (window.Prism) {
+                Prism.highlightAll();
+            }
+        });
+
+        async function executeJava(sourceCode, btn, consoleOut) {
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Running...';
+            consoleOut.style.display = 'block';
+            consoleOut.className = 'console-output';
+            consoleOut.textContent = 'Compiling and executing on cloud...';
+
+            let codeToRun = sourceCode;
+            if (!codeToRun.includes('public class') && !codeToRun.includes('static void main')) {
+                codeToRun = `import java.util.*;
+import java.util.stream.*;
+import java.util.concurrent.*;
+public class Main {
+    public static void main(String[] args) throws Exception {
+        ${sourceCode}
+    }
+}`;
+            } else if (!codeToRun.includes('public class') && codeToRun.includes('class ')) {
+                codeToRun = codeToRun.replace('class ', 'public class ');
+            }
+
+            try {
+                const response = await fetch('http://localhost:8080/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: codeToRun })
+                });
+
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    consoleOut.textContent = result.output || "Program finished with no output.";
+                } else {
+                    consoleOut.className = 'console-output error';
+                    if (result.type === 'compile') {
+                        consoleOut.textContent = "COMPILATION ERROR:\n" + result.output;
+                    } else if (result.type === 'run') {
+                        consoleOut.textContent = "RUNTIME ERROR:\n" + result.output;
+                    } else {
+                        consoleOut.textContent = "SERVER ERROR:\n" + result.output;
+                    }
+                }
+            } catch (err) {
+                consoleOut.className = 'console-output error';
+                consoleOut.textContent = "Network error: Make sure you are running 'python compiler_server.py' in the background!\nDetails: " + err.message;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '▶ Run Code';
+            }
+        }
+    </script>
+</body>
+</html>

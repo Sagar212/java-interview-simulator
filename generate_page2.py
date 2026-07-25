@@ -293,6 +293,7 @@ html_template = """<!DOCTYPE html>
     <div class="top-nav">
         <a href="index.html">Page 1: Core Java Simulator</a>
         <a href="page2.html" class="active">Page 2: Spring & Master Q&A</a>
+        <a href="page3.html">Page 3: Spring Boot Deep Dive</a>
     </div>
 
     <div id="app">

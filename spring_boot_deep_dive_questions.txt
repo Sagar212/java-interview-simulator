@@ -1,0 +1,325 @@
+======
+1) AUTO-CONFIGURATION
+======
+
+Q: How does Spring Boot auto-configuration work internally?
+A: Spring Boot auto-configuration attempts to automatically configure your Spring application based on the jar dependencies that you have added.
+- **Decision Process:** It looks at `@Conditional` annotations on `@AutoConfiguration` classes.
+- **Conditions:** Conditions include `@ConditionalOnClass` (is a class in classpath?), `@ConditionalOnMissingBean` (did the user already define this bean?), and `@ConditionalOnProperty` (is a property set?).
+- **Starters:** Starter dependencies simply pull in the necessary jars. Their presence triggers `@ConditionalOnClass` in the auto-config classes.
+- **Debugging:** You can debug by running with `--debug` or setting `logging.level.org.springframework.boot.autoconfigure=DEBUG` to see the Auto-configuration report.
+
+======
+2) SPRING BOOT APPLICATION
+======
+
+Q: What exactly happens when @SpringBootApplication is used?
+A: `@SpringBootApplication` is a convenience annotation that combines three powerful features:
+1. `@EnableAutoConfiguration`: Enables Spring Boot's auto-configuration mechanism.
+2. `@ComponentScan`: Enables component scanning in the package where the application class is located and its sub-packages.
+3. `@SpringBootConfiguration`: Flags the class as a configuration class (a specialized `@Configuration`).
+- **Package Location:** It should be placed in the root package above other classes. If placed in a sub-package (e.g., `com.app.main`), it will only scan that sub-package, missing controllers or services in `com.app.services`.
+
+Java Template
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class MyApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(MyApplication.class, args);
+    }
+}
+End Template
+
+======
+3) BEAN CREATION
+======
+
+Q: How does Spring Boot decide which beans to auto-configure?
+A: Spring Boot leverages `@Conditional` annotations to determine bean creation.
+- **@Conditional:** Allows registering beans only if certain criteria are met.
+- **Classpath:** `@ConditionalOnClass` checks if a specific library is present. E.g., if `DataSource.class` is on the classpath, it attempts to configure a database.
+- **Fallback:** `@ConditionalOnMissingBean` ensures that auto-configured beans are only created if the developer hasn't manually defined a bean of the same type. This allows easy overriding.
+- **Overriding:** Simply declare a `@Bean` in your own `@Configuration` class, and the auto-configured fallback will back off.
+
+======
+4) AUTO-CONFIGURATION DISCOVERY
+======
+
+Q: What is the role of spring.factories or AutoConfiguration.imports?
+A: They are the discovery mechanisms for Auto-Configuration classes.
+- **Purpose:** They list the fully qualified names of configuration classes that Spring Boot should evaluate on startup.
+- **Discovery:** Spring Boot's `SpringFactoriesLoader` reads `META-INF/spring.factories` (or `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` in Spring Boot 2.7/3.0+) across all jars.
+- **Changes:** In Spring Boot 3.0, `spring.factories` was completely replaced by `AutoConfiguration.imports` for auto-configuration specifically, making it cleaner.
+- **Customization:** To register your own, create the `imports` file in `META-INF/spring/` and list your custom `@AutoConfiguration` class.
+
+======
+5) SCANNING VS AUTO-CONFIG
+======
+
+Q: What is the difference between @ComponentScan and @EnableAutoConfiguration?
+A: 
+- **@ComponentScan:** Scans your application's source code packages for custom components (`@Controller`, `@Service`, `@Repository`). It only finds what *you* wrote.
+- **@EnableAutoConfiguration:** Scans the classpath (jars) and evaluates pre-defined configuration classes to set up infrastructure (like Web Servers, DataSources, Message Brokers) based on conditions.
+- **Overlap:** They don't overlap in responsibilities, but they work together.
+- **Problems:** If `@ComponentScan` is set too broad (e.g., scanning `org` or `com`), it drastically increases startup time and might load unintended beans.
+
+======
+6) EMBEDDED SERVERS
+======
+
+Q: How does Spring Boot embedded Tomcat start internally?
+A: 
+- **Creation:** During startup, if a web environment is detected, Spring Boot creates an `AnnotationConfigServletWebServerApplicationContext`.
+- **Binding:** A `ServletWebServerFactory` bean (auto-configured for Tomcat if `tomcat-embed-core` is present) is used to create and start the `WebServer`.
+- **Switching:** Exclude `spring-boot-starter-tomcat` and include `spring-boot-starter-undertow` or `jetty`.
+- **Graceful Shutdown:** When enabled, the server stops accepting new connections but allows active requests a grace period (e.g., 30s) to finish before shutting down.
+
+======
+7) LIFECYCLE
+======
+
+Q: What happens during the Spring Boot application startup lifecycle?
+A: 
+1. **Bootstrap:** `SpringApplication` instantiates and sets up `ApplicationListeners`.
+2. **Environment:** The `Environment` is prepared (properties, profiles).
+3. **Context Creation:** The `ApplicationContext` is created based on the environment (Web, Reactive, or Standard).
+4. **Bean Initialization:** Classes are scanned, auto-configuration runs, and singletons are instantiated.
+5. **Runners:** `ApplicationRunner` and `CommandLineRunner` beans are executed.
+- **Hooks:** You can hook into events like `ApplicationStartingEvent` or `ApplicationReadyEvent`.
+
+======
+8) DEPENDENCY INJECTION
+======
+
+Q: How does dependency injection work under the hood in Spring Boot?
+A: 
+- **Resolution:** Spring builds a graph of dependencies. When Bean A needs Bean B, the `BeanFactory` checks if B exists. If not, it creates B first.
+- **BeanFactory:** It is the core engine responsible for instantiating, configuring, and managing beans.
+- **Constructor vs Field:** Constructor injection enforces immutability and guarantees dependencies are not null. Field injection uses reflection post-instantiation, allowing circular dependencies but making testing harder.
+- **Circular Dependencies:** Constructor circular dependencies fail at startup. Setter/Field circular dependencies can be resolved by Spring using early proxies, though it's bad practice.
+
+======
+9) CONTEXT VS FACTORY
+======
+
+Q: What is the difference between ApplicationContext and BeanFactory?
+A: 
+- **BeanFactory:** The fundamental IoC container. It uses lazy initialization by default (creates beans only when requested).
+- **ApplicationContext:** A sub-interface of BeanFactory. It adds enterprise features: Event publishing, Message resolution (i18n), Environment properties, and eager instantiation of singletons.
+- **Usage:** Spring Boot almost exclusively uses `ApplicationContext` because web applications need eager initialization and robust event systems.
+
+======
+10) EXTERNAL CONFIGURATION
+======
+
+Q: How does Spring Boot handle externalized configuration?
+A: 
+- **Sources:** `application.properties`, `application.yml`, Environment Variables, Command-line args, Config Servers.
+- **Merging:** Properties are merged, with higher-precedence sources overriding lower ones.
+- **Profiles:** `application-{profile}.yml` is loaded if that profile is active, overriding defaults.
+- **Binding:** Use `@ConfigurationProperties` to strongly type configuration into Java record/class objects.
+
+======
+11) PROPERTY RESOLUTION
+======
+
+Q: What is the order of property resolution in Spring Boot?
+A: Spring Boot has a strict precedence order (highest to lowest):
+1. Command-line arguments (`--server.port=8081`).
+2. JVM System properties (`-Dserver.port=8081`).
+3. OS Environment variables (`SERVER_PORT=8081`).
+4. Profile-specific application properties outside packaged jar.
+5. Profile-specific application properties inside packaged jar.
+6. Standard application properties outside jar.
+7. Standard application properties inside jar.
+8. `@PropertySource` annotations.
+9. Default properties.
+
+======
+12) BEAN LIFECYCLE
+======
+
+Q: How does Spring Boot manage bean creation and bean lifecycle internally?
+A: 
+1. **Instantiation:** Memory allocated (Constructor called).
+2. **Populate Properties:** Dependencies injected.
+3. **BeanPostProcessors (Before):** Framework modifies the bean (e.g., injecting ApplicationContext).
+4. **Initialization:** `@PostConstruct` methods execute, followed by `InitializingBean.afterPropertiesSet()`.
+5. **BeanPostProcessors (After):** Proxies (like AOP/Transactions) are wrapped around the bean.
+6. **Destruction:** On shutdown, `@PreDestroy` executes.
+
+Java Template
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import org.springframework.stereotype.Component;
+
+@Component
+public class LifecycleDemo {
+    public LifecycleDemo() {
+        System.out.println("1. Constructor called");
+    }
+
+    @PostConstruct
+    public void init() {
+        System.out.println("2. @PostConstruct called");
+    }
+
+    @PreDestroy
+    public void destroy() {
+        System.out.println("3. @PreDestroy called on shutdown");
+    }
+}
+End Template
+
+======
+13) BEAN VS COMPONENT
+======
+
+Q: What is the difference between @Bean and @Component?
+A: 
+- **@Component:** A class-level annotation. Spring creates the bean automatically during classpath scanning. Best for your own code.
+- **@Bean:** A method-level annotation inside `@Configuration` classes. You manually instantiate and return the object. Best for third-party classes (e.g., `RestTemplate`) where you can't add `@Component`.
+- **Proxy Behavior:** `@Configuration` classes are proxied using CGLIB. Calling a `@Bean` method directly from another method in the same class returns the singleton from the container, not a new instance.
+
+======
+14) ACTUATOR
+======
+
+Q: How does Spring Boot Actuator work internally?
+A: 
+- **Endpoints:** It auto-configures HTTP and JMX endpoints (`/actuator/health`, `/actuator/metrics`).
+- **Security:** By default, only `/health` and `/info` are exposed over HTTP. You secure them via Spring Security and configure exposure via `management.endpoints.web.exposure.include=*`.
+- **Metrics:** It integrates with Micrometer to collect JVM, Tomcat, and application metrics, which can be exported to Prometheus, Datadog, etc.
+
+======
+15) HEALTH INDICATORS
+======
+
+Q: How do you create custom health indicators in Actuator?
+A: 
+- **Usage:** Useful for checking connectivity to external APIs or custom databases not supported out-of-the-box.
+- **Implementation:** Implement `HealthIndicator` or extend `AbstractHealthIndicator`. Return `Health.up()` or `Health.down().withDetail(...)`.
+- **Liveness vs Readiness:** Spring Boot 2.3+ separates these. Liveness means the app is running. Readiness means it's ready to accept traffic.
+
+Java Template
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.stereotype.Component;
+
+@Component
+public class CustomApiHealthIndicator implements HealthIndicator {
+    @Override
+    public Health health() {
+        boolean isApiUp = checkExternalApi();
+        if (isApiUp) {
+            return Health.up().withDetail("External API", "Available").build();
+        }
+        return Health.down().withDetail("External API", "Unreachable").build();
+    }
+
+    private boolean checkExternalApi() {
+        return true; // Mock implementation
+    }
+}
+End Template
+
+======
+16) GRACEFUL SHUTDOWN
+======
+
+Q: How does Spring Boot support graceful shutdown?
+A: 
+- **Protection:** Prevents dropping active user requests when the application is killed (e.g., during Kubernetes rolling updates).
+- **Mechanism:** When a SIGTERM is received, the embedded web server stops accepting new connections but lets active threads finish.
+- **Configuration:** `server.shutdown=graceful` and `spring.lifecycle.timeout-per-shutdown-phase=30s`.
+
+======
+17) TRANSACTIONS
+======
+
+Q: How do @Transactional and transaction propagation work in real applications?
+A: 
+- **Default Propagation:** `REQUIRED` - join existing transaction if present, else create a new one.
+- **Proxies:** Spring generates a CGLIB proxy around the class. The proxy opens a transaction, calls the real method, and then commits/rolls back.
+- **Rollbacks:** Rolls back on `RuntimeException` and `Error` automatically. Checked exceptions DO NOT trigger rollback unless explicitly configured with `rollbackFor = Exception.class`.
+
+======
+18) TRANSACTION PROXY ISSUES
+======
+
+Q: Why does @Transactional fail in self-invocation?
+A: 
+- **Proxy Bypass:** Spring AOP works via proxies. If Method A calls Method B within the same class, the call goes directly via `this.MethodB()`, bypassing the proxy. Therefore, any `@Transactional` on Method B is ignored.
+- **Fix:** Move Method B to a different service class, or inject `ApplicationContext` to retrieve the proxy (anti-pattern), or use AspectJ weaving instead of Spring AOP proxies.
+
+======
+19) FILTERS VS INTERCEPTORS
+======
+
+Q: How do filters and interceptors differ in request flow?
+A: 
+- **Filter:** Part of the Servlet API. Executes BEFORE requests reach the DispatcherServlet. Good for raw HTTP modifications, CORS, and early authentication (Spring Security uses Filter Chains).
+- **Interceptor:** Part of the Spring MVC framework. Executes AFTER DispatcherServlet but before the Controller. Good for application-level logic, checking Controller annotations, or accessing model/view data.
+
+======
+20) ASYNC PROCESSING
+======
+
+Q: How does Spring Boot handle async processing, and what happens when an async method fails?
+A: 
+- **Execution:** `@Async` tells Spring to execute the method in a separate thread pool.
+- **Executor:** If no custom `Executor` is defined, Spring uses a `SimpleAsyncTaskExecutor` (creates a new thread for every request - very bad for production). You should define a `ThreadPoolTaskExecutor` bean.
+- **Results & Errors:** Return `CompletableFuture<T>`. Exceptions in `void` methods are logged but swallowed unless an `AsyncUncaughtExceptionHandler` is configured.
+
+======
+21) HIKARICP
+======
+
+Q: Why is HikariCP the default connection pool in Spring Boot?
+A: 
+- **Performance:** It is exceptionally fast and lightweight due to bytecode-level optimizations, custom array structures, and minimal lock contention.
+- **Tuning:** Key settings include `maximumPoolSize` (to prevent DB overload) and `connectionTimeout`.
+- **Auto-config:** `DataSourceAutoConfiguration` detects Hikari in the classpath and configures it automatically using `spring.datasource.hikari.*` properties.
+
+======
+22) CIRCULAR DEPENDENCIES
+======
+
+Q: How does Spring Boot handle circular dependencies?
+A: 
+- **Constructor Injection:** Fails immediately with `BeanCurrentlyInCreationException`. A needs B, B needs A; neither can be instantiated.
+- **Setter/Field Injection:** Spring can resolve this using early references. It creates a blank A, exposes an early reference, creates B injecting A, then finishes A by injecting B.
+- **Spring Boot 2.6+:** Circular dependencies are disabled by default. You must refactor or set `spring.main.allow-circular-references=true`.
+
+======
+23) CONFIGURATION PROPERTIES
+======
+
+Q: What happens internally when @ConfigurationProperties is used?
+A: 
+- **Binding:** A `ConfigurationPropertiesBindingPostProcessor` binds the environment properties to the bean fields using reflection or constructors.
+- **Relaxed Binding:** Spring allows `kebab-case`, `camelCase`, or `SNAKE_CASE` in properties to map to `camelCase` java fields seamlessly.
+- **Validation:** Combine with `@Validated` and JSR-303 annotations (`@NotNull`, `@Min`) to fail startup if config is invalid.
+
+======
+24) PROFILES
+======
+
+Q: How do profiles work internally in Spring Boot?
+A: 
+- **Selection:** Active profiles are set via `spring.profiles.active=dev,mysql`.
+- **Loading:** `@Profile("dev")` ensures a bean is only created if `dev` is active. Spring also loads `application-dev.yml` automatically, overriding keys in `application.yml`.
+- **Testing:** Use `@ActiveProfiles("test")` on test classes to isolate test configuration.
+
+======
+25) STARTUP OPTIMIZATION
+======
+
+Q: How do you optimize Spring Boot startup time in production?
+A: 
+- **Lazy Init:** Set `spring.main.lazy-initialization=true`. Beans are created on first request, drastically cutting startup time (but delaying first-request latency).
+- **Scanning:** Limit `@ComponentScan` and `@EntityScan` strictly to necessary packages.
+- **JIT vs AOT:** Use GraalVM Native Image (Spring Boot 3) to compile the app Ahead-Of-Time, reducing startup to milliseconds.
+- **Measurement:** Use the Actuator `/actuator/startup` endpoint or application startup tracking to identify slow beans.
