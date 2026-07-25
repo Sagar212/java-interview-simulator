@@ -320,6 +320,11 @@
         "content": "volatile provides two important guarantees in multithreading:\n1. Visibility: when one thread writes to a volatile variable, other threads reading it will see the most recent value immediately.\n2. Ordering: volatile prevents certain instruction reordering around that variable.\n\nIn simple words, volatile tells the JVM:\n- Do not cache this value in a thread-local way for long.\n- Make sure reads and writes happen in the expected order.\n- Keep other threads updated with the latest value.\n\nA very common use case is a stop flag:\n- One thread keeps checking a boolean flag.\n- Another thread changes it to false.\n- Without volatile, the first thread may keep seeing the old value.\n- With volatile, the change becomes visible quickly."
     },
     {
+        "type": "code",
+        "lang": "java",
+        "content": "public class VolatileExample {\n    // Volatile guarantees visibility across threads\n    private volatile boolean isRunning = true;\n\n    public void stopRunning() {\n        isRunning = false; // Write becomes immediately visible\n    }\n\n    public void runWork() {\n        while (isRunning) {\n            // Do some work continuously until stopRunning() is called\n        }\n        System.out.println(\"Work stopped!\");\n    }\n}"
+    },
+    {
         "type": "question",
         "content": "How does volatile differ from synchronized?"
     },
@@ -362,6 +367,11 @@
     {
         "type": "theory",
         "content": "A static block and a static method are both class-level, but they behave differently.\n\nStatic block:\n- Runs once when the class is loaded.\n- Used for initialization.\n- Cannot be called manually like a method.\n\nStatic method:\n- Runs only when called.\n- Used for utility or class-level behavior.\n- Can be called without creating an object.\n\nExample use:\n- static block for initializing static maps or loading config.\n- static method for utility functions like Math.max()."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "public class StaticExample {\n    // Static Block - runs once when class is loaded\n    static {\n        System.out.println(\"1. Class is loaded. Initializing static resources.\");\n    }\n\n    // Static Method - runs only when called explicitly\n    public static void printMessage() {\n        System.out.println(\"2. Static method called.\");\n    }\n\n    public static void main(String[] args) {\n        StaticExample.printMessage();\n    }\n}"
     },
     {
         "type": "question",
@@ -414,6 +424,11 @@
     {
         "type": "theory",
         "content": "Lambdas work because the compiler knows the target type.\nThat target type is usually a functional interface.\n\nThe lambda body becomes the implementation of the single abstract method.\nThis is why lambdas and functional interfaces are tightly connected in Java 8 and above."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "@FunctionalInterface\ninterface MathOperation {\n    int operate(int a, int b);\n}\n\npublic class LambdaDemo {\n    public static void main(String[] args) {\n        // Lambda provides the implementation for the single abstract method\n        MathOperation addition = (a, b) -> a + b;\n        MathOperation multiplication = (a, b) -> a * b;\n\n        System.out.println(\"Add: \" + addition.operate(10, 5));\n        System.out.println(\"Multiply: \" + multiplication.operate(10, 5));\n    }\n}"
     },
     {
         "type": "category",
@@ -534,6 +549,11 @@
     {
         "type": "theory",
         "content": "Runnable:\n- has run()\n- returns no result\n- cannot throw checked exceptions directly\n\nCallable:\n- has call()\n- returns a value\n- can throw checked exceptions\n\nSo Runnable is for fire-and-forget tasks.\nCallable is for tasks where you expect a result."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "import java.util.concurrent.*;\n\npublic class RunnableCallableDemo {\n    public static void main(String[] args) throws Exception {\n        ExecutorService executor = Executors.newFixedThreadPool(2);\n\n        // Runnable: No return type, cannot throw checked exceptions\n        Runnable myRunnable = () -> {\n            System.out.println(\"Runnable task executing...\");\n        };\n\n        // Callable: Returns a result (String here), can throw exceptions\n        Callable<String> myCallable = () -> {\n            Thread.sleep(1000);\n            return \"Callable task finished!\";\n        };\n\n        executor.submit(myRunnable);\n        Future<String> futureResult = executor.submit(myCallable);\n\n        System.out.println(\"Waiting for Callable result: \" + futureResult.get());\n        executor.shutdown();\n    }\n}"
     },
     {
         "type": "question",
@@ -968,6 +988,11 @@
         "content": "A:\n- == checks whether both references point to the same object\n- equals() checks logical content equality for String"
     },
     {
+        "type": "code",
+        "lang": "java",
+        "content": "public class StringEqualityDemo {\n    public static void main(String[] args) {\n        String s1 = \"Hello\";              // String Pool\n        String s2 = \"Hello\";              // String Pool (reused)\n        String s3 = new String(\"Hello\");  // Heap Memory\n\n        // == compares memory references\n        System.out.println(\"s1 == s2 : \" + (s1 == s2)); // true (same pool object)\n        System.out.println(\"s1 == s3 : \" + (s1 == s3)); // false (different objects)\n\n        // .equals() compares the actual character content\n        System.out.println(\"s1.equals(s3) : \" + s1.equals(s3)); // true (content is same)\n    }\n}"
+    },
+    {
         "type": "question",
         "content": "What is string pool?"
     },
@@ -1046,6 +1071,11 @@
     {
         "type": "theory",
         "content": "A:\n- extend Thread\n- implement Runnable\n- implement Callable and submit to ExecutorService\n- use executor framework\n- use higher-level async APIs like CompletableFuture"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "public class ThreadCreationDemo {\n    // Way 1: Extend Thread\n    static class MyThread extends Thread {\n        public void run() {\n            System.out.println(\"Thread running via Thread class\");\n        }\n    }\n\n    // Way 2: Implement Runnable\n    static class MyRunnable implements Runnable {\n        public void run() {\n            System.out.println(\"Thread running via Runnable interface\");\n        }\n    }\n\n    public static void main(String[] args) {\n        MyThread t1 = new MyThread();\n        t1.start();\n\n        Thread t2 = new Thread(new MyRunnable());\n        t2.start();\n\n        // Way 3: Lambda (Runnable)\n        Thread t3 = new Thread(() -> System.out.println(\"Thread running via Lambda\"));\n        t3.start();\n    }\n}"
     },
     {
         "type": "question",

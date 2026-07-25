@@ -21,6 +21,25 @@ A very common use case is a stop flag:
 - Without volatile, the first thread may keep seeing the old value.
 - With volatile, the change becomes visible quickly.
 
+
+Java Template
+public class VolatileExample {
+    // Volatile guarantees visibility across threads
+    private volatile boolean isRunning = true;
+
+    public void stopRunning() {
+        isRunning = false; // Write becomes immediately visible
+    }
+
+    public void runWork() {
+        while (isRunning) {
+            // Do some work continuously until stopRunning() is called
+        }
+        System.out.println("Work stopped!");
+    }
+}
+End Template
+
 Q: How does volatile differ from synchronized?
 A: volatile and synchronized both help with visibility, but they are very different:
 - volatile gives visibility and ordering only.
@@ -92,6 +111,25 @@ Example use:
 - static block for initializing static maps or loading config.
 - static method for utility functions like Math.max().
 
+
+Java Template
+public class StaticExample {
+    // Static Block - runs once when class is loaded
+    static {
+        System.out.println("1. Class is loaded. Initializing static resources.");
+    }
+
+    // Static Method - runs only when called explicitly
+    public static void printMessage() {
+        System.out.println("2. Static method called.");
+    }
+
+    public static void main(String[] args) {
+        StaticExample.printMessage();
+    }
+}
+End Template
+
 Q: Can static methods participate in polymorphism?
 A: Static methods do not participate in runtime polymorphism.
 
@@ -154,6 +192,25 @@ That target type is usually a functional interface.
 
 The lambda body becomes the implementation of the single abstract method.
 This is why lambdas and functional interfaces are tightly connected in Java 8 and above.
+
+
+Java Template
+@FunctionalInterface
+interface MathOperation {
+    int operate(int a, int b);
+}
+
+public class LambdaDemo {
+    public static void main(String[] args) {
+        // Lambda provides the implementation for the single abstract method
+        MathOperation addition = (a, b) -> a + b;
+        MathOperation multiplication = (a, b) -> a * b;
+
+        System.out.println("Add: " + addition.operate(10, 5));
+        System.out.println("Multiply: " + multiplication.operate(10, 5));
+    }
+}
+End Template
 
 ============================================================
 4) GARBAGE COLLECTION
@@ -368,6 +425,34 @@ Callable:
 
 So Runnable is for fire-and-forget tasks.
 Callable is for tasks where you expect a result.
+
+
+Java Template
+import java.util.concurrent.*;
+
+public class RunnableCallableDemo {
+    public static void main(String[] args) throws Exception {
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        // Runnable: No return type, cannot throw checked exceptions
+        Runnable myRunnable = () -> {
+            System.out.println("Runnable task executing...");
+        };
+
+        // Callable: Returns a result (String here), can throw exceptions
+        Callable<String> myCallable = () -> {
+            Thread.sleep(1000);
+            return "Callable task finished!";
+        };
+
+        executor.submit(myRunnable);
+        Future<String> futureResult = executor.submit(myCallable);
+        
+        System.out.println("Waiting for Callable result: " + futureResult.get());
+        executor.shutdown();
+    }
+}
+End Template
 
 Q: When should you use Callable over Runnable?
 A: Use Callable when:
@@ -758,6 +843,24 @@ A:
 - == checks whether both references point to the same object
 - equals() checks logical content equality for String
 
+
+Java Template
+public class StringEqualityDemo {
+    public static void main(String[] args) {
+        String s1 = "Hello";              // String Pool
+        String s2 = "Hello";              // String Pool (reused)
+        String s3 = new String("Hello");  // Heap Memory
+
+        // == compares memory references
+        System.out.println("s1 == s2 : " + (s1 == s2)); // true (same pool object)
+        System.out.println("s1 == s3 : " + (s1 == s3)); // false (different objects)
+
+        // .equals() compares the actual character content
+        System.out.println("s1.equals(s3) : " + s1.equals(s3)); // true (content is same)
+    }
+}
+End Template
+
 Q: What is string pool?
 A: String pool is a special JVM area where String literals are reused to save memory.
 
@@ -810,6 +913,37 @@ A:
 - implement Callable and submit to ExecutorService
 - use executor framework
 - use higher-level async APIs like CompletableFuture
+
+
+Java Template
+public class ThreadCreationDemo {
+    // Way 1: Extend Thread
+    static class MyThread extends Thread {
+        public void run() {
+            System.out.println("Thread running via Thread class");
+        }
+    }
+
+    // Way 2: Implement Runnable
+    static class MyRunnable implements Runnable {
+        public void run() {
+            System.out.println("Thread running via Runnable interface");
+        }
+    }
+
+    public static void main(String[] args) {
+        MyThread t1 = new MyThread();
+        t1.start();
+
+        Thread t2 = new Thread(new MyRunnable());
+        t2.start();
+        
+        // Way 3: Lambda (Runnable)
+        Thread t3 = new Thread(() -> System.out.println("Thread running via Lambda"));
+        t3.start();
+    }
+}
+End Template
 
 Q: Runnable vs Thread class?
 A:
