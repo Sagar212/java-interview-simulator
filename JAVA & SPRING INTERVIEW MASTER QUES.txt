@@ -1,0 +1,863 @@
+JAVA & SPRING INTERVIEW MASTER QUESTION SET
+Detailed Answers
+
+============================================================
+1) VOLATILE KEYWORD
+============================================================
+
+Q: What guarantees does volatile provide regarding visibility and ordering?
+A: volatile provides two important guarantees in multithreading:
+1. Visibility: when one thread writes to a volatile variable, other threads reading it will see the most recent value immediately.
+2. Ordering: volatile prevents certain instruction reordering around that variable.
+
+In simple words, volatile tells the JVM:
+- Do not cache this value in a thread-local way for long.
+- Make sure reads and writes happen in the expected order.
+- Keep other threads updated with the latest value.
+
+A very common use case is a stop flag:
+- One thread keeps checking a boolean flag.
+- Another thread changes it to false.
+- Without volatile, the first thread may keep seeing the old value.
+- With volatile, the change becomes visible quickly.
+
+Q: How does volatile differ from synchronized?
+A: volatile and synchronized both help with visibility, but they are very different:
+- volatile gives visibility and ordering only.
+- synchronized gives visibility, ordering, and mutual exclusion.
+
+Main difference:
+- volatile is for simple shared flags or state.
+- synchronized is for protecting critical sections where multiple operations must be done together.
+
+Example:
+- volatile is okay for isRunning = false.
+- synchronized is needed for count++ or balance updates.
+
+Q: Can volatile ensure atomicity? Why or why not?
+A: No, volatile cannot ensure atomicity.
+
+Atomicity means a task happens as one complete unit without interruption.
+volatile only ensures that threads see the latest value, but it does not make compound actions safe.
+
+Example:
+count++
+
+This is not one step. It is:
+1. read count
+2. add 1
+3. write count
+
+Two threads can still interfere and overwrite each other’s updates. That is why volatile is not enough for incrementing counters.
+
+Q: When is volatile unnecessary in multithreading?
+A: volatile is unnecessary when:
+- Access is already protected by synchronized blocks or locks.
+- The variable is only used by one thread.
+- Atomic classes like AtomicInteger are being used for updates.
+- The field is immutable or safely published in another way.
+
+In short:
+- If you need only visibility, volatile may help.
+- If you need both visibility and atomic updates, use synchronized or atomic classes.
+
+============================================================
+2) STATIC KEYWORD
+============================================================
+
+Q: How do static variables behave in multithreading?
+A: static variables belong to the class, not to any object.
+That means all threads and all instances share the same static variable.
+
+This creates two important consequences:
+- It is shared globally within the class loader.
+- It is not thread-safe by default.
+
+If multiple threads update a static variable at the same time, race conditions can happen unless you synchronize access or use atomic operations.
+
+Q: Difference between static block and static method?
+A: A static block and a static method are both class-level, but they behave differently.
+
+Static block:
+- Runs once when the class is loaded.
+- Used for initialization.
+- Cannot be called manually like a method.
+
+Static method:
+- Runs only when called.
+- Used for utility or class-level behavior.
+- Can be called without creating an object.
+
+Example use:
+- static block for initializing static maps or loading config.
+- static method for utility functions like Math.max().
+
+Q: Can static methods participate in polymorphism?
+A: Static methods do not participate in runtime polymorphism.
+
+Why?
+Because polymorphism in Java usually means method overriding, and overriding works with instance methods.
+Static methods are resolved at compile time based on the reference type, not the actual object type.
+
+So if a child class declares a static method with the same signature, it does not override. It hides the parent method.
+
+Q: What is method hiding vs overriding for static methods?
+A: Method hiding happens with static methods.
+Method overriding happens with instance methods.
+
+If both parent and child have a static method with the same signature:
+- the child method hides the parent method
+- the call is decided by the reference type
+
+If both parent and child have an instance method with the same signature:
+- the child method overrides the parent method
+- the call is decided at runtime by the actual object
+
+============================================================
+3) FUNCTIONAL INTERFACE
+============================================================
+
+Q: How do default and static methods allow multiple methods?
+A: A functional interface must have exactly one abstract method.
+But it can still have:
+- any number of default methods
+- any number of static methods
+
+Why?
+Because only abstract methods count for lambda compatibility.
+Default methods already have implementation.
+Static methods belong to the interface itself.
+
+So an interface like this is still functional:
+- one abstract method
+- one default method
+- one static method
+
+Q: What happens if more than one abstract method exists?
+A: Then it is no longer a functional interface.
+
+That means:
+- lambda expressions cannot be used to implement it directly
+- method references also cannot target it as a SAM type
+
+The reason is simple:
+a lambda can only supply one behavior, so the target interface must have one abstract method only.
+
+Q: Can it extend another interface and still remain functional?
+A: Yes, but only if the final inherited abstract method count is still exactly one.
+
+If it extends another interface that adds more abstract methods, then it stops being functional.
+
+Q: How do lambdas depend on functional interfaces?
+A: Lambdas work because the compiler knows the target type.
+That target type is usually a functional interface.
+
+The lambda body becomes the implementation of the single abstract method.
+This is why lambdas and functional interfaces are tightly connected in Java 8 and above.
+
+============================================================
+4) GARBAGE COLLECTION
+============================================================
+
+Q: How does JVM identify objects for GC?
+A: The JVM identifies live objects using reachability analysis.
+
+It starts from GC roots such as:
+- local variables on thread stacks
+- static references
+- active threads
+- JNI references
+
+Then it follows the object graph.
+If an object can be reached from a root, it is alive.
+If not, it becomes eligible for garbage collection.
+
+Q: Minor vs Major vs Full GC differences?
+A: These terms describe how much of the heap is collected.
+
+Minor GC:
+- collects the young generation
+- happens frequently
+- usually fast
+
+Major GC:
+- usually refers to collection of the old generation
+- less frequent and more expensive
+
+Full GC:
+- collects the entire heap
+- usually the most expensive
+- can cause noticeable pauses
+
+Interview note:
+Different JVMs and collectors may use these terms slightly differently, so explain the concept clearly instead of sounding too rigid.
+
+Q: How do G1, CMS, Serial GC differ?
+A:
+Serial GC:
+- single-threaded
+- simple
+- good for small applications
+- may cause longer pauses
+
+CMS:
+- designed to reduce pause times
+- mostly old-generation focus
+- has been deprecated/removed in modern Java versions
+
+G1:
+- region-based collector
+- designed for large heaps
+- aims for predictable pause times
+- common modern choice
+
+In interviews, it is enough to explain the trade-off:
+- Serial = simple
+- CMS = low pause but older
+- G1 = balanced and modern
+
+Q: How to monitor and tune GC?
+A: GC can be monitored using:
+- GC logs
+- jstat
+- jcmd
+- VisualVM
+- Java Mission Control
+- application monitoring tools
+
+What to look for:
+- frequent GC pauses
+- long pause times
+- high allocation rate
+- old generation pressure
+- promotion failures
+- full GC frequency
+
+Tuning usually involves:
+- choosing the right collector
+- adjusting heap size
+- reducing object allocation
+- fixing memory leaks
+- reducing large object churn
+
+============================================================
+5) SPRING BOOT LIFECYCLE
+============================================================
+
+Q: What happens during application startup?
+A: Spring Boot startup is a sequence of framework-managed steps.
+
+Typical flow:
+1. main method calls SpringApplication.run()
+2. Environment is prepared
+3. ApplicationContext is created
+4. Beans are discovered and registered
+5. Dependencies are injected
+6. Bean lifecycle callbacks run
+7. Runners execute
+8. Application ready event is published
+
+So startup is not just "app begins".
+It is a full lifecycle of context creation, bean wiring, and initialization.
+
+Q: How are beans created and injected?
+A: Spring creates beans from:
+- @Component, @Service, @Repository, @Controller
+- @Bean methods inside @Configuration classes
+
+Then Spring:
+- instantiates the bean
+- resolves dependencies
+- injects them
+- runs init callbacks if any
+
+Constructor injection is usually preferred because:
+- it makes dependencies clear
+- it supports immutability better
+- it is easier to test
+
+Q: How to hook into lifecycle events?
+A: Common lifecycle hooks include:
+- @PostConstruct
+- InitializingBean
+- BeanPostProcessor
+- ApplicationListener
+- ApplicationReadyEvent
+- ApplicationStartedEvent
+
+Use them based on timing:
+- @PostConstruct: after bean creation
+- ApplicationReadyEvent: after app is fully started
+
+Q: ApplicationRunner vs CommandLineRunner?
+A: Both run after the Spring Boot application starts.
+
+CommandLineRunner:
+- receives String[] args
+
+ApplicationRunner:
+- receives ApplicationArguments
+- easier to inspect option and non-option arguments
+
+Use ApplicationRunner when you want richer argument handling.
+
+============================================================
+6) SERIALIZATION
+============================================================
+
+Q: How does Serializable work internally?
+A: Serializable is a marker interface.
+It does not contain methods, but it tells JVM that the object can be converted to bytes and restored later.
+
+When an object is serialized:
+- non-static fields are written
+- transient fields are skipped
+- object graph references are also handled
+
+During deserialization, the object is recreated from the byte stream.
+
+Q: What is serialVersionUID?
+A: serialVersionUID is a version identifier for a serializable class.
+
+Why it matters:
+- during deserialization, the JVM checks whether the serialized class version matches the current class version
+- if it does not match, deserialization may fail
+
+It is best practice to define it explicitly to control compatibility.
+
+Q: How do readObject/writeObject customize behavior?
+A: These are special methods you can define to control serialization manually.
+
+writeObject:
+- customizes what gets written
+
+readObject:
+- customizes how the object is restored
+
+This is useful when:
+- you want to encrypt data
+- you want to validate fields
+- you want to rebuild derived values
+- you want to handle legacy formats
+
+Q: What happens when class structure changes?
+A: If the class structure changes, deserialization compatibility can break.
+
+Examples:
+- field added
+- field removed
+- field type changed
+- class hierarchy changed
+
+If serialVersionUID is not handled carefully, old serialized data may no longer match the new class definition.
+
+============================================================
+7) RUNNABLE VS CALLABLE
+============================================================
+
+Q: Difference between Runnable and Callable?
+A: Runnable:
+- has run()
+- returns no result
+- cannot throw checked exceptions directly
+
+Callable:
+- has call()
+- returns a value
+- can throw checked exceptions
+
+So Runnable is for fire-and-forget tasks.
+Callable is for tasks where you expect a result.
+
+Q: When should you use Callable over Runnable?
+A: Use Callable when:
+- you need a returned result
+- you need exception reporting
+- the task is like a computation or query
+
+Use Runnable when:
+- the task is just an action
+- no return value is needed
+
+Q: What is Future and how does it work?
+A: Future represents a result that may not be ready yet.
+
+It lets you:
+- check if a task is done
+- cancel a task
+- get the result later
+
+Important:
+future.get() blocks until the result is available, unless timeout is used.
+
+Q: How does ExecutorService manage threads?
+A: ExecutorService manages a pool of reusable threads.
+Instead of creating a new thread for every task, it reuses existing threads.
+
+Benefits:
+- better performance
+- better resource control
+- cleaner concurrency code
+- task queueing support
+
+============================================================
+8) @QUALIFIER ANNOTATION
+============================================================
+
+Q: Why is @Qualifier needed?
+A: It is needed when Spring finds multiple beans of the same type and cannot choose one automatically.
+
+Example:
+If two beans implement PaymentService, Spring needs help deciding which one to inject.
+
+Q: How does it resolve ambiguity in Spring?
+A: @Qualifier tells Spring the exact bean name or qualifier to use.
+
+So instead of:
+- "inject any PaymentService"
+
+you say:
+- "inject this specific PaymentService"
+
+Q: Difference between @Primary and @Qualifier?
+A:
+@Primary:
+- marks one bean as default
+- used when multiple candidates exist
+
+@Qualifier:
+- selects one bean explicitly
+- more precise than @Primary
+
+If both exist, @Qualifier usually wins at the injection point.
+
+Q: Can you use it with constructor injection?
+A: Yes.
+This is one of the best ways to use it.
+
+Example:
+- declare multiple beans
+- inject the needed one in constructor using @Qualifier
+
+============================================================
+9) INTERFACE VS ABSTRACT CLASS
+============================================================
+
+Q: What differences still exist after default methods?
+A: Even after default methods were added to interfaces, important differences remain.
+
+Interface:
+- defines contract
+- supports multiple inheritance of type
+- fields are implicitly public static final
+
+Abstract class:
+- can have instance state
+- can have constructors
+- can have protected helper methods
+- can provide partial implementation
+
+So default methods make interfaces more powerful, but they do not replace abstract classes.
+
+Q: When should you prefer abstract class?
+A: Prefer abstract class when:
+- subclasses share common state
+- constructor logic is needed
+- common behavior can be reused
+- you want to prevent repeated code
+
+Q: Multiple inheritance via interfaces vs abstract class?
+A:
+- interfaces: multiple allowed
+- abstract classes: only one parent class allowed
+
+This is a major reason interfaces are used for contracts, while abstract classes are used for shared base behavior.
+
+Q: State management differences?
+A:
+- interface cannot hold instance state
+- abstract class can hold fields and mutable state
+
+That makes abstract class better for shared internal data.
+
+============================================================
+10) OOP CONCEPTS
+============================================================
+
+Q: Real-world examples of each?
+A:
+Encapsulation:
+- Bank account hides balance and only allows update through deposit and withdraw methods.
+
+Abstraction:
+- A car driver uses steering, accelerator, and brake without knowing engine internals.
+
+Polymorphism:
+- A payment interface can work with card payment, UPI payment, or wallet payment through different implementations.
+
+Q: Compile-time vs runtime polymorphism?
+A:
+Compile-time polymorphism:
+- method overloading
+- decided by compiler
+
+Runtime polymorphism:
+- method overriding
+- decided by actual object at runtime
+
+Q: How does abstraction differ from encapsulation?
+A:
+Abstraction hides complexity.
+Encapsulation protects data.
+
+Abstraction answers:
+- what should the object do?
+
+Encapsulation answers:
+- how is internal data protected?
+
+Q: How are these implemented in Java?
+A:
+Encapsulation:
+- private fields
+- getters/setters or business methods
+
+Abstraction:
+- interfaces
+- abstract classes
+
+Polymorphism:
+- method overriding
+- interface-based programming
+
+============================================================
+11) METHOD OVERLOADING VS OVERRIDING
+============================================================
+
+Q: Key differences?
+A:
+Overloading:
+- same method name
+- different parameters
+- compile-time resolution
+
+Overriding:
+- same method signature
+- child provides new implementation
+- runtime resolution
+
+Q: Rules for overriding (return type, access)?
+A:
+- return type must be same or covariant
+- access cannot be more restrictive
+- checked exceptions cannot be broader
+- final/private methods cannot be overridden
+
+Q: Can static methods be overridden?
+A: No.
+Static methods are hidden, not overridden.
+
+Q: How does compile-time vs runtime binding work?
+A:
+- Overloaded method selection happens at compile time.
+- Overridden method selection happens at runtime based on object type.
+
+============================================================
+12) METHOD HIDING
+============================================================
+
+Q: What is method hiding?
+A: Method hiding happens when a child class defines a static method with the same signature as a static method in the parent class.
+
+Q: Difference between hiding and overriding?
+A:
+Hiding:
+- static methods
+- compile-time binding
+
+Overriding:
+- instance methods
+- runtime binding
+
+Q: How does static binding work?
+A: The compiler determines the method call using the reference type, not the runtime object type.
+
+Q: When is method hiding used?
+A: Usually it is not used intentionally. It appears naturally when static methods are declared in both parent and child classes.
+
+============================================================
+13) COVARIANT RETURN TYPE
+============================================================
+
+Q: What is it and why is it useful?
+A: Covariant return type means a child method can return a more specific type than the parent method.
+
+Useful because:
+- it improves readability
+- it reduces casting
+- it makes APIs more precise
+
+Q: Rules for covariant return types?
+A:
+- must be an overriding method
+- child return type must be subtype of parent return type
+
+Q: How does it help in method overriding?
+A: It allows subclasses to give a more specific return type while still matching the parent method contract.
+
+Q: Real-world use cases?
+A:
+- factory methods
+- cloning methods
+- fluent API designs
+
+============================================================
+14) CLASS WITHOUT MAIN METHOD
+============================================================
+
+Q: Can Java run without main method?
+A: A standard standalone Java application needs a main method.
+However, in framework-based apps, your business class may not appear to need one because another framework class starts execution.
+
+Q: How do frameworks like Spring Boot run apps?
+A: Spring Boot usually starts through a main method in a bootstrap class.
+After startup, the framework handles object creation and control flow.
+
+Q: What is the actual JVM entry point?
+A: public static void main(String[] args)
+
+Q: Can static blocks execute without main?
+A: Static blocks run when the class is loaded, but they are not the JVM entry point.
+
+============================================================
+15) ANONYMOUS CLASS
+============================================================
+
+Q: What is an anonymous class?
+A: An anonymous class is a one-time unnamed class defined and instantiated inline.
+
+Q: When should you use it?
+A:
+- for small one-off implementations
+- for event handlers
+- for quick interface or abstract class implementations
+
+Q: Anonymous class vs lambda?
+A:
+Anonymous class:
+- can implement abstract classes too
+- can contain more code
+- is more verbose
+
+Lambda:
+- only for functional interfaces
+- shorter and cleaner
+- preferred for simple single-method behavior
+
+Q: Limitations of anonymous classes?
+A:
+- no named reuse
+- hard to read if large
+- no explicit constructor
+- can be clunky compared to lambda
+
+============================================================
+16) HASHMAP INTERNAL WORKING
+============================================================
+
+Q: How does HashMap store data?
+A: HashMap stores key-value pairs in an internal array of buckets.
+A hash of the key determines the bucket index.
+
+Each bucket contains nodes that store:
+- hash
+- key
+- value
+- next reference
+
+Q: How are collisions handled?
+A: If two keys land in the same bucket, HashMap stores multiple nodes in that bucket.
+Traditionally this was a linked list.
+In Java 8+, if collisions become heavy, the bucket can be treeified.
+
+Q: What changed in Java 8 (treeification)?
+A: Java 8 introduced converting long collision chains into a red-black tree.
+This improves worst-case lookup from O(n) to O(log n) for that bucket.
+
+Q: Difference from ConcurrentHashMap?
+A: HashMap is not thread-safe.
+ConcurrentHashMap is designed for concurrent access and safe multi-thread use.
+
+============================================================
+17) DESIGN PATTERNS
+============================================================
+
+Q: What are creational, structural, behavioral patterns?
+A:
+Creational:
+- focus on object creation
+- examples: Singleton, Factory, Builder
+
+Structural:
+- focus on how classes/objects are composed
+- examples: Adapter, Decorator, Facade
+
+Behavioral:
+- focus on communication between objects
+- examples: Strategy, Observer, Command
+
+Q: Singleton pitfalls in multithreading?
+A:
+- lazy initialization may create multiple instances
+- unsynchronized code is unsafe
+- double-checked locking requires volatile
+
+Q: Factory vs Abstract Factory?
+A:
+Factory:
+- creates one type of object
+
+Abstract Factory:
+- creates related families of objects
+
+Q: When to use Builder pattern?
+A:
+Use Builder when:
+- object has many optional parameters
+- you want clean construction
+- you want immutability and readability
+
+============================================================
+18) SCENARIO-BASED DESIGN PATTERNS
+============================================================
+
+Q: Which pattern for object creation flexibility?
+A: Factory or Builder.
+
+Q: Which pattern for decoupling systems?
+A: Observer, Adapter, or Facade depending on the problem.
+
+Q: Which pattern for dynamic behavior changes?
+A: Strategy or State.
+
+Q: How to choose the right pattern?
+A:
+Choose based on the type of problem:
+- creation problem -> creational pattern
+- structure problem -> structural pattern
+- behavior problem -> behavioral pattern
+
+Do not force a pattern if the solution can be simpler.
+
+============================================================
+19) STRING == VS EQUALS
+============================================================
+
+Q: Difference between == and equals?
+A:
+- == checks whether both references point to the same object
+- equals() checks logical content equality for String
+
+Q: What is string pool?
+A: String pool is a special JVM area where String literals are reused to save memory.
+
+Q: How does interning work?
+A: intern() returns a canonical pooled String reference.
+If the same text already exists in the pool, that reference is returned.
+Otherwise, the string is added to the pool.
+
+Q: Why are Strings immutable?
+A:
+- security
+- thread safety
+- reuse in string pool
+- stable hash code behavior
+- safe sharing across the application
+
+============================================================
+20) OVERLOADING MAIN METHOD
+============================================================
+
+Q: Can main be overloaded?
+A: Yes.
+You can define multiple methods named main with different parameter lists.
+
+Q: Will JVM call overloaded main?
+A: No.
+JVM only calls the exact signature:
+public static void main(String[] args)
+
+Q: Use cases for overloading main?
+A:
+- demos
+- internal testing
+- educational examples
+
+Q: What if standard main is missing?
+A: The class cannot be launched normally from the command line.
+
+Q: Should you overload main?
+A: Usually no in production, because it can confuse readers.
+
+============================================================
+21) THREAD CREATION
+============================================================
+
+Q: Ways to create threads in Java?
+A:
+- extend Thread
+- implement Runnable
+- implement Callable and submit to ExecutorService
+- use executor framework
+- use higher-level async APIs like CompletableFuture
+
+Q: Runnable vs Thread class?
+A:
+Thread class:
+- represents the actual thread
+- not ideal for separating task from execution
+
+Runnable:
+- represents the task
+- more flexible and preferred in most cases
+
+Q: Executor framework benefits?
+A:
+- manages thread pools
+- reuses threads
+- reduces overhead
+- improves scalability
+- gives better control over task execution
+
+Q: Thread lifecycle states?
+A:
+- NEW
+- RUNNABLE
+- BLOCKED
+- WAITING
+- TIMED_WAITING
+- TERMINATED
+
+============================================================
+FINAL REVISION NOTES
+============================================================
+
+Important interview points:
+- volatile is visibility, not atomicity
+- static means class-level, not thread-safe
+- functional interface must have exactly one abstract method
+- GC works based on reachability
+- Spring Boot startup includes context, beans, and runners
+- Serializable is marker-based
+- Callable returns value, Runnable does not
+- @Qualifier resolves bean ambiguity
+- interface and abstract class still differ strongly
+- overloading is compile-time, overriding is runtime
+- static methods are hidden, not overridden
+- covariant return type allows narrower return in child
+- anonymous class is one-time inline class
+- HashMap uses buckets and collision handling
+- design patterns solve creation, structure, or behavior problems
+- == compares references, equals compares content for String
+- JVM only calls standard main
+- executor framework is preferred for thread management
