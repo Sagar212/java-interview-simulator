@@ -303,6 +303,7 @@ html_template = """<!DOCTYPE html>
         <a href="page2.html" class="active">Page 2: Spring & Master Q&A</a>
         <a href="page3.html">Page 3: Spring Boot Deep Dive</a>
         <a href="page4.html">Page 4: Scenario Deep Dives</a>
+        <a href="page5.html">Page 5: DataCamp Q&A</a>
     </div>
 
     <div id="app">
