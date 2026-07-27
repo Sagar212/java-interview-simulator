@@ -158,7 +158,15 @@ html_template = """<!DOCTYPE html>
             font-weight: 700;
         }
 
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
         table {
+
             width: 100%;
             border-collapse: collapse;
             margin: 25px 0;
@@ -294,6 +302,7 @@ html_template = """<!DOCTYPE html>
         <a href="index.html" class="active">Page 1: Core Java Simulator</a>
         <a href="page2.html">Page 2: Spring & Master Q&A</a>
         <a href="page3.html">Page 3: Spring Boot Deep Dive</a>
+        <a href="page4.html">Page 4: Scenario Deep Dives</a>
     </div>
 
     <div id="app">
@@ -359,7 +368,55 @@ html_template = """<!DOCTYPE html>
 
                     const tEl = document.createElement('div');
                     tEl.className = 'theory';
-                    let formattedHTML = theoryHTML.replace(/\\n\\n/g, '<br><br>');
+
+                    let lines = theoryHTML.split('
+');
+                    let inTable = false;
+                    let tableHTML = '';
+                    let finalLines = [];
+
+                    for (let i = 0; i < lines.length; i++) {
+                        let line = lines[i].trim();
+                        if (line.startsWith('|') && line.endsWith('|')) {
+                            if (!inTable) {
+                                inTable = true;
+                                tableHTML = '<div class="table-responsive"><table>
+';
+                            }
+                            
+                            if (line.includes('---')) continue;
+                            
+                            let cells = line.split('|').slice(1, -1).map(c => c.trim());
+                            let rowHTML = '<tr>';
+                            cells.forEach(cell => {
+                                if (tableHTML.indexOf('<tr>') === -1) {
+                                    rowHTML += `<th>${cell}</th>`;
+                                } else {
+                                    rowHTML += `<td>${cell}</td>`;
+                                }
+                            });
+                            rowHTML += '</tr>
+';
+                            tableHTML += rowHTML;
+                        } else {
+                            if (inTable) {
+                                inTable = false;
+                                tableHTML += '</table></div>';
+                                finalLines.push(tableHTML);
+                            }
+                            finalLines.push(lines[i]);
+                        }
+                    }
+                    if (inTable) {
+                        tableHTML += '</table></div>';
+                        finalLines.push(tableHTML);
+                    }
+
+                    let formattedHTML = finalLines.join('<br>');
+                    formattedHTML = formattedHTML.replace(/<br>- /g, '<br>• ');
+                    formattedHTML = formattedHTML.replace(/<br><div class="table-responsive">/g, '<div class="table-responsive">');
+                    formattedHTML = formattedHTML.replace(/<\/div><br>/g, '</div>');
+
                     tEl.innerHTML = formattedHTML;
                     currentContainer.appendChild(tEl);
 

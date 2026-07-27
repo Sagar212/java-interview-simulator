@@ -294,13 +294,13 @@
     <div class="top-nav">
         <a href="index.html">Page 1: Core Java Simulator</a>
         <a href="page2.html">Page 2: Spring & Master Q&A</a>
-        <a href="page3.html" class="active">Page 3: Spring Boot Deep Dive</a>
-        <a href="page4.html">Page 4: Scenario Deep Dives</a>
+        <a href="page3.html">Page 3: Spring Boot Deep Dive</a>
+        <a href="page4.html" class="active">Page 4: Scenario Deep Dives</a>
     </div>
 
     <div id="app">
         <header>
-            <h1>Spring Boot Deep Dive</h1>
+            <h1>Scenario Deep Dives</h1>
             <div class="subtitle">High-Retention Interview Preparation (In-Depth Edition)</div>
         </header>
         <main id="content-track"></main>
@@ -315,318 +315,255 @@
         const interviewData = [
     {
         "type": "category",
-        "content": "1) AUTO-CONFIGURATION"
+        "content": "1) OUT OF MEMORY"
     },
     {
         "type": "question",
-        "content": "How does Spring Boot auto-configuration work internally?"
+        "content": "Your Java application suddenly starts throwing OutOfMemoryError. How will you debug it?"
     },
     {
         "type": "theory",
-        "content": "Spring Boot auto-configuration attempts to automatically configure your Spring application based on the jar dependencies that you have added.\n- **Decision Process:** It looks at `@Conditional` annotations on `@AutoConfiguration` classes.\n- **Conditions:** Conditions include `@ConditionalOnClass` (is a class in classpath?), `@ConditionalOnMissingBean` (did the user already define this bean?), and `@ConditionalOnProperty` (is a property set?).\n- **Starters:** Starter dependencies simply pull in the necessary jars. Their presence triggers `@ConditionalOnClass` in the auto-config classes.\n- **Debugging:** You can debug by running with `--debug` or setting `logging.level.org.springframework.boot.autoconfigure=DEBUG` to see the Auto-configuration report."
+        "content": "First, identify the exact OOM type because the fix depends entirely on the memory region:\n- **Java heap space:** Objects are being retained too long.\n- **Metaspace:** Class loading or proxy growth issue.\n- **Direct buffer memory:** Often NIO/Netty buffer usage.\n- **unable to create new native thread:** OS limit or thread exhaustion.\n\nCapture evidence before restarting:\n- Enable heap dump on OOM: `-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/logs/`\n- Capture GC logs.\n- Use `jmap -dump:live,format=b,file=heap.bin <pid>` if the app is still barely running.\n\nAnalyze the heap dump (using Eclipse MAT or VisualVM) for:\n- Large retained collections.\n- Static references keeping object graphs alive.\n- Caches without eviction policies.\n- ThreadLocal leaks in web containers.\n\n| OOM Type | Common Cause | Fix Strategy |\n|---|---|---|\n| Heap Space | Memory leaks, huge payloads | Fix memory leaks, implement pagination |\n| Metaspace | Dynamic class generation | Increase MaxMetaspaceSize, fix classloader leak |\n| Direct Memory | Unclosed NIO buffers | Check ByteBuffer allocations |"
     },
     {
         "type": "category",
-        "content": "2) SPRING BOOT APPLICATION"
+        "content": "2) HIGH CPU / LOW TRAFFIC"
     },
     {
         "type": "question",
-        "content": "What exactly happens when @SpringBootApplication is used?"
+        "content": "You see high CPU usage but low traffic. What could be the reason?"
     },
     {
         "type": "theory",
-        "content": "`@SpringBootApplication` is a convenience annotation that combines three powerful features:\n1. `@EnableAutoConfiguration`: Enables Spring Boot's auto-configuration mechanism.\n2. `@ComponentScan`: Enables component scanning in the package where the application class is located and its sub-packages.\n3. `@SpringBootConfiguration`: Flags the class as a configuration class (a specialized `@Configuration`).\n- **Package Location:** It should be placed in the root package above other classes. If placed in a sub-package (e.g., `com.app.main`), it will only scan that sub-package, missing controllers or services in `com.app.services`."
-    },
-    {
-        "type": "code",
-        "lang": "java",
-        "content": "import org.springframework.boot.SpringApplication;\nimport org.springframework.boot.autoconfigure.SpringBootApplication;\n\n@SpringBootApplication\npublic class MyApplication {\n    public static void main(String[] args) {\n        SpringApplication.run(MyApplication.class, args);\n    }\n}"
+        "content": "Low traffic with high CPU usually means the app is doing unnecessary work per request or is stuck in a bad loop.\n\nCommon causes:\n- **Infinite loops:** A logic error keeping a thread spinning forever.\n- **Regex abuse:** Catastrophic backtracking in regular expressions.\n- **GC Storm:** The heap is 99% full, so the JVM spends all CPU time doing garbage collection instead of application work.\n- **Hot locks:** Threads constantly context switching while fighting for a lock.\n- **Expensive Serialization:** Serializing massive JSON objects over and over.\n\nDiagnostic approach:\n- Take a CPU profile using VisualVM or Java Mission Control.\n- Run `top -H -p <pid>` to find the specific Linux thread using CPU.\n- Run `jstack <pid>` to see what that specific thread is doing (convert the decimal PID from `top` to hex to match the `nid` in `jstack`)."
     },
     {
         "type": "category",
-        "content": "3) BEAN CREATION"
+        "content": "3) BLOCKED THREADS"
     },
     {
         "type": "question",
-        "content": "How does Spring Boot decide which beans to auto-configure?"
+        "content": "A thread is stuck in BLOCKED state. How will you identify and fix it?"
     },
     {
         "type": "theory",
-        "content": "Spring Boot leverages `@Conditional` annotations to determine bean creation.\n- **@Conditional:** Allows registering beans only if certain criteria are met.\n- **Classpath:** `@ConditionalOnClass` checks if a specific library is present. E.g., if `DataSource.class` is on the classpath, it attempts to configure a database.\n- **Fallback:** `@ConditionalOnMissingBean` ensures that auto-configured beans are only created if the developer hasn't manually defined a bean of the same type. This allows easy overriding.\n- **Overriding:** Simply declare a `@Bean` in your own `@Configuration` class, and the auto-configured fallback will back off."
+        "content": "A BLOCKED thread means it is waiting to acquire a monitor lock that another thread already holds.\n\nDiagnostic steps:\n- Take a thread dump using `jstack <pid> > threads.txt`.\n- Find the BLOCKED thread and note the lock ID it is waiting for: `- waiting to lock <0x...>`\n- Search the thread dump for the thread holding that lock: `- locked <0x...>`\n\nCommon fixes:\n- **Reduce critical section:** Move I/O or expensive operations outside the `synchronized` block.\n- **Avoid nested locks:** Do not acquire Lock B while holding Lock A.\n- **Use Concurrent Tools:** Replace `synchronized` with `ReentrantLock` (with timeouts) or `ConcurrentHashMap`.\n\n| State | Meaning | Resolution Focus |\n|---|---|---|\n| RUNNABLE | Thread is executing or ready | If stuck here, check for infinite loops |\n| WAITING | Waiting indefinitely on condition | Check `Object.wait()` without `notify()` |\n| BLOCKED | Waiting for monitor lock | Find the thread holding the lock |"
     },
     {
         "type": "category",
-        "content": "4) AUTO-CONFIGURATION DISCOVERY"
+        "content": "4) GRADUAL SLOWDOWN"
     },
     {
         "type": "question",
-        "content": "What is the role of spring.factories or AutoConfiguration.imports?"
+        "content": "Your application slows down after running for a few hours. What will you check?"
     },
     {
         "type": "theory",
-        "content": "They are the discovery mechanisms for Auto-Configuration classes.\n- **Purpose:** They list the fully qualified names of configuration classes that Spring Boot should evaluate on startup.\n- **Discovery:** Spring Boot's `SpringFactoriesLoader` reads `META-INF/spring.factories` (or `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` in Spring Boot 2.7/3.0+) across all jars.\n- **Changes:** In Spring Boot 3.0, `spring.factories` was completely replaced by `AutoConfiguration.imports` for auto-configuration specifically, making it cleaner.\n- **Customization:** To register your own, create the `imports` file in `META-INF/spring/` and list your custom `@AutoConfiguration` class."
+        "content": "When performance gets worse over time, it is a classic sign of a gradual resource leak or unbounded growth.\n\nWhat to check and compare (Startup vs After Slowdown):\n- **Heap growth:** Is baseline memory increasing after every Full GC? (Memory Leak)\n- **Thread count:** Are threads being created but never dying? (Thread Leak)\n- **Connection pool:** Are DB connections exhausted and threads queuing? (Connection Leak)\n- **File handles:** Are files or sockets opened but not closed? (`lsof -p <pid>`)\n\nFix strategy:\n- Implement proper `finally` blocks or try-with-resources to close connections/streams.\n- Cap unbounded data structures (e.g., use fixed-size LRU caches instead of plain `HashMap`)."
     },
     {
         "type": "category",
-        "content": "5) SCANNING VS AUTO-CONFIG"
+        "content": "5) GC PAUSES"
     },
     {
         "type": "question",
-        "content": "What is the difference between @ComponentScan and @EnableAutoConfiguration?"
+        "content": "You are facing frequent GC pauses. How will you optimize it?"
     },
     {
         "type": "theory",
-        "content": "A:\n- **@ComponentScan:** Scans your application's source code packages for custom components (`@Controller`, `@Service`, `@Repository`). It only finds what *you* wrote.\n- **@EnableAutoConfiguration:** Scans the classpath (jars) and evaluates pre-defined configuration classes to set up infrastructure (like Web Servers, DataSources, Message Brokers) based on conditions.\n- **Overlap:** They don't overlap in responsibilities, but they work together.\n- **Problems:** If `@ComponentScan` is set too broad (e.g., scanning `org` or `com`), it drastically increases startup time and might load unintended beans."
+        "content": "Frequent GC pauses mean the JVM is spending too much time cleaning memory.\n\nRoot Cause Analysis:\n- **Allocation Pressure:** Creating too many short-lived objects (e.g., massive String concatenations in a loop).\n- **Promotion Failure:** Old generation is full, forcing slow Major GCs.\n\nOptimization Steps:\n- **Lower allocation rate:** Reuse objects, use primitives instead of wrappers, avoid large temporary collections.\n- **Tune Heap Size:** Ensure the Young Generation is large enough so objects die there before being promoted.\n- **Change Algorithm:** If using ParallelGC, switch to G1GC (`-XX:+UseG1GC`) or ZGC for lower pause times.\n\n| GC Algorithm | Best For | Tradeoff |\n|---|---|---|\n| Parallel GC | High throughput (batch jobs) | Long pause times |\n| G1 GC | Balanced throughput and latency | Moderate CPU overhead |\n| ZGC / Shenandoah | Ultra-low latency (<1ms pauses) | Higher CPU and memory footprint |"
     },
     {
         "type": "category",
-        "content": "6) EMBEDDED SERVERS"
+        "content": "6) HASHMAP SLOWDOWN"
     },
     {
         "type": "question",
-        "content": "How does Spring Boot embedded Tomcat start internally?"
+        "content": "A HashMap is causing performance issues under heavy load. Why?"
     },
     {
         "type": "theory",
-        "content": "A:\n- **Creation:** During startup, if a web environment is detected, Spring Boot creates an `AnnotationConfigServletWebServerApplicationContext`.\n- **Binding:** A `ServletWebServerFactory` bean (auto-configured for Tomcat if `tomcat-embed-core` is present) is used to create and start the `WebServer`.\n- **Switching:** Exclude `spring-boot-starter-tomcat` and include `spring-boot-starter-undertow` or `jetty`.\n- **Graceful Shutdown:** When enabled, the server stops accepting new connections but allows active requests a grace period (e.g., 30s) to finish before shutting down."
+        "content": "Under heavy load, a plain `HashMap` can degrade severely due to several reasons:\n\n1. **Collision-heavy keys:** If `hashCode()` is poorly implemented, many keys map to the same bucket, turning O(1) lookups into O(N) linked-list traversals (or O(log N) tree traversals in Java 8+).\n2. **Mutable keys:** If a key's state changes after insertion, its hash changes, making it impossible to retrieve.\n3. **Resizing Overhead:** If initialized without a capacity and filled with millions of elements, the map constantly resizes and rehashes.\n4. **Concurrency:** `HashMap` is NOT thread-safe. Concurrent writes can cause data corruption or even an infinite loop during resizing (prior to Java 8).\n\nFix: Pre-size the map if the size is known, ensure good `hashCode()` implementations, and use `ConcurrentHashMap` for multithreaded access."
     },
     {
         "type": "category",
-        "content": "7) LIFECYCLE"
+        "content": "7) RACE CONDITIONS"
     },
     {
         "type": "question",
-        "content": "What happens during the Spring Boot application startup lifecycle?"
+        "content": "Multiple threads are updating shared data incorrectly. How will you fix it?"
     },
     {
         "type": "theory",
-        "content": "A:\n1. **Bootstrap:** `SpringApplication` instantiates and sets up `ApplicationListeners`.\n2. **Environment:** The `Environment` is prepared (properties, profiles).\n3. **Context Creation:** The `ApplicationContext` is created based on the environment (Web, Reactive, or Standard).\n4. **Bean Initialization:** Classes are scanned, auto-configuration runs, and singletons are instantiated.\n5. **Runners:** `ApplicationRunner` and `CommandLineRunner` beans are executed.\n- **Hooks:** You can hook into events like `ApplicationStartingEvent` or `ApplicationReadyEvent`."
+        "content": "This is a classic race condition caused by unprotected shared mutable state.\n\nHow to fix it (from best to worst):\n- **Avoid Shared State (Best):** Redesign so threads don't share data at all (e.g., ThreadLocal or message passing).\n- **Use Immutability:** If an object cannot be changed, it is inherently thread-safe.\n- **Use Atomic Classes:** Use `AtomicInteger` or `LongAdder` instead of `count++`.\n- **Use Concurrent Collections:** Use `ConcurrentHashMap` instead of `HashMap`.\n- **Use Locks (Worst):** Protect the critical section with `synchronized` or `ReentrantLock`."
     },
     {
         "type": "category",
-        "content": "8) DEPENDENCY INJECTION"
+        "content": "8) ENVIRONMENT MISMATCH"
     },
     {
         "type": "question",
-        "content": "How does dependency injection work under the hood in Spring Boot?"
+        "content": "Your API works fine locally but fails in production. What will you investigate?"
     },
     {
         "type": "theory",
-        "content": "A:\n- **Resolution:** Spring builds a graph of dependencies. When Bean A needs Bean B, the `BeanFactory` checks if B exists. If not, it creates B first.\n- **BeanFactory:** It is the core engine responsible for instantiating, configuring, and managing beans.\n- **Constructor vs Field:** Constructor injection enforces immutability and guarantees dependencies are not null. Field injection uses reflection post-instantiation, allowing circular dependencies but making testing harder.\n- **Circular Dependencies:** Constructor circular dependencies fail at startup. Setter/Field circular dependencies can be resolved by Spring using early proxies, though it's bad practice."
+        "content": "This is usually an environment mismatch. A local success does not mean the code is production-ready.\n\nInvestigation Checklist:\n- **Configuration:** Are properties/secrets different?\n- **Data Volume:** Prod DB has 10 million rows, local DB has 10. Did a missing index cause a timeout?\n- **Concurrency:** Prod receives 1000 req/sec, local receives 1. Did a race condition trigger?\n- **Network & Security:** Firewalls, proxies, TLS certificates, or CORS rules blocking traffic.\n- **Container Limits:** Does prod run in a Docker container with restricted CPU/Memory compared to your local machine?"
     },
     {
         "type": "category",
-        "content": "9) CONTEXT VS FACTORY"
+        "content": "9) MEMORY LEAK CONFIRMATION"
     },
     {
         "type": "question",
-        "content": "What is the difference between ApplicationContext and BeanFactory?"
+        "content": "You suspect a memory leak. How will you confirm it?"
     },
     {
         "type": "theory",
-        "content": "A:\n- **BeanFactory:** The fundamental IoC container. It uses lazy initialization by default (creates beans only when requested).\n- **ApplicationContext:** A sub-interface of BeanFactory. It adds enterprise features: Event publishing, Message resolution (i18n), Environment properties, and eager instantiation of singletons.\n- **Usage:** Spring Boot almost exclusively uses `ApplicationContext` because web applications need eager initialization and robust event systems."
+        "content": "A memory leak occurs when objects remain strongly reachable even though the application no longer needs them.\n\nConfirmation Steps:\n1. **Monitor Heap:** Observe the heap usage pattern in APM tools (Datadog, New Relic) or VisualVM. If the sawtooth pattern shows the baseline memory rising steadily after every GC, it is a leak.\n2. **GC Frequency:** Notice if GCs become increasingly frequent and reclaim less and less memory.\n3. **Heap Dumps:** Take a heap dump, wait an hour, take another. Compare them in Eclipse MAT. Look for objects whose instance count keeps growing indefinitely."
     },
     {
         "type": "category",
-        "content": "10) EXTERNAL CONFIGURATION"
+        "content": "10) RANDOM UNRESPONSIVENESS"
     },
     {
         "type": "question",
-        "content": "How does Spring Boot handle externalized configuration?"
+        "content": "A service becomes unresponsive randomly. What could be happening?"
     },
     {
         "type": "theory",
-        "content": "A:\n- **Sources:** `application.properties`, `application.yml`, Environment Variables, Command-line args, Config Servers.\n- **Merging:** Properties are merged, with higher-precedence sources overriding lower ones.\n- **Profiles:** `application-{profile}.yml` is loaded if that profile is active, overriding defaults.\n- **Binding:** Use `@ConfigurationProperties` to strongly type configuration into Java record/class objects."
+        "content": "Random unresponsiveness usually means threads are stuck, not that CPU is overwhelmed. The service looks alive (responds to ping) but cannot process requests.\n\nCommon culprits:\n- **Thread Pool Exhaustion:** All Tomcat threads are waiting for a slow downstream API or database query.\n- **Deadlock:** Threads are permanently stuck waiting for each other.\n- **Long GC Pause:** A \"Stop-The-World\" GC pause froze the entire JVM for 30 seconds.\n\nAction: Capture a thread dump during the unresponsiveness. Check if threads are WAITING on external I/O without timeouts."
     },
     {
         "type": "category",
-        "content": "11) PROPERTY RESOLUTION"
+        "content": "11) DEADLOCKS"
     },
     {
         "type": "question",
-        "content": "What is the order of property resolution in Spring Boot?"
+        "content": "You see a deadlock in your system. How will you detect and resolve it?"
     },
     {
         "type": "theory",
-        "content": "Spring Boot has a strict precedence order (highest to lowest):\n1. Command-line arguments (`--server.port=8081`).\n2. JVM System properties (`-Dserver.port=8081`).\n3. OS Environment variables (`SERVER_PORT=8081`).\n4. Profile-specific application properties outside packaged jar.\n5. Profile-specific application properties inside packaged jar.\n6. Standard application properties outside jar.\n7. Standard application properties inside jar.\n8. `@PropertySource` annotations.\n9. Default properties."
+        "content": "A deadlock occurs when Thread A holds Lock 1 and waits for Lock 2, while Thread B holds Lock 2 and waits for Lock 1.\n\nDetection:\n- Run `jstack <pid>`. The JVM will explicitly print \"Found one Java-level deadlock:\" and list the offending threads.\n\nResolution:\n- **Lock Ordering:** Ensure all threads acquire locks in the exact same global order.\n- **Lock Timeouts:** Use `ReentrantLock.tryLock(timeout)` instead of `synchronized` to fail gracefully instead of freezing forever.\n- **Reduce Scope:** Avoid calling alien methods (callbacks, overridable methods) while holding a lock."
     },
     {
         "type": "category",
-        "content": "12) BEAN LIFECYCLE"
+        "content": "12) INCONSISTENT LOGS"
     },
     {
         "type": "question",
-        "content": "How does Spring Boot manage bean creation and bean lifecycle internally?"
+        "content": "Your logs show inconsistent behavior across requests. Why?"
     },
     {
         "type": "theory",
-        "content": "A:\n1. **Instantiation:** Memory allocated (Constructor called).\n2. **Populate Properties:** Dependencies injected.\n3. **BeanPostProcessors (Before):** Framework modifies the bean (e.g., injecting ApplicationContext).\n4. **Initialization:** `@PostConstruct` methods execute, followed by `InitializingBean.afterPropertiesSet()`.\n5. **BeanPostProcessors (After):** Proxies (like AOP/Transactions) are wrapped around the bean.\n6. **Destruction:** On shutdown, `@PreDestroy` executes."
-    },
-    {
-        "type": "code",
-        "lang": "java",
-        "content": "import jakarta.annotation.PostConstruct;\nimport jakarta.annotation.PreDestroy;\nimport org.springframework.stereotype.Component;\n\n@Component\npublic class LifecycleDemo {\n    public LifecycleDemo() {\n        System.out.println(\"1. Constructor called\");\n    }\n\n    @PostConstruct\n    public void init() {\n        System.out.println(\"2. @PostConstruct called\");\n    }\n\n    @PreDestroy\n    public void destroy() {\n        System.out.println(\"3. @PreDestroy called on shutdown\");\n    }\n}"
+        "content": "In web apps, threads are pooled. The same thread serves Request A, then Request B.\n\nCause: **Context Leakage.**\nIf you store data (like UserID or CorrelationID) in a `ThreadLocal` or SLF4J `MDC` (Mapped Diagnostic Context) during a request but forget to clear it, the next request processed by that same thread will inherit the stale data!\n\nFix: Always clear `ThreadLocal` and `MDC` in a `finally` block or a Servlet Filter's `afterCompletion` method."
     },
     {
         "type": "category",
-        "content": "13) BEAN VS COMPONENT"
+        "content": "13) SILENT CRASHES"
     },
     {
         "type": "question",
-        "content": "What is the difference between @Bean and @Component?"
+        "content": "Your application crashes without any clear Java exception error. How will you debug it?"
     },
     {
         "type": "theory",
-        "content": "A:\n- **@Component:** A class-level annotation. Spring creates the bean automatically during classpath scanning. Best for your own code.\n- **@Bean:** A method-level annotation inside `@Configuration` classes. You manually instantiate and return the object. Best for third-party classes (e.g., `RestTemplate`) where you can't add `@Component`.\n- **Proxy Behavior:** `@Configuration` classes are proxied using CGLIB. Calling a `@Bean` method directly from another method in the same class returns the singleton from the container, not a new instance."
+        "content": "If the JVM disappears without a stack trace, it died below the Java layer.\n\nWhat to check:\n- **OOM Killer (Linux):** Run `dmesg -T | grep -i oom`. The OS may have killed Java for exceeding container memory limits.\n- **JVM Crash Log:** Look for an `hs_err_pid.log` file in the working directory. This indicates a fatal JVM error (often caused by JNI/native library bugs).\n- **Container Restarts:** Check Kubernetes or Docker events (`kubectl describe pod`) for exit codes (e.g., Exit Code 137 means killed by OOM)."
     },
     {
         "type": "category",
-        "content": "14) ACTUATOR"
+        "content": "14) DATABASE BOTTLENECK"
     },
     {
         "type": "question",
-        "content": "How does Spring Boot Actuator work internally?"
+        "content": "A database call is slowing down your Java service. How will you optimize it?"
     },
     {
         "type": "theory",
-        "content": "A:\n- **Endpoints:** It auto-configures HTTP and JMX endpoints (`/actuator/health`, `/actuator/metrics`).\n- **Security:** By default, only `/health` and `/info` are exposed over HTTP. You secure them via Spring Security and configure exposure via `management.endpoints.web.exposure.include=*`.\n- **Metrics:** It integrates with Micrometer to collect JVM, Tomcat, and application metrics, which can be exported to Prometheus, Datadog, etc."
+        "content": "Optimization should happen in layers, starting with the database.\n\n1. **SQL & Indexes:** Use `EXPLAIN` to check query execution plans. Add missing indexes. Avoid full table scans.\n2. **Data Transfer:** Only `SELECT` the columns you need. Don't fetch 10,000 rows if you only display 10 (use Pagination).\n3. **N+1 Problem:** Check if Hibernate/JPA is firing 100 queries to load children instead of a single `JOIN FETCH`.\n4. **Caching:** If the data rarely changes, use Redis or Spring `@Cacheable` to skip the DB entirely."
     },
     {
         "type": "category",
-        "content": "15) HEALTH INDICATORS"
+        "content": "15) THREAD POOL EXHAUSTION"
     },
     {
         "type": "question",
-        "content": "How do you create custom health indicators in Actuator?"
+        "content": "Your thread pool gets exhausted under load. What\u2019s your approach?"
     },
     {
         "type": "theory",
-        "content": "A:\n- **Usage:** Useful for checking connectivity to external APIs or custom databases not supported out-of-the-box.\n- **Implementation:** Implement `HealthIndicator` or extend `AbstractHealthIndicator`. Return `Health.up()` or `Health.down().withDetail(...)`.\n- **Liveness vs Readiness:** Spring Boot 2.3+ separates these. Liveness means the app is running. Readiness means it's ready to accept traffic."
-    },
-    {
-        "type": "code",
-        "lang": "java",
-        "content": "import org.springframework.boot.actuate.health.Health;\nimport org.springframework.boot.actuate.health.HealthIndicator;\nimport org.springframework.stereotype.Component;\n\n@Component\npublic class CustomApiHealthIndicator implements HealthIndicator {\n    @Override\n    public Health health() {\n        boolean isApiUp = checkExternalApi();\n        if (isApiUp) {\n            return Health.up().withDetail(\"External API\", \"Available\").build();\n        }\n        return Health.down().withDetail(\"External API\", \"Unreachable\").build();\n    }\n\n    private boolean checkExternalApi() {\n        return true; // Mock implementation\n    }\n}"
+        "content": "Thread pool exhaustion means all worker threads (e.g., Tomcat's 200 default threads) are busy. New requests queue up and eventually time out.\n\nCrucial Realization: Threads usually run out because they are *stuck waiting*, not because they are doing heavy CPU work.\n\nFixes:\n- **Add Timeouts:** Never make an HTTP or DB call without strict connect and read timeouts.\n- **Circuit Breakers:** Use Resilience4j. If a downstream service is slow, fail fast instead of holding threads hostage.\n- **Bulkheads:** Isolate thread pools. Don't let a slow reporting endpoint exhaust the threads needed for the critical checkout endpoint."
     },
     {
         "type": "category",
-        "content": "16) GRACEFUL SHUTDOWN"
+        "content": "16) HIGH CONCURRENCY DESIGN"
     },
     {
         "type": "question",
-        "content": "How does Spring Boot support graceful shutdown?"
+        "content": "You need to handle high concurrency safely. What will you use?"
     },
     {
         "type": "theory",
-        "content": "A:\n- **Protection:** Prevents dropping active user requests when the application is killed (e.g., during Kubernetes rolling updates).\n- **Mechanism:** When a SIGTERM is received, the embedded web server stops accepting new connections but lets active threads finish.\n- **Configuration:** `server.shutdown=graceful` and `spring.lifecycle.timeout-per-shutdown-phase=30s`."
+        "content": "Use the lightest concurrency control possible to maximize throughput.\n\n| Technique | Cost | Best Use Case |\n|---|---|---|\n| Immutability | Lowest | Read-heavy configs, DTOs |\n| Atomic Classes | Low | Simple counters (`AtomicInteger`) |\n| Concurrent Collections | Medium | Shared caches (`ConcurrentHashMap`) |\n| ReentrantLock | High | Complex logic across multiple variables |\n| synchronized | High | Simple block protection (legacy) |"
     },
     {
         "type": "category",
-        "content": "17) TRANSACTIONS"
+        "content": "17) IDEMPOTENCY"
     },
     {
         "type": "question",
-        "content": "How do @Transactional and transaction propagation work in real applications?"
+        "content": "Your system processes duplicate requests. How will you handle it?"
     },
     {
         "type": "theory",
-        "content": "A:\n- **Default Propagation:** `REQUIRED` - join existing transaction if present, else create a new one.\n- **Proxies:** Spring generates a CGLIB proxy around the class. The proxy opens a transaction, calls the real method, and then commits/rolls back.\n- **Rollbacks:** Rolls back on `RuntimeException` and `Error` automatically. Checked exceptions DO NOT trigger rollback unless explicitly configured with `rollbackFor = Exception.class`."
+        "content": "Duplicates happen due to network timeouts (client retries) or message broker redeliveries (at-least-once delivery).\n\nHandling (Idempotency):\n- **Idempotency Key:** Clients send a unique UUID. The server checks a dedup table; if seen, it returns the cached result without reprocessing.\n- **Database Constraints:** Rely on unique constraints (`UNIQUE INDEX`) so duplicates fail safely.\n- **Stateless/Safe Operations:** Design updates to be absolute (`SET status='PAID'`) rather than relative (`status += 1`), so repeating them is harmless."
     },
     {
         "type": "category",
-        "content": "18) TRANSACTION PROXY ISSUES"
+        "content": "18) STALE CACHE"
     },
     {
         "type": "question",
-        "content": "Why does @Transactional fail in self-invocation?"
+        "content": "A cache is giving stale data. How will you fix it?"
     },
     {
         "type": "theory",
-        "content": "A:\n- **Proxy Bypass:** Spring AOP works via proxies. If Method A calls Method B within the same class, the call goes directly via `this.MethodB()`, bypassing the proxy. Therefore, any `@Transactional` on Method B is ignored.\n- **Fix:** Move Method B to a different service class, or inject `ApplicationContext` to retrieve the proxy (anti-pattern), or use AspectJ weaving instead of Spring AOP proxies."
+        "content": "Stale cache means the cached value no longer matches the database source of truth.\n\nFix strategies:\n- **TTL (Time-To-Live):** Ensure keys expire naturally.\n- **Event-Driven Invalidation:** When the DB is updated, publish a Kafka event or Spring ApplicationEvent to evict the specific cache key.\n- **Cache-Aside Pattern:** When updating, update the DB first, then immediately `evict` the cache key.\n- **Distributed Consistency:** If using multiple app nodes with local in-memory caches (Caffeine), switch to a centralized cache (Redis) so all nodes see the same invalidation."
     },
     {
         "type": "category",
-        "content": "19) FILTERS VS INTERCEPTORS"
+        "content": "19) HORIZONTAL SCALING LIMITS"
     },
     {
         "type": "question",
-        "content": "How do filters and interceptors differ in request flow?"
+        "content": "Your application is not scaling even after adding instances. Why?"
     },
     {
         "type": "theory",
-        "content": "A:\n- **Filter:** Part of the Servlet API. Executes BEFORE requests reach the DispatcherServlet. Good for raw HTTP modifications, CORS, and early authentication (Spring Security uses Filter Chains).\n- **Interceptor:** Part of the Spring MVC framework. Executes AFTER DispatcherServlet but before the Controller. Good for application-level logic, checking Controller annotations, or accessing model/view data."
+        "content": "Adding more app servers (horizontal scaling) only helps if the bottleneck is CPU or memory inside the app node.\n\nIf it doesn't help, the bottleneck is shared:\n- **Database Saturation:** The DB is maxed out on CPU/Connections. More app nodes just queue up faster.\n- **Shared Lock:** App nodes are fighting for a distributed lock in Redis.\n- **Synchronous Downstream:** You are waiting on a third-party API that can only process 10 requests/sec.\n\nFix: Scale the DB (Read Replicas), introduce caching, or switch to asynchronous/event-driven processing."
     },
     {
         "type": "category",
-        "content": "20) ASYNC PROCESSING"
+        "content": "20) DISTRIBUTED TRACING"
     },
     {
         "type": "question",
-        "content": "How does Spring Boot handle async processing, and what happens when an async method fails?"
+        "content": "You need to trace a request across multiple layers. How will you do it?"
     },
     {
         "type": "theory",
-        "content": "A:\n- **Execution:** `@Async` tells Spring to execute the method in a separate thread pool.\n- **Executor:** If no custom `Executor` is defined, Spring uses a `SimpleAsyncTaskExecutor` (creates a new thread for every request - very bad for production). You should define a `ThreadPoolTaskExecutor` bean.\n- **Results & Errors:** Return `CompletableFuture<T>`. Exceptions in `void` methods are logged but swallowed unless an `AsyncUncaughtExceptionHandler` is configured."
+        "content": "In microservices, a single user click might hit an API Gateway, Service A, Service B, Kafka, and Service C.\n\nSolution: **Distributed Tracing (Sleuth/Micrometer Tracing + Zipkin/Jaeger)**\n- The Gateway generates a unique **Trace ID**.\n- This ID is propagated via HTTP Headers (e.g., `X-B3-TraceId`) and Kafka headers to all downstream services.\n- SLF4J MDC injects this Trace ID into every log line.\n- When an error occurs, you search Splunk/ELK for the Trace ID and instantly see the entire lifecycle of the request across all microservices."
     },
     {
         "type": "category",
-        "content": "21) HIKARICP"
+        "content": "21) TWO DATABASES & XA"
     },
     {
         "type": "question",
-        "content": "Why is HikariCP the default connection pool in Spring Boot?"
+        "content": "Can you call two different databases in Spring Boot? How will you avoid XA transaction errors?"
     },
     {
         "type": "theory",
-        "content": "A:\n- **Performance:** It is exceptionally fast and lightweight due to bytecode-level optimizations, custom array structures, and minimal lock contention.\n- **Tuning:** Key settings include `maximumPoolSize` (to prevent DB overload) and `connectionTimeout`.\n- **Auto-config:** `DataSourceAutoConfiguration` detects Hikari in the classpath and configures it automatically using `spring.datasource.hikari.*` properties."
-    },
-    {
-        "type": "category",
-        "content": "22) CIRCULAR DEPENDENCIES"
-    },
-    {
-        "type": "question",
-        "content": "How does Spring Boot handle circular dependencies?"
-    },
-    {
-        "type": "theory",
-        "content": "A:\n- **Constructor Injection:** Fails immediately with `BeanCurrentlyInCreationException`. A needs B, B needs A; neither can be instantiated.\n- **Setter/Field Injection:** Spring can resolve this using early references. It creates a blank A, exposes an early reference, creates B injecting A, then finishes A by injecting B.\n- **Spring Boot 2.6+:** Circular dependencies are disabled by default. You must refactor or set `spring.main.allow-circular-references=true`."
-    },
-    {
-        "type": "category",
-        "content": "23) CONFIGURATION PROPERTIES"
-    },
-    {
-        "type": "question",
-        "content": "What happens internally when @ConfigurationProperties is used?"
-    },
-    {
-        "type": "theory",
-        "content": "A:\n- **Binding:** A `ConfigurationPropertiesBindingPostProcessor` binds the environment properties to the bean fields using reflection or constructors.\n- **Relaxed Binding:** Spring allows `kebab-case`, `camelCase`, or `SNAKE_CASE` in properties to map to `camelCase` java fields seamlessly.\n- **Validation:** Combine with `@Validated` and JSR-303 annotations (`@NotNull`, `@Min`) to fail startup if config is invalid."
-    },
-    {
-        "type": "category",
-        "content": "24) PROFILES"
-    },
-    {
-        "type": "question",
-        "content": "How do profiles work internally in Spring Boot?"
-    },
-    {
-        "type": "theory",
-        "content": "A:\n- **Selection:** Active profiles are set via `spring.profiles.active=dev,mysql`.\n- **Loading:** `@Profile(\"dev\")` ensures a bean is only created if `dev` is active. Spring also loads `application-dev.yml` automatically, overriding keys in `application.yml`.\n- **Testing:** Use `@ActiveProfiles(\"test\")` on test classes to isolate test configuration."
-    },
-    {
-        "type": "category",
-        "content": "25) STARTUP OPTIMIZATION"
-    },
-    {
-        "type": "question",
-        "content": "How do you optimize Spring Boot startup time in production?"
-    },
-    {
-        "type": "theory",
-        "content": "A:\n- **Lazy Init:** Set `spring.main.lazy-initialization=true`. Beans are created on first request, drastically cutting startup time (but delaying first-request latency).\n- **Scanning:** Limit `@ComponentScan` and `@EntityScan` strictly to necessary packages.\n- **JIT vs AOT:** Use GraalVM Native Image (Spring Boot 3) to compile the app Ahead-Of-Time, reducing startup to milliseconds.\n- **Measurement:** Use the Actuator `/actuator/startup` endpoint or application startup tracking to identify slow beans."
+        "content": "Yes, you configure two separate `DataSource`, `EntityManagerFactory`, and `TransactionManager` beans, and map them to separate repository packages.\n\n**The Consistency Problem:**\nIf you write to DB1 and DB2 in the same method, and DB2 fails, DB1 is already committed.\n\n**Why avoid XA?**\nXA (Two-Phase Commit) solves this but is notoriously slow, complex, and prone to distributed deadlocks. It shouldn't be the default choice.\n\n| Pattern | Complexity | Consistency Guarantees |\n|---|---|---|\n| XA (2PC) | Very High | Strong (Immediate) |\n| Saga Pattern | High | Eventual (via Compensating actions) |\n| Outbox Pattern | Medium | Eventual (Guaranteed delivery via events) |\n\n**Modern approach:** Use the Outbox Pattern or Saga Pattern. Save to DB1, drop a message in a local outbox table (in the same transaction), and use an async worker to reliably publish that message to update DB2 eventually."
     }
 ];
 

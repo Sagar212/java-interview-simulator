@@ -2,7 +2,7 @@ import json
 import os
 
 # Load the meticulously ordered master JSON
-with open('data/page2.json', 'r', encoding='utf-8') as f:
+with open('data/page4.json', 'r', encoding='utf-8') as f:
     qa_list = json.load(f)
 
 html_template = """<!DOCTYPE html>
@@ -300,14 +300,14 @@ html_template = """<!DOCTYPE html>
 <body>
     <div class="top-nav">
         <a href="index.html">Page 1: Core Java Simulator</a>
-        <a href="page2.html" class="active">Page 2: Spring & Master Q&A</a>
+        <a href="page2.html">Page 2: Spring & Master Q&A</a>
         <a href="page3.html">Page 3: Spring Boot Deep Dive</a>
-        <a href="page4.html">Page 4: Scenario Deep Dives</a>
+        <a href="page4.html" class="active">Page 4: Scenario Deep Dives</a>
     </div>
 
     <div id="app">
         <header>
-            <h1>Java & Spring Master Q&A</h1>
+            <h1>Scenario Deep Dives</h1>
             <div class="subtitle">High-Retention Interview Preparation (In-Depth Edition)</div>
         </header>
         <main id="content-track"></main>
@@ -522,5 +522,5 @@ public class Main {
 final_html = html_template.replace("JSON_PAYLOAD_HERE", json.dumps(qa_list, indent=4))
 
 # Write final HTML
-with open('page2.html', 'w', encoding='utf-8') as f:
+with open('page4.html', 'w', encoding='utf-8') as f:
     f.write(final_html)

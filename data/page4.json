@@ -1,0 +1,254 @@
+[
+    {
+        "type": "category",
+        "content": "1) OUT OF MEMORY"
+    },
+    {
+        "type": "question",
+        "content": "Your Java application suddenly starts throwing OutOfMemoryError. How will you debug it?"
+    },
+    {
+        "type": "theory",
+        "content": "First, identify the exact OOM type because the fix depends entirely on the memory region:\n- **Java heap space:** Objects are being retained too long.\n- **Metaspace:** Class loading or proxy growth issue.\n- **Direct buffer memory:** Often NIO/Netty buffer usage.\n- **unable to create new native thread:** OS limit or thread exhaustion.\n\nCapture evidence before restarting:\n- Enable heap dump on OOM: `-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/logs/`\n- Capture GC logs.\n- Use `jmap -dump:live,format=b,file=heap.bin <pid>` if the app is still barely running.\n\nAnalyze the heap dump (using Eclipse MAT or VisualVM) for:\n- Large retained collections.\n- Static references keeping object graphs alive.\n- Caches without eviction policies.\n- ThreadLocal leaks in web containers.\n\n| OOM Type | Common Cause | Fix Strategy |\n|---|---|---|\n| Heap Space | Memory leaks, huge payloads | Fix memory leaks, implement pagination |\n| Metaspace | Dynamic class generation | Increase MaxMetaspaceSize, fix classloader leak |\n| Direct Memory | Unclosed NIO buffers | Check ByteBuffer allocations |"
+    },
+    {
+        "type": "category",
+        "content": "2) HIGH CPU / LOW TRAFFIC"
+    },
+    {
+        "type": "question",
+        "content": "You see high CPU usage but low traffic. What could be the reason?"
+    },
+    {
+        "type": "theory",
+        "content": "Low traffic with high CPU usually means the app is doing unnecessary work per request or is stuck in a bad loop.\n\nCommon causes:\n- **Infinite loops:** A logic error keeping a thread spinning forever.\n- **Regex abuse:** Catastrophic backtracking in regular expressions.\n- **GC Storm:** The heap is 99% full, so the JVM spends all CPU time doing garbage collection instead of application work.\n- **Hot locks:** Threads constantly context switching while fighting for a lock.\n- **Expensive Serialization:** Serializing massive JSON objects over and over.\n\nDiagnostic approach:\n- Take a CPU profile using VisualVM or Java Mission Control.\n- Run `top -H -p <pid>` to find the specific Linux thread using CPU.\n- Run `jstack <pid>` to see what that specific thread is doing (convert the decimal PID from `top` to hex to match the `nid` in `jstack`)."
+    },
+    {
+        "type": "category",
+        "content": "3) BLOCKED THREADS"
+    },
+    {
+        "type": "question",
+        "content": "A thread is stuck in BLOCKED state. How will you identify and fix it?"
+    },
+    {
+        "type": "theory",
+        "content": "A BLOCKED thread means it is waiting to acquire a monitor lock that another thread already holds.\n\nDiagnostic steps:\n- Take a thread dump using `jstack <pid> > threads.txt`.\n- Find the BLOCKED thread and note the lock ID it is waiting for: `- waiting to lock <0x...>`\n- Search the thread dump for the thread holding that lock: `- locked <0x...>`\n\nCommon fixes:\n- **Reduce critical section:** Move I/O or expensive operations outside the `synchronized` block.\n- **Avoid nested locks:** Do not acquire Lock B while holding Lock A.\n- **Use Concurrent Tools:** Replace `synchronized` with `ReentrantLock` (with timeouts) or `ConcurrentHashMap`.\n\n| State | Meaning | Resolution Focus |\n|---|---|---|\n| RUNNABLE | Thread is executing or ready | If stuck here, check for infinite loops |\n| WAITING | Waiting indefinitely on condition | Check `Object.wait()` without `notify()` |\n| BLOCKED | Waiting for monitor lock | Find the thread holding the lock |"
+    },
+    {
+        "type": "category",
+        "content": "4) GRADUAL SLOWDOWN"
+    },
+    {
+        "type": "question",
+        "content": "Your application slows down after running for a few hours. What will you check?"
+    },
+    {
+        "type": "theory",
+        "content": "When performance gets worse over time, it is a classic sign of a gradual resource leak or unbounded growth.\n\nWhat to check and compare (Startup vs After Slowdown):\n- **Heap growth:** Is baseline memory increasing after every Full GC? (Memory Leak)\n- **Thread count:** Are threads being created but never dying? (Thread Leak)\n- **Connection pool:** Are DB connections exhausted and threads queuing? (Connection Leak)\n- **File handles:** Are files or sockets opened but not closed? (`lsof -p <pid>`)\n\nFix strategy:\n- Implement proper `finally` blocks or try-with-resources to close connections/streams.\n- Cap unbounded data structures (e.g., use fixed-size LRU caches instead of plain `HashMap`)."
+    },
+    {
+        "type": "category",
+        "content": "5) GC PAUSES"
+    },
+    {
+        "type": "question",
+        "content": "You are facing frequent GC pauses. How will you optimize it?"
+    },
+    {
+        "type": "theory",
+        "content": "Frequent GC pauses mean the JVM is spending too much time cleaning memory.\n\nRoot Cause Analysis:\n- **Allocation Pressure:** Creating too many short-lived objects (e.g., massive String concatenations in a loop).\n- **Promotion Failure:** Old generation is full, forcing slow Major GCs.\n\nOptimization Steps:\n- **Lower allocation rate:** Reuse objects, use primitives instead of wrappers, avoid large temporary collections.\n- **Tune Heap Size:** Ensure the Young Generation is large enough so objects die there before being promoted.\n- **Change Algorithm:** If using ParallelGC, switch to G1GC (`-XX:+UseG1GC`) or ZGC for lower pause times.\n\n| GC Algorithm | Best For | Tradeoff |\n|---|---|---|\n| Parallel GC | High throughput (batch jobs) | Long pause times |\n| G1 GC | Balanced throughput and latency | Moderate CPU overhead |\n| ZGC / Shenandoah | Ultra-low latency (<1ms pauses) | Higher CPU and memory footprint |"
+    },
+    {
+        "type": "category",
+        "content": "6) HASHMAP SLOWDOWN"
+    },
+    {
+        "type": "question",
+        "content": "A HashMap is causing performance issues under heavy load. Why?"
+    },
+    {
+        "type": "theory",
+        "content": "Under heavy load, a plain `HashMap` can degrade severely due to several reasons:\n\n1. **Collision-heavy keys:** If `hashCode()` is poorly implemented, many keys map to the same bucket, turning O(1) lookups into O(N) linked-list traversals (or O(log N) tree traversals in Java 8+).\n2. **Mutable keys:** If a key's state changes after insertion, its hash changes, making it impossible to retrieve.\n3. **Resizing Overhead:** If initialized without a capacity and filled with millions of elements, the map constantly resizes and rehashes.\n4. **Concurrency:** `HashMap` is NOT thread-safe. Concurrent writes can cause data corruption or even an infinite loop during resizing (prior to Java 8).\n\nFix: Pre-size the map if the size is known, ensure good `hashCode()` implementations, and use `ConcurrentHashMap` for multithreaded access."
+    },
+    {
+        "type": "category",
+        "content": "7) RACE CONDITIONS"
+    },
+    {
+        "type": "question",
+        "content": "Multiple threads are updating shared data incorrectly. How will you fix it?"
+    },
+    {
+        "type": "theory",
+        "content": "This is a classic race condition caused by unprotected shared mutable state.\n\nHow to fix it (from best to worst):\n- **Avoid Shared State (Best):** Redesign so threads don't share data at all (e.g., ThreadLocal or message passing).\n- **Use Immutability:** If an object cannot be changed, it is inherently thread-safe.\n- **Use Atomic Classes:** Use `AtomicInteger` or `LongAdder` instead of `count++`.\n- **Use Concurrent Collections:** Use `ConcurrentHashMap` instead of `HashMap`.\n- **Use Locks (Worst):** Protect the critical section with `synchronized` or `ReentrantLock`."
+    },
+    {
+        "type": "category",
+        "content": "8) ENVIRONMENT MISMATCH"
+    },
+    {
+        "type": "question",
+        "content": "Your API works fine locally but fails in production. What will you investigate?"
+    },
+    {
+        "type": "theory",
+        "content": "This is usually an environment mismatch. A local success does not mean the code is production-ready.\n\nInvestigation Checklist:\n- **Configuration:** Are properties/secrets different?\n- **Data Volume:** Prod DB has 10 million rows, local DB has 10. Did a missing index cause a timeout?\n- **Concurrency:** Prod receives 1000 req/sec, local receives 1. Did a race condition trigger?\n- **Network & Security:** Firewalls, proxies, TLS certificates, or CORS rules blocking traffic.\n- **Container Limits:** Does prod run in a Docker container with restricted CPU/Memory compared to your local machine?"
+    },
+    {
+        "type": "category",
+        "content": "9) MEMORY LEAK CONFIRMATION"
+    },
+    {
+        "type": "question",
+        "content": "You suspect a memory leak. How will you confirm it?"
+    },
+    {
+        "type": "theory",
+        "content": "A memory leak occurs when objects remain strongly reachable even though the application no longer needs them.\n\nConfirmation Steps:\n1. **Monitor Heap:** Observe the heap usage pattern in APM tools (Datadog, New Relic) or VisualVM. If the sawtooth pattern shows the baseline memory rising steadily after every GC, it is a leak.\n2. **GC Frequency:** Notice if GCs become increasingly frequent and reclaim less and less memory.\n3. **Heap Dumps:** Take a heap dump, wait an hour, take another. Compare them in Eclipse MAT. Look for objects whose instance count keeps growing indefinitely."
+    },
+    {
+        "type": "category",
+        "content": "10) RANDOM UNRESPONSIVENESS"
+    },
+    {
+        "type": "question",
+        "content": "A service becomes unresponsive randomly. What could be happening?"
+    },
+    {
+        "type": "theory",
+        "content": "Random unresponsiveness usually means threads are stuck, not that CPU is overwhelmed. The service looks alive (responds to ping) but cannot process requests.\n\nCommon culprits:\n- **Thread Pool Exhaustion:** All Tomcat threads are waiting for a slow downstream API or database query.\n- **Deadlock:** Threads are permanently stuck waiting for each other.\n- **Long GC Pause:** A \"Stop-The-World\" GC pause froze the entire JVM for 30 seconds.\n\nAction: Capture a thread dump during the unresponsiveness. Check if threads are WAITING on external I/O without timeouts."
+    },
+    {
+        "type": "category",
+        "content": "11) DEADLOCKS"
+    },
+    {
+        "type": "question",
+        "content": "You see a deadlock in your system. How will you detect and resolve it?"
+    },
+    {
+        "type": "theory",
+        "content": "A deadlock occurs when Thread A holds Lock 1 and waits for Lock 2, while Thread B holds Lock 2 and waits for Lock 1.\n\nDetection:\n- Run `jstack <pid>`. The JVM will explicitly print \"Found one Java-level deadlock:\" and list the offending threads.\n\nResolution:\n- **Lock Ordering:** Ensure all threads acquire locks in the exact same global order.\n- **Lock Timeouts:** Use `ReentrantLock.tryLock(timeout)` instead of `synchronized` to fail gracefully instead of freezing forever.\n- **Reduce Scope:** Avoid calling alien methods (callbacks, overridable methods) while holding a lock."
+    },
+    {
+        "type": "category",
+        "content": "12) INCONSISTENT LOGS"
+    },
+    {
+        "type": "question",
+        "content": "Your logs show inconsistent behavior across requests. Why?"
+    },
+    {
+        "type": "theory",
+        "content": "In web apps, threads are pooled. The same thread serves Request A, then Request B.\n\nCause: **Context Leakage.**\nIf you store data (like UserID or CorrelationID) in a `ThreadLocal` or SLF4J `MDC` (Mapped Diagnostic Context) during a request but forget to clear it, the next request processed by that same thread will inherit the stale data!\n\nFix: Always clear `ThreadLocal` and `MDC` in a `finally` block or a Servlet Filter's `afterCompletion` method."
+    },
+    {
+        "type": "category",
+        "content": "13) SILENT CRASHES"
+    },
+    {
+        "type": "question",
+        "content": "Your application crashes without any clear Java exception error. How will you debug it?"
+    },
+    {
+        "type": "theory",
+        "content": "If the JVM disappears without a stack trace, it died below the Java layer.\n\nWhat to check:\n- **OOM Killer (Linux):** Run `dmesg -T | grep -i oom`. The OS may have killed Java for exceeding container memory limits.\n- **JVM Crash Log:** Look for an `hs_err_pid.log` file in the working directory. This indicates a fatal JVM error (often caused by JNI/native library bugs).\n- **Container Restarts:** Check Kubernetes or Docker events (`kubectl describe pod`) for exit codes (e.g., Exit Code 137 means killed by OOM)."
+    },
+    {
+        "type": "category",
+        "content": "14) DATABASE BOTTLENECK"
+    },
+    {
+        "type": "question",
+        "content": "A database call is slowing down your Java service. How will you optimize it?"
+    },
+    {
+        "type": "theory",
+        "content": "Optimization should happen in layers, starting with the database.\n\n1. **SQL & Indexes:** Use `EXPLAIN` to check query execution plans. Add missing indexes. Avoid full table scans.\n2. **Data Transfer:** Only `SELECT` the columns you need. Don't fetch 10,000 rows if you only display 10 (use Pagination).\n3. **N+1 Problem:** Check if Hibernate/JPA is firing 100 queries to load children instead of a single `JOIN FETCH`.\n4. **Caching:** If the data rarely changes, use Redis or Spring `@Cacheable` to skip the DB entirely."
+    },
+    {
+        "type": "category",
+        "content": "15) THREAD POOL EXHAUSTION"
+    },
+    {
+        "type": "question",
+        "content": "Your thread pool gets exhausted under load. What\u2019s your approach?"
+    },
+    {
+        "type": "theory",
+        "content": "Thread pool exhaustion means all worker threads (e.g., Tomcat's 200 default threads) are busy. New requests queue up and eventually time out.\n\nCrucial Realization: Threads usually run out because they are *stuck waiting*, not because they are doing heavy CPU work.\n\nFixes:\n- **Add Timeouts:** Never make an HTTP or DB call without strict connect and read timeouts.\n- **Circuit Breakers:** Use Resilience4j. If a downstream service is slow, fail fast instead of holding threads hostage.\n- **Bulkheads:** Isolate thread pools. Don't let a slow reporting endpoint exhaust the threads needed for the critical checkout endpoint."
+    },
+    {
+        "type": "category",
+        "content": "16) HIGH CONCURRENCY DESIGN"
+    },
+    {
+        "type": "question",
+        "content": "You need to handle high concurrency safely. What will you use?"
+    },
+    {
+        "type": "theory",
+        "content": "Use the lightest concurrency control possible to maximize throughput.\n\n| Technique | Cost | Best Use Case |\n|---|---|---|\n| Immutability | Lowest | Read-heavy configs, DTOs |\n| Atomic Classes | Low | Simple counters (`AtomicInteger`) |\n| Concurrent Collections | Medium | Shared caches (`ConcurrentHashMap`) |\n| ReentrantLock | High | Complex logic across multiple variables |\n| synchronized | High | Simple block protection (legacy) |"
+    },
+    {
+        "type": "category",
+        "content": "17) IDEMPOTENCY"
+    },
+    {
+        "type": "question",
+        "content": "Your system processes duplicate requests. How will you handle it?"
+    },
+    {
+        "type": "theory",
+        "content": "Duplicates happen due to network timeouts (client retries) or message broker redeliveries (at-least-once delivery).\n\nHandling (Idempotency):\n- **Idempotency Key:** Clients send a unique UUID. The server checks a dedup table; if seen, it returns the cached result without reprocessing.\n- **Database Constraints:** Rely on unique constraints (`UNIQUE INDEX`) so duplicates fail safely.\n- **Stateless/Safe Operations:** Design updates to be absolute (`SET status='PAID'`) rather than relative (`status += 1`), so repeating them is harmless."
+    },
+    {
+        "type": "category",
+        "content": "18) STALE CACHE"
+    },
+    {
+        "type": "question",
+        "content": "A cache is giving stale data. How will you fix it?"
+    },
+    {
+        "type": "theory",
+        "content": "Stale cache means the cached value no longer matches the database source of truth.\n\nFix strategies:\n- **TTL (Time-To-Live):** Ensure keys expire naturally.\n- **Event-Driven Invalidation:** When the DB is updated, publish a Kafka event or Spring ApplicationEvent to evict the specific cache key.\n- **Cache-Aside Pattern:** When updating, update the DB first, then immediately `evict` the cache key.\n- **Distributed Consistency:** If using multiple app nodes with local in-memory caches (Caffeine), switch to a centralized cache (Redis) so all nodes see the same invalidation."
+    },
+    {
+        "type": "category",
+        "content": "19) HORIZONTAL SCALING LIMITS"
+    },
+    {
+        "type": "question",
+        "content": "Your application is not scaling even after adding instances. Why?"
+    },
+    {
+        "type": "theory",
+        "content": "Adding more app servers (horizontal scaling) only helps if the bottleneck is CPU or memory inside the app node.\n\nIf it doesn't help, the bottleneck is shared:\n- **Database Saturation:** The DB is maxed out on CPU/Connections. More app nodes just queue up faster.\n- **Shared Lock:** App nodes are fighting for a distributed lock in Redis.\n- **Synchronous Downstream:** You are waiting on a third-party API that can only process 10 requests/sec.\n\nFix: Scale the DB (Read Replicas), introduce caching, or switch to asynchronous/event-driven processing."
+    },
+    {
+        "type": "category",
+        "content": "20) DISTRIBUTED TRACING"
+    },
+    {
+        "type": "question",
+        "content": "You need to trace a request across multiple layers. How will you do it?"
+    },
+    {
+        "type": "theory",
+        "content": "In microservices, a single user click might hit an API Gateway, Service A, Service B, Kafka, and Service C.\n\nSolution: **Distributed Tracing (Sleuth/Micrometer Tracing + Zipkin/Jaeger)**\n- The Gateway generates a unique **Trace ID**.\n- This ID is propagated via HTTP Headers (e.g., `X-B3-TraceId`) and Kafka headers to all downstream services.\n- SLF4J MDC injects this Trace ID into every log line.\n- When an error occurs, you search Splunk/ELK for the Trace ID and instantly see the entire lifecycle of the request across all microservices."
+    },
+    {
+        "type": "category",
+        "content": "21) TWO DATABASES & XA"
+    },
+    {
+        "type": "question",
+        "content": "Can you call two different databases in Spring Boot? How will you avoid XA transaction errors?"
+    },
+    {
+        "type": "theory",
+        "content": "Yes, you configure two separate `DataSource`, `EntityManagerFactory`, and `TransactionManager` beans, and map them to separate repository packages.\n\n**The Consistency Problem:**\nIf you write to DB1 and DB2 in the same method, and DB2 fails, DB1 is already committed.\n\n**Why avoid XA?**\nXA (Two-Phase Commit) solves this but is notoriously slow, complex, and prone to distributed deadlocks. It shouldn't be the default choice.\n\n| Pattern | Complexity | Consistency Guarantees |\n|---|---|---|\n| XA (2PC) | Very High | Strong (Immediate) |\n| Saga Pattern | High | Eventual (via Compensating actions) |\n| Outbox Pattern | Medium | Eventual (Guaranteed delivery via events) |\n\n**Modern approach:** Use the Outbox Pattern or Saga Pattern. Save to DB1, drop a message in a local outbox table (in the same transaction), and use an async worker to reliably publish that message to update DB2 eventually."
+    }
+]
