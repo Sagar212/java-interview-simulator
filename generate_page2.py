@@ -369,8 +369,7 @@ html_template = """<!DOCTYPE html>
                     const tEl = document.createElement('div');
                     tEl.className = 'theory';
 
-                    let lines = theoryHTML.split('
-');
+                    let lines = theoryHTML.split('\\n');
                     let inTable = false;
                     let tableHTML = '';
                     let finalLines = [];
@@ -380,8 +379,7 @@ html_template = """<!DOCTYPE html>
                         if (line.startsWith('|') && line.endsWith('|')) {
                             if (!inTable) {
                                 inTable = true;
-                                tableHTML = '<div class="table-responsive"><table>
-';
+                                tableHTML = '<div class="table-responsive"><table>\\n';
                             }
                             
                             if (line.includes('---')) continue;
@@ -395,8 +393,7 @@ html_template = """<!DOCTYPE html>
                                     rowHTML += `<td>${cell}</td>`;
                                 }
                             });
-                            rowHTML += '</tr>
-';
+                            rowHTML += '</tr>\\n';
                             tableHTML += rowHTML;
                         } else {
                             if (inTable) {
