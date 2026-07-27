@@ -48,16 +48,20 @@ while i < len(lines):
         continue
     
     # Check for Question
-    if line.startswith("Q: "):
+    if line.startswith("Q:") and (len(line) == 2 or line[2].isspace()):
         flush_content()
-        output.append({"type": "question", "content": line[3:].strip()})
+        q_content = line[2:].strip()
+        if q_content:
+            output.append({"type": "question", "content": q_content})
         i += 1
         continue
         
     # Check for Answer
-    if line.startswith("A: "):
+    if line.startswith("A:") and (len(line) == 2 or line[2].isspace()):
         flush_content() # Just in case
-        current_content.append(line[3:].strip())
+        a_content = line[2:].strip()
+        if a_content:
+            current_content.append(a_content)
         i += 1
         continue
         

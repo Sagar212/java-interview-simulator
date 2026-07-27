@@ -376,7 +376,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- **@ComponentScan:** Scans your application's source code packages for custom components (`@Controller`, `@Service`, `@Repository`). It only finds what *you* wrote.\n- **@EnableAutoConfiguration:** Scans the classpath (jars) and evaluates pre-defined configuration classes to set up infrastructure (like Web Servers, DataSources, Message Brokers) based on conditions.\n- **Overlap:** They don't overlap in responsibilities, but they work together.\n- **Problems:** If `@ComponentScan` is set too broad (e.g., scanning `org` or `com`), it drastically increases startup time and might load unintended beans."
+        "content": "- **@ComponentScan:** Scans your application's source code packages for custom components (`@Controller`, `@Service`, `@Repository`). It only finds what *you* wrote.\n- **@EnableAutoConfiguration:** Scans the classpath (jars) and evaluates pre-defined configuration classes to set up infrastructure (like Web Servers, DataSources, Message Brokers) based on conditions.\n- **Overlap:** They don't overlap in responsibilities, but they work together.\n- **Problems:** If `@ComponentScan` is set too broad (e.g., scanning `org` or `com`), it drastically increases startup time and might load unintended beans."
     },
     {
         "type": "category",
@@ -388,7 +388,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- **Creation:** During startup, if a web environment is detected, Spring Boot creates an `AnnotationConfigServletWebServerApplicationContext`.\n- **Binding:** A `ServletWebServerFactory` bean (auto-configured for Tomcat if `tomcat-embed-core` is present) is used to create and start the `WebServer`.\n- **Switching:** Exclude `spring-boot-starter-tomcat` and include `spring-boot-starter-undertow` or `jetty`.\n- **Graceful Shutdown:** When enabled, the server stops accepting new connections but allows active requests a grace period (e.g., 30s) to finish before shutting down."
+        "content": "- **Creation:** During startup, if a web environment is detected, Spring Boot creates an `AnnotationConfigServletWebServerApplicationContext`.\n- **Binding:** A `ServletWebServerFactory` bean (auto-configured for Tomcat if `tomcat-embed-core` is present) is used to create and start the `WebServer`.\n- **Switching:** Exclude `spring-boot-starter-tomcat` and include `spring-boot-starter-undertow` or `jetty`.\n- **Graceful Shutdown:** When enabled, the server stops accepting new connections but allows active requests a grace period (e.g., 30s) to finish before shutting down."
     },
     {
         "type": "category",
@@ -400,7 +400,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n1. **Bootstrap:** `SpringApplication` instantiates and sets up `ApplicationListeners`.\n2. **Environment:** The `Environment` is prepared (properties, profiles).\n3. **Context Creation:** The `ApplicationContext` is created based on the environment (Web, Reactive, or Standard).\n4. **Bean Initialization:** Classes are scanned, auto-configuration runs, and singletons are instantiated.\n5. **Runners:** `ApplicationRunner` and `CommandLineRunner` beans are executed.\n- **Hooks:** You can hook into events like `ApplicationStartingEvent` or `ApplicationReadyEvent`."
+        "content": "1. **Bootstrap:** `SpringApplication` instantiates and sets up `ApplicationListeners`.\n2. **Environment:** The `Environment` is prepared (properties, profiles).\n3. **Context Creation:** The `ApplicationContext` is created based on the environment (Web, Reactive, or Standard).\n4. **Bean Initialization:** Classes are scanned, auto-configuration runs, and singletons are instantiated.\n5. **Runners:** `ApplicationRunner` and `CommandLineRunner` beans are executed.\n- **Hooks:** You can hook into events like `ApplicationStartingEvent` or `ApplicationReadyEvent`."
     },
     {
         "type": "category",
@@ -412,7 +412,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- **Resolution:** Spring builds a graph of dependencies. When Bean A needs Bean B, the `BeanFactory` checks if B exists. If not, it creates B first.\n- **BeanFactory:** It is the core engine responsible for instantiating, configuring, and managing beans.\n- **Constructor vs Field:** Constructor injection enforces immutability and guarantees dependencies are not null. Field injection uses reflection post-instantiation, allowing circular dependencies but making testing harder.\n- **Circular Dependencies:** Constructor circular dependencies fail at startup. Setter/Field circular dependencies can be resolved by Spring using early proxies, though it's bad practice."
+        "content": "- **Resolution:** Spring builds a graph of dependencies. When Bean A needs Bean B, the `BeanFactory` checks if B exists. If not, it creates B first.\n- **BeanFactory:** It is the core engine responsible for instantiating, configuring, and managing beans.\n- **Constructor vs Field:** Constructor injection enforces immutability and guarantees dependencies are not null. Field injection uses reflection post-instantiation, allowing circular dependencies but making testing harder.\n- **Circular Dependencies:** Constructor circular dependencies fail at startup. Setter/Field circular dependencies can be resolved by Spring using early proxies, though it's bad practice."
     },
     {
         "type": "category",
@@ -424,7 +424,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- **BeanFactory:** The fundamental IoC container. It uses lazy initialization by default (creates beans only when requested).\n- **ApplicationContext:** A sub-interface of BeanFactory. It adds enterprise features: Event publishing, Message resolution (i18n), Environment properties, and eager instantiation of singletons.\n- **Usage:** Spring Boot almost exclusively uses `ApplicationContext` because web applications need eager initialization and robust event systems."
+        "content": "- **BeanFactory:** The fundamental IoC container. It uses lazy initialization by default (creates beans only when requested).\n- **ApplicationContext:** A sub-interface of BeanFactory. It adds enterprise features: Event publishing, Message resolution (i18n), Environment properties, and eager instantiation of singletons.\n- **Usage:** Spring Boot almost exclusively uses `ApplicationContext` because web applications need eager initialization and robust event systems."
     },
     {
         "type": "category",
@@ -436,7 +436,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- **Sources:** `application.properties`, `application.yml`, Environment Variables, Command-line args, Config Servers.\n- **Merging:** Properties are merged, with higher-precedence sources overriding lower ones.\n- **Profiles:** `application-{profile}.yml` is loaded if that profile is active, overriding defaults.\n- **Binding:** Use `@ConfigurationProperties` to strongly type configuration into Java record/class objects."
+        "content": "- **Sources:** `application.properties`, `application.yml`, Environment Variables, Command-line args, Config Servers.\n- **Merging:** Properties are merged, with higher-precedence sources overriding lower ones.\n- **Profiles:** `application-{profile}.yml` is loaded if that profile is active, overriding defaults.\n- **Binding:** Use `@ConfigurationProperties` to strongly type configuration into Java record/class objects."
     },
     {
         "type": "category",
@@ -460,7 +460,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n1. **Instantiation:** Memory allocated (Constructor called).\n2. **Populate Properties:** Dependencies injected.\n3. **BeanPostProcessors (Before):** Framework modifies the bean (e.g., injecting ApplicationContext).\n4. **Initialization:** `@PostConstruct` methods execute, followed by `InitializingBean.afterPropertiesSet()`.\n5. **BeanPostProcessors (After):** Proxies (like AOP/Transactions) are wrapped around the bean.\n6. **Destruction:** On shutdown, `@PreDestroy` executes."
+        "content": "1. **Instantiation:** Memory allocated (Constructor called).\n2. **Populate Properties:** Dependencies injected.\n3. **BeanPostProcessors (Before):** Framework modifies the bean (e.g., injecting ApplicationContext).\n4. **Initialization:** `@PostConstruct` methods execute, followed by `InitializingBean.afterPropertiesSet()`.\n5. **BeanPostProcessors (After):** Proxies (like AOP/Transactions) are wrapped around the bean.\n6. **Destruction:** On shutdown, `@PreDestroy` executes."
     },
     {
         "type": "code",
@@ -477,7 +477,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- **@Component:** A class-level annotation. Spring creates the bean automatically during classpath scanning. Best for your own code.\n- **@Bean:** A method-level annotation inside `@Configuration` classes. You manually instantiate and return the object. Best for third-party classes (e.g., `RestTemplate`) where you can't add `@Component`.\n- **Proxy Behavior:** `@Configuration` classes are proxied using CGLIB. Calling a `@Bean` method directly from another method in the same class returns the singleton from the container, not a new instance."
+        "content": "- **@Component:** A class-level annotation. Spring creates the bean automatically during classpath scanning. Best for your own code.\n- **@Bean:** A method-level annotation inside `@Configuration` classes. You manually instantiate and return the object. Best for third-party classes (e.g., `RestTemplate`) where you can't add `@Component`.\n- **Proxy Behavior:** `@Configuration` classes are proxied using CGLIB. Calling a `@Bean` method directly from another method in the same class returns the singleton from the container, not a new instance."
     },
     {
         "type": "category",
@@ -489,7 +489,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- **Endpoints:** It auto-configures HTTP and JMX endpoints (`/actuator/health`, `/actuator/metrics`).\n- **Security:** By default, only `/health` and `/info` are exposed over HTTP. You secure them via Spring Security and configure exposure via `management.endpoints.web.exposure.include=*`.\n- **Metrics:** It integrates with Micrometer to collect JVM, Tomcat, and application metrics, which can be exported to Prometheus, Datadog, etc."
+        "content": "- **Endpoints:** It auto-configures HTTP and JMX endpoints (`/actuator/health`, `/actuator/metrics`).\n- **Security:** By default, only `/health` and `/info` are exposed over HTTP. You secure them via Spring Security and configure exposure via `management.endpoints.web.exposure.include=*`.\n- **Metrics:** It integrates with Micrometer to collect JVM, Tomcat, and application metrics, which can be exported to Prometheus, Datadog, etc."
     },
     {
         "type": "category",
@@ -501,7 +501,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- **Usage:** Useful for checking connectivity to external APIs or custom databases not supported out-of-the-box.\n- **Implementation:** Implement `HealthIndicator` or extend `AbstractHealthIndicator`. Return `Health.up()` or `Health.down().withDetail(...)`.\n- **Liveness vs Readiness:** Spring Boot 2.3+ separates these. Liveness means the app is running. Readiness means it's ready to accept traffic."
+        "content": "- **Usage:** Useful for checking connectivity to external APIs or custom databases not supported out-of-the-box.\n- **Implementation:** Implement `HealthIndicator` or extend `AbstractHealthIndicator`. Return `Health.up()` or `Health.down().withDetail(...)`.\n- **Liveness vs Readiness:** Spring Boot 2.3+ separates these. Liveness means the app is running. Readiness means it's ready to accept traffic."
     },
     {
         "type": "code",
@@ -518,7 +518,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- **Protection:** Prevents dropping active user requests when the application is killed (e.g., during Kubernetes rolling updates).\n- **Mechanism:** When a SIGTERM is received, the embedded web server stops accepting new connections but lets active threads finish.\n- **Configuration:** `server.shutdown=graceful` and `spring.lifecycle.timeout-per-shutdown-phase=30s`."
+        "content": "- **Protection:** Prevents dropping active user requests when the application is killed (e.g., during Kubernetes rolling updates).\n- **Mechanism:** When a SIGTERM is received, the embedded web server stops accepting new connections but lets active threads finish.\n- **Configuration:** `server.shutdown=graceful` and `spring.lifecycle.timeout-per-shutdown-phase=30s`."
     },
     {
         "type": "category",
@@ -530,7 +530,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- **Default Propagation:** `REQUIRED` - join existing transaction if present, else create a new one.\n- **Proxies:** Spring generates a CGLIB proxy around the class. The proxy opens a transaction, calls the real method, and then commits/rolls back.\n- **Rollbacks:** Rolls back on `RuntimeException` and `Error` automatically. Checked exceptions DO NOT trigger rollback unless explicitly configured with `rollbackFor = Exception.class`."
+        "content": "- **Default Propagation:** `REQUIRED` - join existing transaction if present, else create a new one.\n- **Proxies:** Spring generates a CGLIB proxy around the class. The proxy opens a transaction, calls the real method, and then commits/rolls back.\n- **Rollbacks:** Rolls back on `RuntimeException` and `Error` automatically. Checked exceptions DO NOT trigger rollback unless explicitly configured with `rollbackFor = Exception.class`."
     },
     {
         "type": "category",
@@ -542,7 +542,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- **Proxy Bypass:** Spring AOP works via proxies. If Method A calls Method B within the same class, the call goes directly via `this.MethodB()`, bypassing the proxy. Therefore, any `@Transactional` on Method B is ignored.\n- **Fix:** Move Method B to a different service class, or inject `ApplicationContext` to retrieve the proxy (anti-pattern), or use AspectJ weaving instead of Spring AOP proxies."
+        "content": "- **Proxy Bypass:** Spring AOP works via proxies. If Method A calls Method B within the same class, the call goes directly via `this.MethodB()`, bypassing the proxy. Therefore, any `@Transactional` on Method B is ignored.\n- **Fix:** Move Method B to a different service class, or inject `ApplicationContext` to retrieve the proxy (anti-pattern), or use AspectJ weaving instead of Spring AOP proxies."
     },
     {
         "type": "category",
@@ -554,7 +554,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- **Filter:** Part of the Servlet API. Executes BEFORE requests reach the DispatcherServlet. Good for raw HTTP modifications, CORS, and early authentication (Spring Security uses Filter Chains).\n- **Interceptor:** Part of the Spring MVC framework. Executes AFTER DispatcherServlet but before the Controller. Good for application-level logic, checking Controller annotations, or accessing model/view data."
+        "content": "- **Filter:** Part of the Servlet API. Executes BEFORE requests reach the DispatcherServlet. Good for raw HTTP modifications, CORS, and early authentication (Spring Security uses Filter Chains).\n- **Interceptor:** Part of the Spring MVC framework. Executes AFTER DispatcherServlet but before the Controller. Good for application-level logic, checking Controller annotations, or accessing model/view data."
     },
     {
         "type": "category",
@@ -566,7 +566,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- **Execution:** `@Async` tells Spring to execute the method in a separate thread pool.\n- **Executor:** If no custom `Executor` is defined, Spring uses a `SimpleAsyncTaskExecutor` (creates a new thread for every request - very bad for production). You should define a `ThreadPoolTaskExecutor` bean.\n- **Results & Errors:** Return `CompletableFuture<T>`. Exceptions in `void` methods are logged but swallowed unless an `AsyncUncaughtExceptionHandler` is configured."
+        "content": "- **Execution:** `@Async` tells Spring to execute the method in a separate thread pool.\n- **Executor:** If no custom `Executor` is defined, Spring uses a `SimpleAsyncTaskExecutor` (creates a new thread for every request - very bad for production). You should define a `ThreadPoolTaskExecutor` bean.\n- **Results & Errors:** Return `CompletableFuture<T>`. Exceptions in `void` methods are logged but swallowed unless an `AsyncUncaughtExceptionHandler` is configured."
     },
     {
         "type": "category",
@@ -578,7 +578,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- **Performance:** It is exceptionally fast and lightweight due to bytecode-level optimizations, custom array structures, and minimal lock contention.\n- **Tuning:** Key settings include `maximumPoolSize` (to prevent DB overload) and `connectionTimeout`.\n- **Auto-config:** `DataSourceAutoConfiguration` detects Hikari in the classpath and configures it automatically using `spring.datasource.hikari.*` properties."
+        "content": "- **Performance:** It is exceptionally fast and lightweight due to bytecode-level optimizations, custom array structures, and minimal lock contention.\n- **Tuning:** Key settings include `maximumPoolSize` (to prevent DB overload) and `connectionTimeout`.\n- **Auto-config:** `DataSourceAutoConfiguration` detects Hikari in the classpath and configures it automatically using `spring.datasource.hikari.*` properties."
     },
     {
         "type": "category",
@@ -590,7 +590,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- **Constructor Injection:** Fails immediately with `BeanCurrentlyInCreationException`. A needs B, B needs A; neither can be instantiated.\n- **Setter/Field Injection:** Spring can resolve this using early references. It creates a blank A, exposes an early reference, creates B injecting A, then finishes A by injecting B.\n- **Spring Boot 2.6+:** Circular dependencies are disabled by default. You must refactor or set `spring.main.allow-circular-references=true`."
+        "content": "- **Constructor Injection:** Fails immediately with `BeanCurrentlyInCreationException`. A needs B, B needs A; neither can be instantiated.\n- **Setter/Field Injection:** Spring can resolve this using early references. It creates a blank A, exposes an early reference, creates B injecting A, then finishes A by injecting B.\n- **Spring Boot 2.6+:** Circular dependencies are disabled by default. You must refactor or set `spring.main.allow-circular-references=true`."
     },
     {
         "type": "category",
@@ -602,7 +602,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- **Binding:** A `ConfigurationPropertiesBindingPostProcessor` binds the environment properties to the bean fields using reflection or constructors.\n- **Relaxed Binding:** Spring allows `kebab-case`, `camelCase`, or `SNAKE_CASE` in properties to map to `camelCase` java fields seamlessly.\n- **Validation:** Combine with `@Validated` and JSR-303 annotations (`@NotNull`, `@Min`) to fail startup if config is invalid."
+        "content": "- **Binding:** A `ConfigurationPropertiesBindingPostProcessor` binds the environment properties to the bean fields using reflection or constructors.\n- **Relaxed Binding:** Spring allows `kebab-case`, `camelCase`, or `SNAKE_CASE` in properties to map to `camelCase` java fields seamlessly.\n- **Validation:** Combine with `@Validated` and JSR-303 annotations (`@NotNull`, `@Min`) to fail startup if config is invalid."
     },
     {
         "type": "category",
@@ -614,7 +614,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- **Selection:** Active profiles are set via `spring.profiles.active=dev,mysql`.\n- **Loading:** `@Profile(\"dev\")` ensures a bean is only created if `dev` is active. Spring also loads `application-dev.yml` automatically, overriding keys in `application.yml`.\n- **Testing:** Use `@ActiveProfiles(\"test\")` on test classes to isolate test configuration."
+        "content": "- **Selection:** Active profiles are set via `spring.profiles.active=dev,mysql`.\n- **Loading:** `@Profile(\"dev\")` ensures a bean is only created if `dev` is active. Spring also loads `application-dev.yml` automatically, overriding keys in `application.yml`.\n- **Testing:** Use `@ActiveProfiles(\"test\")` on test classes to isolate test configuration."
     },
     {
         "type": "category",
@@ -626,7 +626,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- **Lazy Init:** Set `spring.main.lazy-initialization=true`. Beans are created on first request, drastically cutting startup time (but delaying first-request latency).\n- **Scanning:** Limit `@ComponentScan` and `@EntityScan` strictly to necessary packages.\n- **JIT vs AOT:** Use GraalVM Native Image (Spring Boot 3) to compile the app Ahead-Of-Time, reducing startup to milliseconds.\n- **Measurement:** Use the Actuator `/actuator/startup` endpoint or application startup tracking to identify slow beans."
+        "content": "- **Lazy Init:** Set `spring.main.lazy-initialization=true`. Beans are created on first request, drastically cutting startup time (but delaying first-request latency).\n- **Scanning:** Limit `@ComponentScan` and `@EntityScan` strictly to necessary packages.\n- **JIT vs AOT:** Use GraalVM Native Image (Spring Boot 3) to compile the app Ahead-Of-Time, reducing startup to milliseconds.\n- **Measurement:** Use the Actuator `/actuator/startup` endpoint or application startup tracking to identify slow beans."
     }
 ];
 

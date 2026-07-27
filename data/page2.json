@@ -152,7 +152,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\nSerial GC:\n- single-threaded\n- simple\n- good for small applications\n- may cause longer pauses\n\nCMS:\n- designed to reduce pause times\n- mostly old-generation focus\n- has been deprecated/removed in modern Java versions\n\nG1:\n- region-based collector\n- designed for large heaps\n- aims for predictable pause times\n- common modern choice\n\nIn interviews, it is enough to explain the trade-off:\n- Serial = simple\n- CMS = low pause but older\n- G1 = balanced and modern"
+        "content": "Serial GC:\n- single-threaded\n- simple\n- good for small applications\n- may cause longer pauses\n\nCMS:\n- designed to reduce pause times\n- mostly old-generation focus\n- has been deprecated/removed in modern Java versions\n\nG1:\n- region-based collector\n- designed for large heaps\n- aims for predictable pause times\n- common modern choice\n\nIn interviews, it is enough to explain the trade-off:\n- Serial = simple\n- CMS = low pause but older\n- G1 = balanced and modern"
     },
     {
         "type": "question",
@@ -301,7 +301,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n@Primary:\n- marks one bean as default\n- used when multiple candidates exist\n\n@Qualifier:\n- selects one bean explicitly\n- more precise than @Primary\n\nIf both exist, @Qualifier usually wins at the injection point."
+        "content": "@Primary:\n- marks one bean as default\n- used when multiple candidates exist\n\n@Qualifier:\n- selects one bean explicitly\n- more precise than @Primary\n\nIf both exist, @Qualifier usually wins at the injection point."
     },
     {
         "type": "question",
@@ -337,7 +337,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- interfaces: multiple allowed\n- abstract classes: only one parent class allowed\n\nThis is a major reason interfaces are used for contracts, while abstract classes are used for shared base behavior."
+        "content": "- interfaces: multiple allowed\n- abstract classes: only one parent class allowed\n\nThis is a major reason interfaces are used for contracts, while abstract classes are used for shared base behavior."
     },
     {
         "type": "question",
@@ -345,7 +345,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- interface cannot hold instance state\n- abstract class can hold fields and mutable state\n\nThat makes abstract class better for shared internal data."
+        "content": "- interface cannot hold instance state\n- abstract class can hold fields and mutable state\n\nThat makes abstract class better for shared internal data."
     },
     {
         "type": "category",
@@ -357,7 +357,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\nEncapsulation:\n- Bank account hides balance and only allows update through deposit and withdraw methods.\n\nAbstraction:\n- A car driver uses steering, accelerator, and brake without knowing engine internals.\n\nPolymorphism:\n- A payment interface can work with card payment, UPI payment, or wallet payment through different implementations."
+        "content": "Encapsulation:\n- Bank account hides balance and only allows update through deposit and withdraw methods.\n\nAbstraction:\n- A car driver uses steering, accelerator, and brake without knowing engine internals.\n\nPolymorphism:\n- A payment interface can work with card payment, UPI payment, or wallet payment through different implementations."
     },
     {
         "type": "question",
@@ -365,7 +365,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\nCompile-time polymorphism:\n- method overloading\n- decided by compiler\n\nRuntime polymorphism:\n- method overriding\n- decided by actual object at runtime"
+        "content": "Compile-time polymorphism:\n- method overloading\n- decided by compiler\n\nRuntime polymorphism:\n- method overriding\n- decided by actual object at runtime"
     },
     {
         "type": "question",
@@ -373,7 +373,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\nAbstraction hides complexity.\nEncapsulation protects data.\n\nAbstraction answers:\n- what should the object do?\n\nEncapsulation answers:\n- how is internal data protected?"
+        "content": "Abstraction hides complexity.\nEncapsulation protects data.\n\nAbstraction answers:\n- what should the object do?\n\nEncapsulation answers:\n- how is internal data protected?"
     },
     {
         "type": "question",
@@ -381,7 +381,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\nEncapsulation:\n- private fields\n- getters/setters or business methods\n\nAbstraction:\n- interfaces\n- abstract classes\n\nPolymorphism:\n- method overriding\n- interface-based programming"
+        "content": "Encapsulation:\n- private fields\n- getters/setters or business methods\n\nAbstraction:\n- interfaces\n- abstract classes\n\nPolymorphism:\n- method overriding\n- interface-based programming"
     },
     {
         "type": "category",
@@ -393,7 +393,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\nOverloading:\n- same method name\n- different parameters\n- compile-time resolution\n\nOverriding:\n- same method signature\n- child provides new implementation\n- runtime resolution"
+        "content": "Overloading:\n- same method name\n- different parameters\n- compile-time resolution\n\nOverriding:\n- same method signature\n- child provides new implementation\n- runtime resolution"
     },
     {
         "type": "question",
@@ -401,7 +401,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- return type must be same or covariant\n- access cannot be more restrictive\n- checked exceptions cannot be broader\n- final/private methods cannot be overridden"
+        "content": "- return type must be same or covariant\n- access cannot be more restrictive\n- checked exceptions cannot be broader\n- final/private methods cannot be overridden"
     },
     {
         "type": "question",
@@ -417,7 +417,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- Overloaded method selection happens at compile time.\n- Overridden method selection happens at runtime based on object type."
+        "content": "- Overloaded method selection happens at compile time.\n- Overridden method selection happens at runtime based on object type."
     },
     {
         "type": "category",
@@ -437,7 +437,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\nHiding:\n- static methods\n- compile-time binding\n\nOverriding:\n- instance methods\n- runtime binding"
+        "content": "Hiding:\n- static methods\n- compile-time binding\n\nOverriding:\n- instance methods\n- runtime binding"
     },
     {
         "type": "question",
@@ -473,7 +473,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- must be an overriding method\n- child return type must be subtype of parent return type"
+        "content": "- must be an overriding method\n- child return type must be subtype of parent return type"
     },
     {
         "type": "question",
@@ -489,7 +489,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- factory methods\n- cloning methods\n- fluent API designs"
+        "content": "- factory methods\n- cloning methods\n- fluent API designs"
     },
     {
         "type": "category",
@@ -545,7 +545,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- for small one-off implementations\n- for event handlers\n- for quick interface or abstract class implementations"
+        "content": "- for small one-off implementations\n- for event handlers\n- for quick interface or abstract class implementations"
     },
     {
         "type": "question",
@@ -553,7 +553,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\nAnonymous class:\n- can implement abstract classes too\n- can contain more code\n- is more verbose\n\nLambda:\n- only for functional interfaces\n- shorter and cleaner\n- preferred for simple single-method behavior"
+        "content": "Anonymous class:\n- can implement abstract classes too\n- can contain more code\n- is more verbose\n\nLambda:\n- only for functional interfaces\n- shorter and cleaner\n- preferred for simple single-method behavior"
     },
     {
         "type": "question",
@@ -561,7 +561,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- no named reuse\n- hard to read if large\n- no explicit constructor\n- can be clunky compared to lambda"
+        "content": "- no named reuse\n- hard to read if large\n- no explicit constructor\n- can be clunky compared to lambda"
     },
     {
         "type": "category",
@@ -609,7 +609,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\nCreational:\n- focus on object creation\n- examples: Singleton, Factory, Builder\n\nStructural:\n- focus on how classes/objects are composed\n- examples: Adapter, Decorator, Facade\n\nBehavioral:\n- focus on communication between objects\n- examples: Strategy, Observer, Command"
+        "content": "Creational:\n- focus on object creation\n- examples: Singleton, Factory, Builder\n\nStructural:\n- focus on how classes/objects are composed\n- examples: Adapter, Decorator, Facade\n\nBehavioral:\n- focus on communication between objects\n- examples: Strategy, Observer, Command"
     },
     {
         "type": "question",
@@ -617,7 +617,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- lazy initialization may create multiple instances\n- unsynchronized code is unsafe\n- double-checked locking requires volatile"
+        "content": "- lazy initialization may create multiple instances\n- unsynchronized code is unsafe\n- double-checked locking requires volatile"
     },
     {
         "type": "question",
@@ -625,7 +625,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\nFactory:\n- creates one type of object\n\nAbstract Factory:\n- creates related families of objects"
+        "content": "Factory:\n- creates one type of object\n\nAbstract Factory:\n- creates related families of objects"
     },
     {
         "type": "question",
@@ -633,7 +633,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\nUse Builder when:\n- object has many optional parameters\n- you want clean construction\n- you want immutability and readability"
+        "content": "Use Builder when:\n- object has many optional parameters\n- you want clean construction\n- you want immutability and readability"
     },
     {
         "type": "category",
@@ -669,7 +669,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\nChoose based on the type of problem:\n- creation problem -> creational pattern\n- structure problem -> structural pattern\n- behavior problem -> behavioral pattern\n\nDo not force a pattern if the solution can be simpler."
+        "content": "Choose based on the type of problem:\n- creation problem -> creational pattern\n- structure problem -> structural pattern\n- behavior problem -> behavioral pattern\n\nDo not force a pattern if the solution can be simpler."
     },
     {
         "type": "category",
@@ -681,7 +681,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- == checks whether both references point to the same object\n- equals() checks logical content equality for String"
+        "content": "- == checks whether both references point to the same object\n- equals() checks logical content equality for String"
     },
     {
         "type": "code",
@@ -710,7 +710,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- security\n- thread safety\n- reuse in string pool\n- stable hash code behavior\n- safe sharing across the application"
+        "content": "- security\n- thread safety\n- reuse in string pool\n- stable hash code behavior\n- safe sharing across the application"
     },
     {
         "type": "category",
@@ -738,7 +738,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- demos\n- internal testing\n- educational examples"
+        "content": "- demos\n- internal testing\n- educational examples"
     },
     {
         "type": "question",
@@ -766,7 +766,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- extend Thread\n- implement Runnable\n- implement Callable and submit to ExecutorService\n- use executor framework\n- use higher-level async APIs like CompletableFuture"
+        "content": "- extend Thread\n- implement Runnable\n- implement Callable and submit to ExecutorService\n- use executor framework\n- use higher-level async APIs like CompletableFuture"
     },
     {
         "type": "code",
@@ -779,7 +779,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\nThread class:\n- represents the actual thread\n- not ideal for separating task from execution\n\nRunnable:\n- represents the task\n- more flexible and preferred in most cases"
+        "content": "Thread class:\n- represents the actual thread\n- not ideal for separating task from execution\n\nRunnable:\n- represents the task\n- more flexible and preferred in most cases"
     },
     {
         "type": "question",
@@ -787,7 +787,7 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- manages thread pools\n- reuses threads\n- reduces overhead\n- improves scalability\n- gives better control over task execution"
+        "content": "- manages thread pools\n- reuses threads\n- reduces overhead\n- improves scalability\n- gives better control over task execution"
     },
     {
         "type": "question",
@@ -795,6 +795,14 @@
     },
     {
         "type": "theory",
-        "content": "A:\n- NEW\n- RUNNABLE\n- BLOCKED\n- WAITING\n- TIMED_WAITING\n- TERMINATED\n\n============================================================\nFINAL REVISION NOTES\n============================================================\n\nImportant interview points:\n- volatile is visibility, not atomicity\n- static means class-level, not thread-safe\n- functional interface must have exactly one abstract method\n- GC works based on reachability\n- Spring Boot startup includes context, beans, and runners\n- Serializable is marker-based\n- Callable returns value, Runnable does not\n- @Qualifier resolves bean ambiguity\n- interface and abstract class still differ strongly\n- overloading is compile-time, overriding is runtime\n- static methods are hidden, not overridden\n- covariant return type allows narrower return in child\n- anonymous class is one-time inline class\n- HashMap uses buckets and collision handling\n- design patterns solve creation, structure, or behavior problems\n- == compares references, equals compares content for String\n- JVM only calls standard main\n- executor framework is preferred for thread management"
+        "content": "- NEW\n- RUNNABLE\n- BLOCKED\n- WAITING\n- TIMED_WAITING\n- TERMINATED"
+    },
+    {
+        "type": "category",
+        "content": "FINAL REVISION NOTES"
+    },
+    {
+        "type": "theory",
+        "content": "Important interview points:\n- volatile is visibility, not atomicity\n- static means class-level, not thread-safe\n- functional interface must have exactly one abstract method\n- GC works based on reachability\n- Spring Boot startup includes context, beans, and runners\n- Serializable is marker-based\n- Callable returns value, Runnable does not\n- @Qualifier resolves bean ambiguity\n- interface and abstract class still differ strongly\n- overloading is compile-time, overriding is runtime\n- static methods are hidden, not overridden\n- covariant return type allows narrower return in child\n- anonymous class is one-time inline class\n- HashMap uses buckets and collision handling\n- design patterns solve creation, structure, or behavior problems\n- == compares references, equals compares content for String\n- JVM only calls standard main\n- executor framework is preferred for thread management"
     }
 ]
