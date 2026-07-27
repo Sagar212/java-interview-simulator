@@ -1,0 +1,1188 @@
+[
+    {
+        "type": "category",
+        "content": "1) Java Basic Interview Questions For Junior Developers"
+    },
+    {
+        "type": "question",
+        "content": "1. What is the difference between JDK, JRE, and JVM?"
+    },
+    {
+        "type": "theory",
+        "content": "This is one of the most commonly asked Java interview questions at all levels. Understanding these three components is fundamental to understanding how Java programs run:"
+    },
+    {
+        "type": "theory",
+        "content": "JVM (Java Virtual Machine): The abstract machine that executes Java bytecode. It is platform-specific (Windows, Linux, macOS each have their own JVM implementation) but executes the same bytecode, giving Java its platform independence.\n\n\nJRE (Java Runtime Environment): The runtime environment that includes the JVM plus the core Java class libraries needed to run Java programs. You need the JRE to run Java applications, but not to develop them.\n\n\nJDK (Java Development Kit): The full development kit that includes the JRE plus development tools like the compiler (javac), debugger, and documentation generator (javadoc). You need the JDK to write and compile Java programs."
+    },
+    {
+        "type": "theory",
+        "content": "A useful memory aid: JDK \u2283 JRE \u2283 JVM. Every JDK contains a JRE, and every JRE contains a JVM."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "// JDK: compiles .java files to .class files\njavac HelloWorld.java\n// JRE/JVM: executes the .class bytecode\njava HelloWorldPowered By"
+    },
+    {
+        "type": "question",
+        "content": "2. Describe Java in a single sentence"
+    },
+    {
+        "type": "theory",
+        "content": "Java is a platform-independent (write once, run anywhere) object-oriented language with automatic memory management (garbage collection), strong typing, and a rich standard library."
+    },
+    {
+        "type": "question",
+        "content": "3. What are the differences between primitive data types and objects in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "Primitives and objects represent two fundamentally different ways Java handles data."
+    },
+    {
+        "type": "theory",
+        "content": "In terms of storage, primitives store actual values while objects store references. Primitives take up less memory, objects more. Primitives have limited built-in operations while you can implement as many methods as you want for objects."
+    },
+    {
+        "type": "theory",
+        "content": "Also, primitives can\u2019t be null, limiting their flexibility (depends on the context) while objects can. For their simplicity, primitives are generally faster to access and manipulate."
+    },
+    {
+        "type": "theory",
+        "content": "In Java, there are 8 primitive types (int, boolean, etc.) while you can create unlimited object types."
+    },
+    {
+        "type": "question",
+        "content": "4. What is the difference between String, StringBuilder, and StringBuffer?"
+    },
+    {
+        "type": "theory",
+        "content": "If your string is not going to change, use a String class as a String object is immutable. If your string should be modified and will be accessed only by a single thread, StringBuilder is good enough. In other scenarios (string can be changed, using multiple threads), use StringBuffer because it is synchronized and thread-safe."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "// String (immutable)\nString s = \"Hello\";\ns += \" World\"; // Creates a new String object\n// StringBuilder (mutable, not thread-safe)\nStringBuilder sb = new StringBuilder(\"Hello\");\nsb.append(\" World\"); // Modifies the same object\n// StringBuffer (mutable, thread-safe)\nStringBuffer sbf = new StringBuffer(\"Hello\");\nsbf.append(\" World\"); // Thread-safe modificationPowered By"
+    },
+    {
+        "type": "question",
+        "content": "5. How do you handle exceptions in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "Exceptions in Java can be gracefully handled using try-catch blocks. In the try block, we write the code that might throw an exception, and the catch block specifies what the code must do if the exception occurs."
+    },
+    {
+        "type": "theory",
+        "content": "A finally block can be used for cleanup operations if try-catch blocks deal with external resources like file managers, database connections, etc."
+    },
+    {
+        "type": "theory",
+        "content": "Here is a code example demonstrating exception handling in Java:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "import java.io.FileReader;\nimport java.io.IOException;\npublic class ExceptionHandlingExample {\n   public static void main(String[] args) {\n       FileReader reader = null;\n       try {\n           reader = new FileReader(\"nonexistent.txt\");\n           // Code that might throw an exception\n           int character = reader.read();\n           System.out.println((char) character);\n       } catch (IOException e) {\n           // Handling the specific exception\n           System.out.println(\"An error occurred while reading the file: \" + e.getMessage());\n       } finally {\n           // Cleanup code that always executes\n           if (reader != null) {\n               try {\n                   reader.close();\n               } catch (IOException e) {\n                   System.out.println(\"Error closing file: \" + e.getMessage());\n               }\n           }\n       }\n   }\n}Powered By"
+    },
+    {
+        "type": "question",
+        "content": "6. What is the purpose of the static keyword in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "The static keyword in Java is used to declare members (variables, methods, nested classes) that belong to the class itself rather than instances of the class. Declaring static members allows sharing data across all instances of a class, creating utility methods that don't require object instantiation or defining constraints."
+    },
+    {
+        "type": "theory",
+        "content": "For example, in the following BankAccount class, totalAccounts and INTEREST_RATE are static, so they are shared across all instances of the class."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "public class BankAccount {\n   private String accountHolder;\n   private double balance;\n   private static int totalAccounts = 0;\n   private static final double INTEREST_RATE = 0.05;\n\n\n   // The rest of the code here ...\n}Powered By"
+    },
+    {
+        "type": "question",
+        "content": "7. Explain the concept of inheritance in Java through examples"
+    },
+    {
+        "type": "theory",
+        "content": "Inheritance is one of the core pillars of object-oriented programming in Java. It allows one class to inherit properties and methods from another class, promoting code reuse and establishing a parent-child relationship between classes."
+    },
+    {
+        "type": "theory",
+        "content": "For example, Car class may inherit from a general Vehicle class. When doing so, Car can behave just like Vehicle in terms of attributes and methods like:"
+    },
+    {
+        "type": "theory",
+        "content": "Vehicle class has members like year and make while Car has an additional member transmission.\n\n\nVehicle class has a move method while Car overrides move with additional behavior suited to cars."
+    },
+    {
+        "type": "question",
+        "content": "8. What is the difference between == and .equals() when comparing strings?"
+    },
+    {
+        "type": "theory",
+        "content": "== compares object references (memory addresses), while .equals() compares the content of strings. For string comparison, always use .equals()."
+    },
+    {
+        "type": "theory",
+        "content": "Here\u2019s an example to illustrate the difference:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "String str1 = \"Hello\";\nString str2 = \"Hello\";\nString str3 = new String(\"Hello\");\nSystem.out.println(str1 == str2);       // true (same object reference)\nSystem.out.println(str1 == str3);       // false (different object references)\nSystem.out.println(str1.equals(str2));  // true (same content)\nSystem.out.println(str1.equals(str3));  // true (same content)Powered By"
+    },
+    {
+        "type": "question",
+        "content": "9. How do you create and use an array in Java? How do arrays in Java differ from arrays in other languages?"
+    },
+    {
+        "type": "theory",
+        "content": "Arrays are critical objects that store multiple values of the same type in Java. They are created using square brackets and can be initialized in several ways. Here are a couple of common patterns:"
+    },
+    {
+        "type": "theory",
+        "content": "1. Declaration and allocation:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "int[] numbers = new int[5];  // Creates an array of 5 integersPowered By"
+    },
+    {
+        "type": "theory",
+        "content": "2. Declaration, allocation, and initialization:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "int[] numbers = {1, 2, 3, 4, 5};  // Creates and initializes an arrayPowered By"
+    },
+    {
+        "type": "theory",
+        "content": "If we compare Java arrays to Python lists, there are many differences. Here are a couple:"
+    },
+    {
+        "type": "theory",
+        "content": "Fixed size: Java arrays, once created, cannot change size\nType safety: Java arrays are type-safe; you can\u2019t put an integer into a String array"
+    },
+    {
+        "type": "question",
+        "content": "10. What is the purpose of class constructors in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "Constructors are special and very important methods used to initialize instances of a class. They have the same name as the class and are called when a new object is created using the new keyword."
+    },
+    {
+        "type": "question",
+        "content": "11. Explain the difference between break and continue statements."
+    },
+    {
+        "type": "theory",
+        "content": "break and continue are important loop flow control keywords in Java. break statement is used to stop the entire loop immediately and ignore the rest of the loop. It is useful to terminate the loop early based on a condition."
+    },
+    {
+        "type": "theory",
+        "content": "For example, I use break for debugging purposes like running only a single iteration of a long loop."
+    },
+    {
+        "type": "theory",
+        "content": "continue is used to skip the rest of the current iteration and immediately jumps to the next iteration. It is useful when looping over sequences and want to skip certain elements based on a condition."
+    },
+    {
+        "type": "theory",
+        "content": "Here is a code example:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "for (int i = 0; i < 5; i++) {\n   if (i == 2) {\n       continue;  // Skip iteration when i is 2\n   }\n   if (i == 4) {\n       break;     // Exit loop when i is 4\n   }\n   System.out.println(i);\n}Powered By"
+    },
+    {
+        "type": "question",
+        "content": "12. What is method overloading in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "Method overloading is a powerful technique that allows a class to have multiple methods with the same name but different parameters. This lets objects of the class handle closely related tasks with different input types."
+    },
+    {
+        "type": "theory",
+        "content": "Here\u2019s a super short example demonstrating method overloading:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "class Calculator {\n   int add(int a, int b) {\n       return a + b;\n   }\n   double add(double a, double b) {\n       return a + b;\n   }\n}Powered By"
+    },
+    {
+        "type": "theory",
+        "content": "In this example, the Calculator class has two add methods: One that takes two integers and returns an integer sum, and another that takes two doubles and returns a double sum. The method name is the same, but the parameters differ, allowing the appropriate method to be called based on the argument types."
+    },
+    {
+        "type": "question",
+        "content": "13. How do you read user input from the console in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "To accept user input from the user, one can use the Scanner class:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "Scanner scanner = new Scanner(System.in);\nString input = scanner.nextLine();Powered By"
+    },
+    {
+        "type": "theory",
+        "content": "Here\u2019s what each line does:"
+    },
+    {
+        "type": "theory",
+        "content": "Scanner scanner = new Scanner(System.in); This line creates a new Scanner object that reads input from the console (System.in).\n\n\nString input = scanner.nextLine(); This line reads a full line of text entered by the user and stores it in the input variable."
+    },
+    {
+        "type": "theory",
+        "content": "The Scanner class is used to parse primitive types and strings from various input sources. In this case, it\u2019s reading from the standard input (keyboard)."
+    },
+    {
+        "type": "theory",
+        "content": "The nextLine() method reads the entire line of text, including spaces, and returns it as a String."
+    },
+    {
+        "type": "question",
+        "content": "14. What is the difference between ArrayList and array?"
+    },
+    {
+        "type": "theory",
+        "content": "One limitation of Java\u2019s built-in array objects is that their size can\u2019t be changed after initialization. ArrayList solves this problem and offers more methods for manipulation. However, this comes at the cost of not being able to store primitives directly. ArrayList only stores objects."
+    },
+    {
+        "type": "question",
+        "content": "15. How do you iterate through a collection in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "A collection in Java is an object that groups multiple elements into a single unit and part of the Java Collections Framework. It is often used to store, retrieve, manipulate and communicate aggregate data."
+    },
+    {
+        "type": "theory",
+        "content": "To iterate through a collection, you can use a for-each loop, iterator, or a traditional for loop. The code example below shows the use of a for-each and a regular for loop:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "// Example using for-each loop:\nList<String> fruits = Arrays.asList(\"Apple\", \"Banana\", \"Orange\");\nfor (String fruit : fruits) {\n   System.out.println(fruit);\n}\n// Example using regular for loop:\nfor (int i = 0; i < fruits.size(); i++) {\n   System.out.println(fruits.get(i));\n}Powered By"
+    },
+    {
+        "type": "question",
+        "content": "16. What is the purpose of the final keyword when used with a variable?"
+    },
+    {
+        "type": "theory",
+        "content": "The final keyword in Java is a modifier that can be applied to variables, methods and classes. When used with a variable, the keyword makes it immutable or in other words, constant. For example, PI is declared as a final variable in the class below:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "public class CircleCalculator {\n   private final double PI = 3.14159;\n   public double calculateArea(double radius) {\n       return PI * radius * radius;\n   }\n}Powered By"
+    },
+    {
+        "type": "theory",
+        "content": "If any code attempts to modify PI, it will result in a compile-time error."
+    },
+    {
+        "type": "question",
+        "content": "17. Explain the difference between public, private, and protected access modifiers."
+    },
+    {
+        "type": "theory",
+        "content": "Java controls the visibility of class variables and methods using different levels of access modifiers\u200a\u2014\u200apublic, private, and protected. Here are their differences:"
+    },
+    {
+        "type": "theory",
+        "content": "public: Accessible from any other class.\n\n\nprivate: Only accessible within the same class.\n\n\nprotected: Accessible within the same package and by subclasses.\n\n\nDefault (no modifier): Accessible within the same package only."
+    },
+    {
+        "type": "theory",
+        "content": "Access modifiers are key in implementing encapsulation, one of the fundamental principles of object-oriented programming. With them, developers improve security and reduce the complexity of the codebase."
+    },
+    {
+        "type": "question",
+        "content": "18. What is the purpose of the this keyword in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "I\u2019d like to think of this as a kind of placeholder for a future instance of my class. It is a requirement to use if you want to differentiate between instance variables and parameters with the same name."
+    },
+    {
+        "type": "question",
+        "content": "19. How do you convert a string to an integer in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "The Integer class exposes a parseInt() method that converts strings with numeric value into integers:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "String str = \"123\";\nint num = Integer.parseInt(str);Powered By"
+    },
+    {
+        "type": "theory",
+        "content": "There are similar methods for doubles and floats in Java. Most often, you use one of these parsing methods after accepting a user input, which is always received as a string."
+    },
+    {
+        "type": "question",
+        "content": "20. What is the difference between && and & operators?"
+    },
+    {
+        "type": "theory",
+        "content": "&& is the logical AND operator with short-circuit evaluation. & is the bitwise AND operator, which also works as a logical AND but evaluates both sides always."
+    },
+    {
+        "type": "theory",
+        "content": "Consider this code example:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "int a = 5;\nint b = 10;\nboolean result;\nresult = (a > 10) && (b++ > 5);\nSystem.out.println(\"a = \" + a + \", b = \" + b + \", result = \" + result);\nresult = (a > 10) & (b++ > 5);\nSystem.out.println(\"a = \" + a + \", b = \" + b + \", result = \" + result);Powered By"
+    },
+    {
+        "type": "theory",
+        "content": "Output:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "a = 5, b = 10, result = false\na = 5, b = 11, result = falsePowered By"
+    },
+    {
+        "type": "theory",
+        "content": "In the first case (&&), b isn't incremented because the left side is false, so evaluation short-circuits. In the second case (&), b is incremented despite the left side being false, as both sides are always evaluated."
+    },
+    {
+        "type": "question",
+        "content": "21. How do you define and use an enum in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "An enum is a special type used to define collections of constants. Example:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "enum Day {\n   MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY\n}\nDay today = Day.MONDAY;Powered By"
+    },
+    {
+        "type": "question",
+        "content": "22. What is the difference between an abstract class and an interface?"
+    },
+    {
+        "type": "theory",
+        "content": "An abstract class can have both abstract and concrete methods, while an interface in Java (before Java 8) could only contain abstract methods. Starting from Java 8, interfaces can also have default and static methods."
+    },
+    {
+        "type": "theory",
+        "content": "Use cases:"
+    },
+    {
+        "type": "theory",
+        "content": "Use an abstract class when you need to share code between related classes.\nUse an interface when you want to define a contract that unrelated classes can implement."
+    },
+    {
+        "type": "question",
+        "content": "23. What is autoboxing and unboxing in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "Autoboxing is the automatic conversion of primitive types to their corresponding wrapper classes (e.g., converting int to Integer). Unboxing is the reverse process. For example:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "int primitive = 5;\nInteger wrapped = primitive;  // Autoboxing\nint unboxed = wrapped;        // UnboxingPowered By"
+    },
+    {
+        "type": "theory",
+        "content": "This feature allows for integration between primitives and objects."
+    },
+    {
+        "type": "theory",
+        "content": "New to Java? Solidify your foundations with the Java Fundamentals skill track on DataCamp, which covers variables, data types, OOP, and data structures \u2014 all concepts tested in junior-level interviews."
+    },
+    {
+        "type": "category",
+        "content": "2) Intermediate Java Interview Questions For Developers"
+    },
+    {
+        "type": "question",
+        "content": "24. Explain the difference between Runnable and Callable interfaces in Java concurrency."
+    },
+    {
+        "type": "theory",
+        "content": "Both are used for defining tasks that can be executed by threads. Runnable doesn't return a result, cannot throw checked exceptions, and thus, is simpler to use for basic tasks. Callable, on the other hand, can return a result and can throw checked exceptions. Callable is typically used with ExecutorService for asynchronous task execution."
+    },
+    {
+        "type": "theory",
+        "content": "Think of Runnable as a worker who silently does the job but doesn't report back with any information other than success or failure. Callable is a more professional worker who not only performs the task but puts together a detailed report on task results with any or all problems encountered during task execution."
+    },
+    {
+        "type": "question",
+        "content": "25. What are the differences between ArrayList and LinkedList? When would you choose one over the other?"
+    },
+    {
+        "type": "theory",
+        "content": "The choice of ArrayList and LinkedList comes down to the tradeoff between array access and array modification. Since ArrayList uses a dynamic array internally, it provides fast random access but slower insertions/deletions. LinkedList, on the other hand, uses a doubly-linked list which makes insertions/deletions faster at the cost of slower random access."
+    },
+    {
+        "type": "question",
+        "content": "26. Describe the Singleton pattern and provide an example of a thread-safe implementation in Java."
+    },
+    {
+        "type": "theory",
+        "content": "In Java, Singleton pattern is often used to ensure a class has only one instance. This can be useful when managing global state or resources and in scenarios involving centralized control, like logging or database connections."
+    },
+    {
+        "type": "theory",
+        "content": "Here is a thread-safe implementation of the Singleton pattern:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "public class Singleton {\n   private static volatile Singleton instance;\n   private Singleton() {}\n   public static Singleton getInstance() {\n       if (instance == null) {\n           synchronized (Singleton.class) {\n               if (instance == null) {\n                   instance = new Singleton();\n               }\n           }\n       }\n       return instance;\n   }\n}Powered By"
+    },
+    {
+        "type": "question",
+        "content": "27. What is the difference between fail-fast and fail-safe iterators?"
+    },
+    {
+        "type": "theory",
+        "content": "Fail-fast iterators throw ConcurrentModificationException if the collection is modified while iterating. Examples include iterators of ArrayList and HashMap. Fail-safe iterators don't throw exceptions if the collection is modified; they work on a clone of the collection. Examples include iterators of ConcurrentHashMap and CopyOnWriteArrayList."
+    },
+    {
+        "type": "theory",
+        "content": "We use fail-fast and fail-safe iterators for different purposes in concurrent Java programming:"
+    },
+    {
+        "type": "theory",
+        "content": "Fail-fast iterators:"
+    },
+    {
+        "type": "theory",
+        "content": "Provide immediate feedback about concurrent modifications.\nHelp detect programming errors early in the development process.\nEnsure data consistency by preventing iteration over a collection that has been modified."
+    },
+    {
+        "type": "theory",
+        "content": "Fail-safe iterators:"
+    },
+    {
+        "type": "theory",
+        "content": "Allow for concurrent modification of the collection during iteration.\nProvide a consistent view of the collection at the time the iterator was created.\nUseful in scenarios where you need to iterate over a collection while allowing modifications by other threads."
+    },
+    {
+        "type": "question",
+        "content": "28. Explain the concept of Java Memory Model and how it relates to multi-threading."
+    },
+    {
+        "type": "theory",
+        "content": "The Java Memory Model (JMM) sets the rules for how Java programs interact with computer memory, especially in multi-threaded environments."
+    },
+    {
+        "type": "theory",
+        "content": "The first rule is ensuring changes to shared data are seen by all threads. Another rule guarantees certain operations are indivisible (atomicity). Also, the model defines the sequence of memory operations (order)."
+    },
+    {
+        "type": "theory",
+        "content": "With these rules in place, you can expect safe data sharing between threads and proper synchronization."
+    },
+    {
+        "type": "question",
+        "content": "29. What are the differences between abstract classes and interfaces in Java 8 and later?"
+    },
+    {
+        "type": "theory",
+        "content": "In Java 8 and later, abstract classes are used as partially implemented classes that cannot be instantiated. Rather, they are used to define a common base for related classes in a hierarchy."
+    },
+    {
+        "type": "theory",
+        "content": "Interfaces, on the other hand, are contracts that specify a set of abstract methods that can be applied to non-related classes to give them the same abilities."
+    },
+    {
+        "type": "theory",
+        "content": "For example, use an abstract class Animal to define common properties and behaviors for different types of animals. Other classes like Bear or Wolf can extend from it."
+    },
+    {
+        "type": "theory",
+        "content": "Use an interface Swimmable to define the ability to swim, which can be implemented by both related (e.g., different species of fish) and unrelated (e.g., duck and human) classes."
+    },
+    {
+        "type": "question",
+        "content": "30. How does the hashCode() method relate to the equals() method? What are the implications of overriding one but not the other?"
+    },
+    {
+        "type": "theory",
+        "content": "When you call .equals() on objects, Java compares their hash codes to perform the check. If you override this method in your classes, you should also override hashCode() method as equal objects must have equal hash codes. Breaking this contract can cause issues with hash-based collections."
+    },
+    {
+        "type": "question",
+        "content": "31. Explain the concept of method references in Java 8 and provide examples of their usage."
+    },
+    {
+        "type": "theory",
+        "content": "In several scenarios like stream operations, functional interface implementations, or event handling, you want to pass behavior (typically in the form of a function) as an argument. This is called method referencing and they can be more readable than certain lambda expressions. They come in four types:"
+    },
+    {
+        "type": "theory",
+        "content": "Static method reference\nInstance method reference of a particular object\nInstance method reference of an arbitrary object\nConstructor reference"
+    },
+    {
+        "type": "theory",
+        "content": "Here is an example:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "List<String> names = Arrays.asList(\"Alice\", \"Bob\", \"Charlie\");\n// Static method reference\nnames.forEach(System.out::println);\n// Instance method reference\nnames.sort(String::compareToIgnoreCase);\n// Constructor reference\nSupplier<List<String>> listSupplier = ArrayList::new;Powered By"
+    },
+    {
+        "type": "question",
+        "content": "32. What is the purpose of the volatile keyword in Java? How does it relate to the happens-before relationship?"
+    },
+    {
+        "type": "theory",
+        "content": "The volatile keyword in Java ensures that changes to a variable are always immediately visible to other threads. It establishes a happens-before relationship, meaning that any write to a volatile variable is guaranteed to be visible to any subsequent read of the same variable by any thread."
+    },
+    {
+        "type": "theory",
+        "content": "Here\u2019s a concrete example:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "public class FlagExample {\n   private volatile boolean flag = false;\n   public void setFlag() {\n       flag = true;\n   }\n   public void checkFlag() {\n       while (!flag) {\n           // Wait for flag to be set\n       }\n       System.out.println(\"Flag was set!\");\n   }\n}Powered By"
+    },
+    {
+        "type": "theory",
+        "content": "So, without volatile, the checkFlag method might never see the update made by setFlag due to CPU caching or compiler optimizations, potentially resulting in an infinite loop. But with volatile, Java guarantees that:"
+    },
+    {
+        "type": "theory",
+        "content": "The write to flag in setFlag is immediately visible to all threads.\n\n\nThe read of flag in checkFlag always gets the most up-to-date value."
+    },
+    {
+        "type": "question",
+        "content": "33. Describe the Observer pattern and how it can be implemented using Java\u2019s built-in classes."
+    },
+    {
+        "type": "theory",
+        "content": "The observer pattern lets objects automatically get notified when another object changes. It\u2019s great for loose coupling in systems like GUIs or event handling."
+    },
+    {
+        "type": "theory",
+        "content": "In Java, we now use PropertyChangeListener instead of the deprecated Observable. A quick example I can think of is a WeatherStation class, which uses PropertyChangeSupport. You\u2019d do something like:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "WeatherStation station = new WeatherStation();\nstation.addObserver(evt -> System.out.println(\"New temp: \" + evt.getNewValue()));\nstation.setTemperature(25);Powered By"
+    },
+    {
+        "type": "theory",
+        "content": "This way, observers automatically update when the temperature changes, creating a flexible decoupled design."
+    },
+    {
+        "type": "question",
+        "content": "34. What are the differences between Comparable and Comparator interfaces? When would you use each?"
+    },
+    {
+        "type": "theory",
+        "content": "Comparable and Comparator are both used for sorting objects but with different purposes."
+    },
+    {
+        "type": "theory",
+        "content": "You can implement a Comparable in the class itself to define its natural ordering. You\u2019d use it when there\u2019s a clear, default way to compare objects of that class. For example:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "public class Person implements Comparable<Person> {\n   private String name;\n   public int compareTo(Person other) {\n       return this.name.compareTo(other.name);\n   }\n}\n/*\nThis code defines a Person class that implements the Comparable interface.\nIt allows Person objects to be compared based on their names.\nThe compareTo method compares the name of the current Person object with another Person object.\nThis enables natural ordering of Person objects, typically used for sorting or in sorted collections.\n*/Powered By"
+    },
+    {
+        "type": "theory",
+        "content": "Comparator, on the other hand, is a separate class used to define custom orderings. It\u2019s great when you need multiple ways to sort objects or can\u2019t modify the original class. Here is a quick example:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "Comparator<Person> ageComparator = (p1, p2) -> Integer.compare(p1.getAge(), p2.getAge());\nCollections.sort(personList, ageComparator);\n/*\nThis code creates a Comparator for Person objects that compares them based on age.\nIt then uses this Comparator to sort a list of Person objects.\nThe lambda expression defines how to compare two Person objects by their age.\nThe Collections.sort method uses this Comparator to determine the order of elements in personList.\n*/Powered By"
+    },
+    {
+        "type": "theory",
+        "content": "So, use Comparable for the default sorting behavior, and Comparator when you need flexibility in how you sort."
+    },
+    {
+        "type": "question",
+        "content": "35. Explain the concept of try-with-resources in Java. How does it improve resource management?"
+    },
+    {
+        "type": "theory",
+        "content": "Try-with-resources is a language construct introduced in Java 7 that automatically closes resources that implement AutoCloseable. It simplifies resource management and helps prevent resource leaks. Example:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "try (BufferedReader br = new BufferedReader(new FileReader(\"file.txt\"))) {\n   // Use the resource\n} catch (IOException e) {\n   // Handle exceptions\n}\n// br is automatically closedPowered By"
+    },
+    {
+        "type": "question",
+        "content": "36. What is the purpose of the synchronized keyword in Java? What are its limitations?"
+    },
+    {
+        "type": "theory",
+        "content": "The synchronized keyword can be great if you know how to use it. It can control access to a block of code or method in multi-threaded environments, ensuring that only one thread can execute the synchronized code at a time."
+    },
+    {
+        "type": "theory",
+        "content": "For example, you might use it like this:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "public synchronized void updateBalance(int amount) {\n   balance += amount;\n}\n/*\n* We need a synchronized block for this method because it modifies a shared\n* resource (balance) that could be accessed by multiple threads simultaneously.\n* Synchronization ensures that only one thread can execute this method at a time,\n* preventing race conditions and maintaining data consistency.\n*/Powered By"
+    },
+    {
+        "type": "theory",
+        "content": "However, its overuse can lead to performance issues due to thread contention (threads competing for resources). It can also cause deadlocks if not used carefully."
+    },
+    {
+        "type": "question",
+        "content": "37. Describe the differences between HashMap, LinkedHashMap, and TreeMap."
+    },
+    {
+        "type": "theory",
+        "content": "Here's a summary of the terms:"
+    },
+    {
+        "type": "theory",
+        "content": "HashMap: Unordered, allows null keys and values, O(1) average time complexity for basic operations.\n\n\nLinkedHashMap: Maintains insertion order (or access order), allows null keys and values, slightly slower than HashMap.\n\n\nTreeMap: Sorted by keys, doesn't allow null keys, O(log n) time complexity for basic operations."
+    },
+    {
+        "type": "question",
+        "content": "38. What is the purpose of the transient keyword in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "I\u2019d like to answer this question with an example. Consider this class:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "public class User implements Serializable {\n   private String username;\n   private transient String password;\n}Powered By"
+    },
+    {
+        "type": "theory",
+        "content": "In this case, when you serialize a User object, the password won\u2019t be included in the serialized data because it is transient. So, this keyword is used to indicate fields that shouldn't be serialized when the object is converted to a byte stream."
+    },
+    {
+        "type": "theory",
+        "content": "The keyword can also be useful for fields that contain temporary data or derived values that can be calculated. Also, it can be a lifesaver if the field includes data that doesn\u2019t support serialization."
+    },
+    {
+        "type": "question",
+        "content": "39. Explain the concept of method overloading and method overriding. How do they relate to polymorphism?"
+    },
+    {
+        "type": "theory",
+        "content": "Method overloading and overriding are two forms of polymorphism in Java."
+    },
+    {
+        "type": "theory",
+        "content": "When multiple methods in the same class have the same name but different parameters, we call it method overloading. For example, consider a calculator class:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "class Calculator {\n   int add(int a, int b) {\n       return a + b;\n   }\n   double add(double a, double b) {\n       return a + b;\n   }\n}Powered By"
+    },
+    {
+        "type": "theory",
+        "content": "Here, we\u2019ve overloaded the add method to work with both integers and doubles."
+    },
+    {
+        "type": "theory",
+        "content": "On the other hand, method overriding happens when a subclass provides a different implementation for a method defined in its superclass\u200a\u2014\u200aaka, runtime polymorphism. For instance:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "class Animal {\n   void makeSound() {\n       System.out.println(\"Some sound\");\n   }\n}\nclass Dog extends Animal {\n   @Override\n   void makeSound() {\n       System.out.println(\"Woof\");\n   }\n}Powered By"
+    },
+    {
+        "type": "theory",
+        "content": "In this case, Dog overrides the makeSound method from Animal."
+    },
+    {
+        "type": "question",
+        "content": "40. What is the purpose of the default methods in interfaces introduced in Java 8?"
+    },
+    {
+        "type": "theory",
+        "content": "In the past, if you wanted to add a method to an interface, you\u2019d have to implement it in every class that uses the interface. That could be a massive pain, especially in large codebases."
+    },
+    {
+        "type": "theory",
+        "content": "With default methods introduced in Java 8, you can provide a default implementation of a method right in the interface and not break any existing code. For example:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "interface Vehicle {\n   void start();\n\n   default void honk() {\n       System.out.println(\"Beep beep!\");\n   }\n}Powered By"
+    },
+    {
+        "type": "theory",
+        "content": "The Vehicle interface now has a default honk() method and any class implementing the interface gets it, but can still override it if needed."
+    },
+    {
+        "type": "question",
+        "content": "41. Describe the differences between checked and unchecked exceptions in Java. When would you use each?"
+    },
+    {
+        "type": "theory",
+        "content": "Checked and unchecked exceptions indicate the method of handling them."
+    },
+    {
+        "type": "theory",
+        "content": "Checked exceptions are checked at compile-time. You must either catch them or declare them in the method signature. They are typically used for recoverable conditions that you expect might happen. For example:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "try {\n   FileReader file = new FileReader(\"example.txt\");\n} catch (FileNotFoundException e) {\n   // Handle the exception\n}Powered By"
+    },
+    {
+        "type": "theory",
+        "content": "Unchecked exceptions, also called runtime exceptions, aren\u2019t checked at compile-time. You don\u2019t have to do anything, no checks or declarations. Just face them and fix them as they usually indicate programming errors and bugs such as null pointer references or illegal arguments. For instance:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "int[] arr = new int[5];\narr[10] = 50; // Throws ArrayIndexOutOfBoundsException; you don't have to catch itPowered By"
+    },
+    {
+        "type": "question",
+        "content": "42. What is the purpose of the java.util.concurrent package? Provide examples of classes from this package and their use cases."
+    },
+    {
+        "type": "theory",
+        "content": "java.util.concurrent is a dedicated package for concurrent programming in Java. It offers thread-safe, high-performance alternatives to traditional synchronization."
+    },
+    {
+        "type": "theory",
+        "content": "Key classes in the package include:"
+    },
+    {
+        "type": "theory",
+        "content": "1. ExecutorService: For managing and executing tasks asynchronously."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "ExecutorService executor = Executors.newFixedThreadPool(5);\nexecutor.submit(() -> System.out.println(\"Task executed\"));Powered By"
+    },
+    {
+        "type": "theory",
+        "content": "2. ConcurrentHashMap: A thread-safe version of HashMap."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "Map<String, Integer> map = new ConcurrentHashMap<>();Powered By"
+    },
+    {
+        "type": "theory",
+        "content": "3. CountDownLatch: For synchronizing threads waiting for operations to complete."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "CountDownLatch latch = new CountDownLatch(3);\nlatch.countDown(); // in worker threads\nlatch.await(); // in waiting threadPowered By"
+    },
+    {
+        "type": "theory",
+        "content": "4. AtomicInteger: For lock-free atomic operations on integers."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "AtomicInteger counter = new AtomicInteger(0);\ncounter.incrementAndGet();Powered By"
+    },
+    {
+        "type": "question",
+        "content": "43. Explain the concept of functional interfaces in Java 8. How do they relate to lambda expressions?"
+    },
+    {
+        "type": "theory",
+        "content": "It is better to explain a functional interface with a simple analogy. Think of it as a simple job description with just one task. For example, imagine a \u2018Chef\u2019 job where the only requirement is to \u2018cook a meal\u2019."
+    },
+    {
+        "type": "theory",
+        "content": "Now, lambda expressions are like quick, on-the-spot hires for these simple jobs. Instead of going through a lengthy hiring process and creating a full employee contract, you can just tell someone, \u2018Hey, here is how to cook the meal\u2019, and they do it."
+    },
+    {
+        "type": "theory",
+        "content": "For example:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "interface Chef {\n   String cookMeal(String ingredient);\n}\n// Traditional way (like a formal hire)\nChef traditionalChef = new Chef() {\n   public String cookMeal(String ingredient) {\n       return \"Cooked \" + ingredient;\n   }\n};\n// Lambda way (like a quick, on-the-spot hire)\nChef lambdaChef = ingredient -> \"Cooked \" + ingredient;\nSystem.out.println(lambdaChef.cookMeal(\"chicken\")); // Outputs: Cooked chickenPowered By"
+    },
+    {
+        "type": "theory",
+        "content": "In this analogy, the Chef interface is our functional interface with one job (cookMeal), and the lambda expression is our quick way to fill that job without the formalities."
+    },
+    {
+        "type": "question",
+        "content": "44. Explain the difference between synchronized collections and concurrent collections in Java."
+    },
+    {
+        "type": "theory",
+        "content": "Synchronized collections: Found in java.util.Collections (e.g., Collections.synchronizedList). They are thread-safe but achieve this by synchronizing all methods, which can cause contention in multi-threaded environments.\n\n\nConcurrent collections: Found in java.util.concurrent (e.g., ConcurrentHashMap). They allow concurrent access by multiple threads using more fine-grained locks or lock-free algorithms, improving performance in concurrent environments."
+    },
+    {
+        "type": "question",
+        "content": "45. What is the purpose of the Fork/Join framework in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "The Fork/Join framework, introduced in Java 7, is designed for parallel processing of tasks. It splits tasks into smaller subtasks (fork), executes them concurrently, and combines the results (join). It can be used for processing large datasets or recursive algorithms like quicksort. For example:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "ForkJoinPool pool = new ForkJoinPool();\npool.invoke(new RecursiveTaskExample());Powered By"
+    },
+    {
+        "type": "theory",
+        "content": "Want to go deeper? DataCamp's Intermediate Java course covers methods, control flow, and loops, while Data Types and Exceptions in Java covers the Collections Framework and exception handling covered in this section."
+    },
+    {
+        "type": "category",
+        "content": "3) Java Technical Interview Questions For Senior Developers"
+    },
+    {
+        "type": "question",
+        "content": "46. Explain the concept of lock-free programming in Java. What are its advantages and challenges?"
+    },
+    {
+        "type": "theory",
+        "content": "Lock-free programming, as the name suggests, is used to achieve thread-safety in multi-threaded environments without using locks. This is done by leveraging atomic operations and compare-and-swap (CAS) mechanisms."
+    },
+    {
+        "type": "theory",
+        "content": "This programming paradigm offers better scalability, no deadlocks and often better performance. Here is a quick example:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "AtomicInteger counter = new AtomicInteger(0);\ncounter.incrementAndGet(); // Thread-safe, lock-free incrementPowered By"
+    },
+    {
+        "type": "theory",
+        "content": "However, it comes with the following challenges:"
+    },
+    {
+        "type": "theory",
+        "content": "More complex implementation\nPotential for ABA problems (where a value changes from A to B and back to A, fooling compare-and-swap operations)\nCan increase memory usage"
+    },
+    {
+        "type": "question",
+        "content": "47. Describe the Garbage Collection process in Java. How would you tune GC for a high-throughput, low-latency application?"
+    },
+    {
+        "type": "theory",
+        "content": "Java\u2019s Garbage Collection (GC) is an automatic cleaning system that finds and removes unused objects to free up memory. For apps that need to handle lots of data quickly without delays, you can make the following adjustments to this underlying mechanism:"
+    },
+    {
+        "type": "theory",
+        "content": "Use newer GC types like G1GC or ZGC. They perform faster cleanup with shorter pauses.\nChange the amount of memory Java can use.\nControl the number of \u2018cleaner\u2019 threads GC uses."
+    },
+    {
+        "type": "theory",
+        "content": "For example, you might run your app like this:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "java -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xmx4g YourAppPowered By"
+    },
+    {
+        "type": "theory",
+        "content": "This tells Java to use G1GC, try not to pause for more than 200 milliseconds, and use up to 4 GB of memory."
+    },
+    {
+        "type": "question",
+        "content": "48. How does the Java Memory Model relate to the happens-before relationship? Provide examples of how this impacts concurrent programming."
+    },
+    {
+        "type": "theory",
+        "content": "JMM sets the rules for how Java programs interact with computer memory, especially in multi-threaded environments. The happens-before relationship is a key part of this model."
+    },
+    {
+        "type": "theory",
+        "content": "\u2018Happens-before\u2019 ensures that memory operations in one thread are correctly ordered with respect to operations in another thread. This is crucial for writing correct concurrent code."
+    },
+    {
+        "type": "theory",
+        "content": "For example, consider the volatile keyword:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "public class SharedData {\n   private volatile boolean flag = false;\n   private int data = 0;\n   void writeData() {\n       data = 42;\n       flag = true;\n   }\n   void readData() {\n       if (flag) {\n           // This is guaranteed to see data = 42\n           System.out.println(data);\n       }\n   }\n}Powered By"
+    },
+    {
+        "type": "theory",
+        "content": "Here, the JMM guarantees that if flag is true in readData(), it will see the updated value of data. This is because the write to flag happens-before the read of flag, establishing an ordering between the threads."
+    },
+    {
+        "type": "question",
+        "content": "49. Explain the concept of Java agents and how they can be used for application monitoring and profiling."
+    },
+    {
+        "type": "theory",
+        "content": "Java agents are special utilities that can watch and change how a Java program runs, without needing to change the original code. One way to think about them is as invisible assistants that can:"
+    },
+    {
+        "type": "theory",
+        "content": "See what\u2019s happening inside the program\nMake small tweaks to how it works\nCollect information about what the program is doing\nTime how long different parts of the program take\nWatch how the program uses memory\nCheck if different parts of the program are getting stuck"
+    },
+    {
+        "type": "theory",
+        "content": "To use a Java agent, you\u2019d typically write special code that tells the agent what to look for, package this code into a file (called a JAR), and tell Java to use this agent when running your program."
+    },
+    {
+        "type": "question",
+        "content": "50. Describe the process of class loading in Java. How can you implement a custom class loader, and what are some use cases for doing so?"
+    },
+    {
+        "type": "theory",
+        "content": "Class loading in Java involves three main steps:"
+    },
+    {
+        "type": "theory",
+        "content": "Loading: The class loader reads the .class file and creates a Class object.\nLinking: This includes verification, preparation, and resolution of symbolic references.\nInitialization: Static variables are initialized and static initializers are executed."
+    },
+    {
+        "type": "theory",
+        "content": "To implement a custom class loader, you\u2019d extend the ClassLoader class and override the findClass method. Here\u2019s a simple example:"
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "public class CustomClassLoader extends ClassLoader {\n   @Override\n   protected Class<?> findClass(String name) throws ClassNotFoundException {\n       byte[] b = loadClassFromFile(name);\n       return defineClass(name, b, 0, b.length);\n   }\n   private byte[] loadClassFromFile(String fileName) {\n       // Load the class file as bytes\n       // Implementation details omitted for brevity\n   }\n}Powered By"
+    },
+    {
+        "type": "theory",
+        "content": "Use cases for custom class loaders include:"
+    },
+    {
+        "type": "theory",
+        "content": "Loading classes from non-standard locations (e.g., databases, networks)\nImplementing plugin systems\nModifying bytecode on-the-fly\nImplementing security policies\nHot-swapping classes in a running application"
+    },
+    {
+        "type": "question",
+        "content": "51. How would you design a highly scalable, distributed caching system using Java?"
+    },
+    {
+        "type": "theory",
+        "content": "A scalable, distributed caching system could use technologies like Hazelcast or Apache Ignite. Key considerations include:"
+    },
+    {
+        "type": "theory",
+        "content": "Partitioning strategy for data distribution\nReplication for fault tolerance\nConsistency model (e.g., eventual consistency vs. strong consistency)\nEviction policies\nNetwork topology and communication protocols\nIntegration with existing systems"
+    },
+    {
+        "type": "question",
+        "content": "52. Explain the concept of reactive programming in Java. How does it differ from traditional imperative programming?"
+    },
+    {
+        "type": "theory",
+        "content": "Reactive programming is a declarative programming paradigm focused on data streams and the propagation of change. In Java, it\u2019s often implemented using libraries like RxJava or Project Reactor. It differs from imperative programming by emphasizing the flow of data and reactions to events, rather than sequential execution of commands. This can lead to more scalable and responsive systems, especially for I/O-bound applications."
+    },
+    {
+        "type": "question",
+        "content": "53. How would you implement a thread-safe singleton in Java? Discuss the trade-offs of different approaches."
+    },
+    {
+        "type": "theory",
+        "content": "There are several approaches:"
+    },
+    {
+        "type": "theory",
+        "content": "Eager initialization\nLazy initialization with double-checked locking\nInitialization-on-demand holder idiom\nEnum singleton"
+    },
+    {
+        "type": "theory",
+        "content": "Each has trade-offs in terms of thread-safety, lazy loading, and serialization behavior. The enum approach is often considered the best as it\u2019s concise, provides serialization for free, and is inherently thread-safe."
+    },
+    {
+        "type": "question",
+        "content": "54. Describe the internals of the ConcurrentHashMap class. How does it achieve its high level of concurrency?"
+    },
+    {
+        "type": "theory",
+        "content": "ConcurrentHashMap uses a segmented structure, dividing the map into segments that can be locked independently. It uses CAS operations for updates when possible, reducing contention. For read operations, it doesn\u2019t use locks at all, allowing for high concurrency. The internal structure has evolved over different Java versions to improve performance and reduce memory footprint."
+    },
+    {
+        "type": "question",
+        "content": "55. How would you design and implement a custom annotation processor in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "Custom annotation processors can be created by implementing the javax.annotation.processing.Processor interface. Key steps include:"
+    },
+    {
+        "type": "theory",
+        "content": "Defining the annotation\nImplementing the processor logic\nRegistering the processor using the ServiceLoader mechanism Use cases include code generation, compile-time checks, and metadata processing."
+    },
+    {
+        "type": "question",
+        "content": "56. How does the CompletableFuture class improve asynchronous programming in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "CompletableFuture provides a more flexible and functional approach to asynchronous programming compared to Future. It allows chaining tasks with methods like .thenApply(), .thenAccept(), and .thenCompose()."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "CompletableFuture.supplyAsync(() -> fetchData())\n    .thenApply(data -> processData(data))\n    .thenAccept(result -> System.out.println(\"Result: \" + result));Powered By"
+    },
+    {
+        "type": "question",
+        "content": "57. What is the difference between weak references and soft references in Java?"
+    },
+    {
+        "type": "theory",
+        "content": "Weak reference: Allows objects to be garbage collected when no strong references exist. Used in WeakHashMap.\n\n\nSoft reference: Retains objects until memory is low. Commonly used for caching."
+    },
+    {
+        "type": "category",
+        "content": "4) Modern Java Features (Java 17\u201321) Interview Questions"
+    },
+    {
+        "type": "question",
+        "content": "58. What are records in Java? (Java 16+)"
+    },
+    {
+        "type": "theory",
+        "content": "Records are a concise way to declare immutable data classes. They automatically generate constructors, getters, equals(), hashCode(), and toString()."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "// Traditional POJO (verbose)\npublic class Point {\n    private final int x;\n    private final int y;\n    public Point(int x, int y) { this.x = x; this.y = y; }\n    public int x() { return x; }\n    public int y() { return y; }\n    // equals, hashCode, toString omitted for brevity\n}\n\n// Record (concise)\npublic record Point(int x, int y) {}Powered By"
+    },
+    {
+        "type": "question",
+        "content": "59. What are sealed classes? (Java 17+)"
+    },
+    {
+        "type": "theory",
+        "content": "Sealed classes restrict which classes can extend or implement them, enabling exhaustive pattern matching and better modeling of closed hierarchies."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "public sealed interface Shape\n    permits Circle, Rectangle, Triangle {}\n\npublic record Circle(double radius) implements Shape {}\npublic record Rectangle(double width, double height) implements Shape {}Powered By"
+    },
+    {
+        "type": "question",
+        "content": "60. What is pattern matching for switch? (Java 21+)"
+    },
+    {
+        "type": "theory",
+        "content": "Pattern matching extends the switch expression to work with type patterns, making it easier to work with sealed hierarchies and eliminating verbose instanceof checks."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "Shape shape = new Circle(5.0);\ndouble area = switch (shape) {\n    case Circle c    -> Math.PI * c.radius() * c.radius();\n    case Rectangle r -> r.width() * r.height();\n    case Triangle t  -> 0.5 * t.base() * t.height();\n};Powered By"
+    },
+    {
+        "type": "question",
+        "content": "61. What are virtual threads? (Java 21+)"
+    },
+    {
+        "type": "theory",
+        "content": "Virtual threads are lightweight threads managed by the JVM (not the OS), enabling millions of concurrent threads without the overhead of platform threads. They are a key feature of Project Loom and dramatically simplify writing high-throughput concurrent applications."
+    },
+    {
+        "type": "code",
+        "lang": "java",
+        "content": "// Platform thread (OS-managed, expensive)\nThread platformThread = new Thread(() -> System.out.println(\"Platform thread\"));\nplatformThread.start();\n\n// Virtual thread (JVM-managed, lightweight)\nThread virtualThread = Thread.ofVirtual()\n    .start(() -> System.out.println(\"Virtual thread\"));\n\n// Or via ExecutorService\ntry (var executor = Executors.newVirtualThreadPerTaskExecutor()) {\n    executor.submit(() -> System.out.println(\"Virtual task\"));\n}Powered By"
+    },
+    {
+        "type": "theory",
+        "content": "Virtual threads use the same Thread API, so existing code can migrate with minimal changes. They are ideal for I/O-bound workloads like HTTP servers and database queries."
+    },
+    {
+        "type": "theory",
+        "content": "Preparing for senior interviews? Our Optimizing Code in Java course covers GC tuning, Big-O complexity, JVM internals, multi-threading, and caching . You can also explore Python vs Java: Differences and Similarities to understand where Java excels in modern software engineering."
+    },
+    {
+        "type": "question",
+        "content": "Top 99 SQL Interview Questions and Answers for 2026"
+    },
+    {
+        "type": "question",
+        "content": "40 R Programming Interview Questions & Answers For All Levels"
+    },
+    {
+        "type": "question",
+        "content": "29 Top Data Scientist Interview Questions For All Levels"
+    },
+    {
+        "type": "question",
+        "content": "33 Azure Interview Questions: From Basic to Advanced"
+    },
+    {
+        "type": "question",
+        "content": "Top 30 SQL Server Interview Questions (2026)"
+    },
+    {
+        "type": "question",
+        "content": "The 41 Top Python Interview Questions & Answers For 2026"
+    },
+    {
+        "type": "question",
+        "content": "Top 99 SQL Interview Questions and Answers for 2026"
+    },
+    {
+        "type": "question",
+        "content": "40 R Programming Interview Questions & Answers For All Levels"
+    },
+    {
+        "type": "question",
+        "content": "29 Top Data Scientist Interview Questions For All Levels"
+    },
+    {
+        "type": "question",
+        "content": "33 Azure Interview Questions: From Basic to Advanced"
+    },
+    {
+        "type": "question",
+        "content": "Top 30 SQL Server Interview Questions (2026)"
+    },
+    {
+        "type": "question",
+        "content": "The 41 Top Python Interview Questions & Answers For 2026"
+    }
+]
