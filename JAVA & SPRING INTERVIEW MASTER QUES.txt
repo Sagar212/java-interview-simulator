@@ -1,6 +1,3 @@
-JAVA & SPRING INTERVIEW MASTER QUESTION SET
-Detailed Answers
-
 ============================================================
 1) VOLATILE KEYWORD
 ============================================================
@@ -304,34 +301,30 @@ Tuning usually involves:
 Q: What happens during application startup?
 A: Spring Boot startup is a sequence of framework-managed steps.
 
-Typical flow:
-1. main method calls SpringApplication.run()
-2. Environment is prepared
-3. ApplicationContext is created
-4. Beans are discovered and registered
-5. Dependencies are injected
-6. Bean lifecycle callbacks run
-7. Runners execute
-8. Application ready event is published
+| Step | Action | Description |
+|---|---|---|
+| 1 | `SpringApplication.run()` | The main method triggers the bootstrap process. |
+| 2 | Environment Prep | Properties, profiles, and YAML files are loaded. |
+| 3 | Context Creation | `ApplicationContext` is instantiated based on web type. |
+| 4 | Bean Discovery | `@ComponentScan` and Auto-configuration run. |
+| 5 | Dependency Injection | Beans are instantiated and wired together. |
+| 6 | Lifecycle Callbacks | `@PostConstruct` and `InitializingBean` execute. |
+| 7 | Runners Execute | `CommandLineRunner` and `ApplicationRunner` run. |
+| 8 | Application Ready | `ApplicationReadyEvent` is published. |
 
-So startup is not just "app begins".
-It is a full lifecycle of context creation, bean wiring, and initialization.
+So startup is not just "app begins". It is a full lifecycle of context creation, bean wiring, and initialization.
 
 Q: How are beans created and injected?
-A: Spring creates beans from:
-- @Component, @Service, @Repository, @Controller
-- @Bean methods inside @Configuration classes
+A: Spring creates beans from `@Component` stereotypes or `@Bean` methods, then resolves and injects their dependencies.
 
-Then Spring:
-- instantiates the bean
-- resolves dependencies
-- injects them
-- runs init callbacks if any
+| Feature | Constructor Injection | Setter Injection |
+|---|---|---|
+| **Immutability** | Yes (fields can be `final`) | No (fields must be mutable) |
+| **Mandatory Dependencies** | Enforced at instantiation | Not enforced until runtime |
+| **Testing** | Easy (pass mocks to constructor) | Harder (requires calling setters) |
+| **Circular Dependencies** | Fails immediately on startup | Resolved easily via early reference |
 
-Constructor injection is usually preferred because:
-- it makes dependencies clear
-- it supports immutability better
-- it is easier to test
+Constructor injection is universally preferred because it guarantees the bean is fully initialized and valid the moment it is created.
 
 Q: How to hook into lifecycle events?
 A: Common lifecycle hooks include:

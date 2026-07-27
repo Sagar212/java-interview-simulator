@@ -1,9 +1,5 @@
 [
     {
-        "type": "theory",
-        "content": "JAVA & SPRING INTERVIEW MASTER QUESTION SET\nDetailed Answers"
-    },
-    {
         "type": "category",
         "content": "1) VOLATILE KEYWORD"
     },
@@ -172,7 +168,7 @@
     },
     {
         "type": "theory",
-        "content": "Spring Boot startup is a sequence of framework-managed steps.\n\nTypical flow:\n1. main method calls SpringApplication.run()\n2. Environment is prepared\n3. ApplicationContext is created\n4. Beans are discovered and registered\n5. Dependencies are injected\n6. Bean lifecycle callbacks run\n7. Runners execute\n8. Application ready event is published\n\nSo startup is not just \"app begins\".\nIt is a full lifecycle of context creation, bean wiring, and initialization."
+        "content": "Spring Boot startup is a sequence of framework-managed steps.\n\n| Step | Action | Description |\n|---|---|---|\n| 1 | `SpringApplication.run()` | The main method triggers the bootstrap process. |\n| 2 | Environment Prep | Properties, profiles, and YAML files are loaded. |\n| 3 | Context Creation | `ApplicationContext` is instantiated based on web type. |\n| 4 | Bean Discovery | `@ComponentScan` and Auto-configuration run. |\n| 5 | Dependency Injection | Beans are instantiated and wired together. |\n| 6 | Lifecycle Callbacks | `@PostConstruct` and `InitializingBean` execute. |\n| 7 | Runners Execute | `CommandLineRunner` and `ApplicationRunner` run. |\n| 8 | Application Ready | `ApplicationReadyEvent` is published. |\n\nSo startup is not just \"app begins\". It is a full lifecycle of context creation, bean wiring, and initialization."
     },
     {
         "type": "question",
@@ -180,7 +176,7 @@
     },
     {
         "type": "theory",
-        "content": "Spring creates beans from:\n- @Component, @Service, @Repository, @Controller\n- @Bean methods inside @Configuration classes\n\nThen Spring:\n- instantiates the bean\n- resolves dependencies\n- injects them\n- runs init callbacks if any\n\nConstructor injection is usually preferred because:\n- it makes dependencies clear\n- it supports immutability better\n- it is easier to test"
+        "content": "Spring creates beans from `@Component` stereotypes or `@Bean` methods, then resolves and injects their dependencies.\n\n| Feature | Constructor Injection | Setter Injection |\n|---|---|---|\n| **Immutability** | Yes (fields can be `final`) | No (fields must be mutable) |\n| **Mandatory Dependencies** | Enforced at instantiation | Not enforced until runtime |\n| **Testing** | Easy (pass mocks to constructor) | Harder (requires calling setters) |\n| **Circular Dependencies** | Fails immediately on startup | Resolved easily via early reference |\n\nConstructor injection is universally preferred because it guarantees the bean is fully initialized and valid the moment it is created."
     },
     {
         "type": "question",
